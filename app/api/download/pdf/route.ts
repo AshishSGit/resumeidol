@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "resumeText is required." }, { status: 400 });
     }
 
-    const buffer = await new Promise<Buffer>((resolve, reject) => {
+    const buffer = await new Promise<Buffer<ArrayBuffer>>((resolve, reject) => {
       const doc = new PDFDocument({ margin: 50, size: "LETTER", autoFirstPage: true });
       const chunks: Buffer[] = [];
       doc.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     const baseName = `${jobTitle || "resume"}-${company || "resumeidol"}`;
     const safeName = baseName.replace(/[^a-zA-Z0-9\-_]/g, "-").slice(0, 80);
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
