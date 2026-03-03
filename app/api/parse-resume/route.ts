@@ -25,8 +25,9 @@ export async function POST(request: NextRequest) {
       text = result.value;
     } else if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
       // PDF → plain text via pdf-parse
-      const pdfParse = (await import("pdf-parse")).default;
-      const data = await pdfParse(buffer);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pdfParse = (await import("pdf-parse")) as any;
+      const data = await (pdfParse.default ?? pdfParse)(buffer);
       text = data.text;
     } else if (file.type === "text/plain" || file.name.endsWith(".txt")) {
       text = buffer.toString("utf-8");
