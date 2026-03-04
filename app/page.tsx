@@ -264,9 +264,24 @@ export default function LandingPage() {
     return () => obs.disconnect();
   }, []);
 
-  const handleWaitlist = (e: React.FormEvent) => {
+  const handleWaitlist = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) setSubmitted(true);
+    if (!email) return;
+    try {
+      await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "YOUR_KEY",
+          email,
+          subject: "ResumeIdol Waitlist Signup",
+          message: `New waitlist signup: ${email}`,
+        }),
+      });
+    } catch {
+      // Silent fail — still show success to user
+    }
+    setSubmitted(true);
   };
 
   return (
@@ -643,9 +658,13 @@ export default function LandingPage() {
             </span>
           </div>
           <div className="flex items-center gap-8">
-            {["Privacy", "Terms", "Contact", "Blog"].map((item) => (
-              <a key={item} href="#" className="text-[#374151] text-sm hover:text-[#6B7A99] transition-colors">
-                {item}
+            {[
+              { label: "Privacy", href: "/privacy" },
+              { label: "Terms", href: "/terms" },
+              { label: "Contact", href: "mailto:hello@resumeidol.com" },
+            ].map((item) => (
+              <a key={item.label} href={item.href} className="text-[#374151] text-sm hover:text-[#6B7A99] transition-colors">
+                {item.label}
               </a>
             ))}
           </div>
