@@ -93,7 +93,7 @@ const PRICING = [
     period: "per month",
     desc: "For the serious job seeker",
     features: [
-      "Unlimited AI resume tailoring",
+      "30 AI resume tailors / month",
       "ATS score before & after",
       "Keyword gap analysis",
       "DOCX + PDF download",

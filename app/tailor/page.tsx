@@ -220,7 +220,7 @@ function TailorInner() {
     }
 
     if (!isPro && tailorCount >= FREE_LIMIT) {
-      setError(`You've used all ${FREE_LIMIT} free tailors this month. Upgrade to Pro for unlimited tailoring.`);
+      setError(`You've used all ${FREE_LIMIT} free tailors this month. Upgrade to Pro (30/mo) or get Lifetime for unlimited.`);
       return;
     }
 
@@ -495,7 +495,7 @@ function TailorInner() {
                   <span className="text-[#ef4444]">
                     Free limit reached.{" "}
                     <a href="/#pricing" className="text-[#C9A84C] hover:underline">Upgrade to Pro</a>
-                    {" "}for unlimited tailoring.
+                    {" "}for 30/mo, or Lifetime for unlimited.
                   </span>
                 ) : (
                   <span>{FREE_LIMIT - tailorCount} free tailor{FREE_LIMIT - tailorCount !== 1 ? "s" : ""} remaining this month</span>
