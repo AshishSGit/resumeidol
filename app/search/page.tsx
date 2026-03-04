@@ -12,15 +12,66 @@ import {
 const SENIORITY = ["Any Level", "Internship", "Entry Level", "Mid Level", "Senior", "Lead", "Director"];
 const JOB_TYPES = ["Any Type", "Full-time", "Part-time", "Contract", "Remote", "Internship"];
 const DATE_POSTED = ["Any time", "Past 24 hours", "Past week", "Past month"];
+const SOURCES = ["All", "LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Dice", "Remotive", "BeBee", "Jooble", "Snagajob"];
+
+const LOCATIONS = [
+  "Anywhere",
+  "Remote",
+  "New York, NY",
+  "San Francisco, CA",
+  "San Jose, CA",
+  "Los Angeles, CA",
+  "Seattle, WA",
+  "Austin, TX",
+  "Chicago, IL",
+  "Boston, MA",
+  "Denver, CO",
+  "Atlanta, GA",
+  "Miami, FL",
+  "Washington, DC",
+  "Dallas, TX",
+  "Philadelphia, PA",
+  "Phoenix, AZ",
+  "Portland, OR",
+  "San Diego, CA",
+  "Minneapolis, MN",
+];
+
+function FilterSelect({
+  value,
+  onChange,
+  options,
+  active,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  active?: boolean;
+}) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="input-luxury text-xs pl-3 pr-7 py-2 rounded-lg appearance-none cursor-pointer"
+        style={{ color: active ? "#DEC27A" : "#6B7A99" }}
+      >
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+      <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#374151]" />
+    </div>
+  );
+}
 
 export default function SearchPage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState("Anywhere");
   const [remote, setRemote] = useState(false);
   const [seniority, setSeniority] = useState("Any Level");
   const [jobType, setJobType] = useState("Any Type");
   const [datePosted, setDatePosted] = useState("Past week");
+  const [source, setSource] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,13 +91,17 @@ export default function SearchPage() {
     setJobs([]);
 
     try {
+      const effectiveLocation = location === "Anywhere" ? "" : location;
+      const effectiveRemote = remote || location === "Remote";
+
       const params = new URLSearchParams({
         q: query,
-        location,
-        remote: String(remote),
+        location: effectiveLocation,
+        remote: String(effectiveRemote),
         seniority,
         jobType,
         datePosted,
+        source,
       });
 
       const res = await fetch(`/api/jobs?${params}`);
@@ -61,7 +116,7 @@ export default function SearchPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, location, remote, seniority, jobType, datePosted]);
+  }, [query, location, remote, seniority, jobType, datePosted, source]);
 
   const handleTailor = (job: Job) => {
     const params = new URLSearchParams({
@@ -79,6 +134,13 @@ export default function SearchPage() {
     setSearched(false);
     inputRef.current?.focus();
   };
+
+  const activeFilterCount = [
+    seniority !== "Any Level",
+    jobType !== "Any Type",
+    datePosted !== "Past week",
+    source !== "All",
+  ].filter(Boolean).length;
 
   return (
     <div className="min-h-screen" style={{ background: "#07090F" }}>
@@ -108,6 +170,7 @@ export default function SearchPage() {
           {/* Search form */}
           <form onSubmit={handleSearch}>
             <div className="flex flex-col sm:flex-row gap-3 mb-3">
+              {/* Query input */}
               <div className="flex-1 relative">
                 <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#374151] pointer-events-none" />
                 <input
@@ -129,15 +192,22 @@ export default function SearchPage() {
                 )}
               </div>
 
+              {/* Location dropdown */}
               <div className="relative sm:w-52">
-                <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#374151] pointer-events-none" />
-                <input
-                  type="text"
+                <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#374151] pointer-events-none z-10" />
+                <select
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Location (or leave blank)"
-                  className="input-luxury w-full pl-10 pr-4 py-3.5 text-sm"
-                />
+                  onChange={(e) => {
+                    setLocation(e.target.value);
+                    if (e.target.value === "Remote") setRemote(true);
+                    else if (e.target.value === "Anywhere") setRemote(false);
+                  }}
+                  className="input-luxury w-full pl-9 pr-8 py-3.5 text-sm appearance-none cursor-pointer"
+                  style={{ color: location !== "Anywhere" ? "#DEC27A" : "#6B7A99" }}
+                >
+                  {LOCATIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#374151]" />
               </div>
 
               <button
@@ -172,43 +242,36 @@ export default function SearchPage() {
               </button>
 
               {/* Seniority */}
-              <div className="relative">
-                <select
-                  value={seniority}
-                  onChange={(e) => setSeniority(e.target.value)}
-                  className="input-luxury text-xs pl-3 pr-8 py-2 rounded-lg appearance-none cursor-pointer"
-                  style={{ color: seniority !== "Any Level" ? "#DEC27A" : "#6B7A99" }}
-                >
-                  {SENIORITY.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#374151]" />
-              </div>
+              <FilterSelect
+                value={seniority}
+                onChange={setSeniority}
+                options={SENIORITY}
+                active={seniority !== "Any Level"}
+              />
 
               {/* Job type */}
-              <div className="relative">
-                <select
-                  value={jobType}
-                  onChange={(e) => setJobType(e.target.value)}
-                  className="input-luxury text-xs pl-3 pr-8 py-2 rounded-lg appearance-none cursor-pointer"
-                  style={{ color: jobType !== "Any Type" ? "#DEC27A" : "#6B7A99" }}
-                >
-                  {JOB_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                </select>
-                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#374151]" />
-              </div>
+              <FilterSelect
+                value={jobType}
+                onChange={setJobType}
+                options={JOB_TYPES}
+                active={jobType !== "Any Type"}
+              />
 
               {/* Date posted */}
-              <div className="relative">
-                <select
-                  value={datePosted}
-                  onChange={(e) => setDatePosted(e.target.value)}
-                  className="input-luxury text-xs pl-3 pr-8 py-2 rounded-lg appearance-none cursor-pointer"
-                  style={{ color: "#6B7A99" }}
-                >
-                  {DATE_POSTED.map((d) => <option key={d} value={d}>{d}</option>)}
-                </select>
-                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#374151]" />
-              </div>
+              <FilterSelect
+                value={datePosted}
+                onChange={setDatePosted}
+                options={DATE_POSTED}
+                active={datePosted !== "Any time"}
+              />
+
+              {/* Source filter */}
+              <FilterSelect
+                value={source}
+                onChange={setSource}
+                options={SOURCES}
+                active={source !== "All"}
+              />
 
               <button
                 type="button"
@@ -216,7 +279,15 @@ export default function SearchPage() {
                 className="btn-ghost flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-lg ml-auto"
               >
                 <SlidersHorizontal size={13} />
-                More filters
+                {activeFilterCount > 0 && (
+                  <span
+                    className="w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center"
+                    style={{ background: "#C9A84C", color: "#07090F" }}
+                  >
+                    {activeFilterCount}
+                  </span>
+                )}
+                Filters
               </button>
             </div>
           </form>
@@ -315,12 +386,12 @@ export default function SearchPage() {
               <div className="text-5xl mb-4">🎯</div>
               <h3 className="text-[#F0F2F7] font-semibold text-lg mb-2">No jobs found</h3>
               <p className="text-[#6B7A99] text-sm max-w-xs mx-auto">
-                Try different keywords, broaden your location, or enable remote search.
+                Try different keywords, broaden your location, or switch to &quot;All&quot; sources.
               </p>
             </div>
           )}
 
-          {/* Initial state — no search yet */}
+          {/* Initial state */}
           {!searched && !loading && (
             <div className="text-center py-24">
               <div

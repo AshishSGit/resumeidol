@@ -107,21 +107,73 @@ const MOCK_JOBS = [
   },
 ];
 
+// Map UI filter values to JSearch API params
+const DATE_MAP: Record<string, string> = {
+  "Past 24 hours": "today",
+  "Past week": "week",
+  "Past month": "month",
+  "Any time": "all",
+};
+
+const JOB_TYPE_MAP: Record<string, string> = {
+  "Full-time": "FULLTIME",
+  "Part-time": "PARTTIME",
+  "Contract": "CONTRACTOR",
+  "Internship": "INTERN",
+};
+
+const SENIORITY_KEYWORDS: Record<string, string> = {
+  "Entry Level": "entry level",
+  "Mid Level": "mid level",
+  "Senior": "senior",
+  "Lead": "lead",
+  "Director": "director",
+  "Internship": "intern",
+};
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q") || "";
   const location = searchParams.get("location") || "";
   const remote = searchParams.get("remote") === "true";
+  const seniority = searchParams.get("seniority") || "Any Level";
+  const jobType = searchParams.get("jobType") || "Any Type";
+  const datePosted = searchParams.get("datePosted") || "Any time";
+  const source = searchParams.get("source") || "All";
   const page = parseInt(searchParams.get("page") || "1");
 
-  // Use real JSearch API if key is available, otherwise use mock data
   const rapidApiKey = process.env.RAPIDAPI_KEY;
 
   if (rapidApiKey && query) {
     try {
-      const searchQuery = `${query}${location ? ` in ${location}` : ""}${remote ? " remote" : ""}`;
+      // Build search query with seniority keyword appended
+      const seniorityKw = SENIORITY_KEYWORDS[seniority] ?? "";
+      const searchQuery = [
+        seniorityKw,
+        query,
+        location && location !== "Remote" ? `in ${location}` : "",
+        remote || location === "Remote" ? "remote" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      const apiParams = new URLSearchParams({
+        query: searchQuery,
+        page: String(page),
+        num_pages: "3",
+        date_posted: DATE_MAP[datePosted] ?? "all",
+      });
+
+      // Employment type filter
+      if (jobType !== "Any Type" && jobType !== "Remote" && JOB_TYPE_MAP[jobType]) {
+        apiParams.set("employment_types", JOB_TYPE_MAP[jobType]);
+      }
+      if (jobType === "Remote" || remote) {
+        apiParams.set("remote_jobs_only", "true");
+      }
+
       const response = await fetch(
-        `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(searchQuery)}&page=${page}&num_pages=1&date_posted=week`,
+        `https://jsearch.p.rapidapi.com/search?${apiParams}`,
         {
           headers: {
             "x-rapidapi-key": rapidApiKey,
@@ -132,22 +184,22 @@ export async function GET(request: NextRequest) {
 
       if (response.ok) {
         const data = await response.json();
-        const jobs = (data.data || []).map((job: Record<string, unknown>, i: number) => {
+        let jobs = (data.data || []).map((job: Record<string, unknown>, i: number) => {
           const postedAt = job.job_posted_at_datetime_utc as string | undefined;
           const daysAgo = postedAt
             ? Math.floor((Date.now() - new Date(postedAt).getTime()) / 86400000)
             : null;
-          const postedLabel = daysAgo === null ? "Recently" : daysAgo === 0 ? "Today" : `${daysAgo} day${daysAgo !== 1 ? "s" : ""} ago`;
+          const postedLabel =
+            daysAgo === null ? "Recently" : daysAgo === 0 ? "Today" : `${daysAgo} day${daysAgo !== 1 ? "s" : ""} ago`;
           const isGhost = daysAgo !== null && daysAgo > 21;
 
           return {
             id: (job.job_id as string) || String(i),
-            title: job.job_title as string || "",
+            title: (job.job_title as string) || "",
             company: (job.employer_name as string) || "",
-            location:
-              job.job_is_remote
-                ? "Remote"
-                : `${job.job_city || ""}${job.job_state ? `, ${job.job_state}` : ""}`,
+            location: job.job_is_remote
+              ? "Remote"
+              : `${job.job_city || ""}${job.job_state ? `, ${job.job_state}` : ""}`,
             salary:
               job.job_min_salary && job.job_max_salary
                 ? `$${Math.round((job.job_min_salary as number) / 1000)}k – $${Math.round((job.job_max_salary as number) / 1000)}k`
@@ -157,13 +209,20 @@ export async function GET(request: NextRequest) {
             description: ((job.job_description as string) || "").slice(0, 300) + "...",
             applyUrl: (job.job_apply_link as string) || "#",
             logo: (job.employer_logo as string) || undefined,
-            matchScore: Math.floor(Math.random() * 30) + 60, // will be replaced with actual matching
+            matchScore: Math.floor(Math.random() * 30) + 60,
             atsType: undefined,
-            source: job.job_publisher as string || "Job Board",
+            source: (job.job_publisher as string) || "Job Board",
             skills: (job.job_required_skills as string[]) || [],
             isGhost,
           };
         });
+
+        // Filter by source if selected
+        if (source !== "All") {
+          jobs = jobs.filter((j: { source: string }) =>
+            j.source.toLowerCase().includes(source.toLowerCase())
+          );
+        }
 
         return NextResponse.json({ jobs, total: jobs.length, source: "live" });
       }
@@ -183,12 +242,14 @@ export async function GET(request: NextRequest) {
     const matchesRemote = !remote || job.type === "Remote";
     const matchesLocation =
       !location ||
+      location === "Remote" ||
       job.location.toLowerCase().includes(location.toLowerCase()) ||
       job.type === "Remote";
-    return matchesQuery && matchesRemote && matchesLocation;
+    const matchesSource =
+      source === "All" || job.source.toLowerCase() === source.toLowerCase();
+    return matchesQuery && matchesRemote && matchesLocation && matchesSource;
   });
 
-  // Simulate delay
   await new Promise((r) => setTimeout(r, 400));
 
   return NextResponse.json({
@@ -196,7 +257,7 @@ export async function GET(request: NextRequest) {
     total: results.length,
     source: "demo",
     notice: !rapidApiKey
-      ? "Running in demo mode. Add RAPIDAPI_KEY to .env.local for live job data."
+      ? "Running in demo mode. Add RAPIDAPI_KEY for live job data."
       : undefined,
   });
 }
