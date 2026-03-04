@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import {
   Upload, FileText, Zap, Download, CheckCircle, AlertCircle,
-  RotateCcw, ArrowUp, ChevronRight, Loader2, X
+  RotateCcw, ArrowUp, ChevronRight, Loader2, X, Pencil, Check, ExternalLink
 } from "lucide-react";
 
 interface TailorResult {
@@ -139,6 +139,8 @@ function TailorInner() {
   const [originalResumeText, setOriginalResumeText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"resume" | "compare" | "keywords" | "changes" | "gaps">("resume");
+  const [editMode, setEditMode] = useState(false);
+  const [editedResume, setEditedResume] = useState("");
   const [isPro, setIsPro] = useState(false);
   const [tailorCount, setTailorCount] = useState(0);
   const FREE_LIMIT = 3;
@@ -226,6 +228,8 @@ function TailorInner() {
       }
 
       setResult(data);
+      setEditedResume(data.tailoredResume);
+      setEditMode(false);
       setActiveTab("resume");
       // Increment usage counter
       if (!isPro) {
@@ -247,7 +251,7 @@ function TailorInner() {
       const res = await fetch("/api/download", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resumeText: result.tailoredResume, fileName: `resume-${company || "resumeidol"}` }),
+        body: JSON.stringify({ resumeText: editedResume, fileName: `resume-${company || "resumeidol"}` }),
       });
       if (!res.ok) throw new Error("Download failed");
       const blob = await res.blob();
@@ -268,7 +272,7 @@ function TailorInner() {
       const res = await fetch("/api/download/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resumeText: result.tailoredResume, jobTitle, company }),
+        body: JSON.stringify({ resumeText: editedResume, jobTitle, company }),
       });
       if (!res.ok) throw new Error("PDF generation failed");
       const blob = await res.blob();
@@ -545,6 +549,17 @@ function TailorInner() {
                       +{result.atsScoreAfter - result.atsScoreBefore}% improvement — you&apos;re now in the top candidate tier
                     </span>
                   </div>
+                  {applyUrl && (
+                    <a
+                      href={applyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-gold w-full mt-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                    >
+                      Apply Now with Tailored Resume
+                      <ExternalLink size={15} />
+                    </a>
+                  )}
                 </div>
 
                 {/* Tabs */}
@@ -576,10 +591,22 @@ function TailorInner() {
                     {activeTab === "resume" && (
                       <div>
                         <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
-                          <span className="text-xs text-[#6B7A99]">Copy or download your tailored resume</span>
+                          <span className="text-xs text-[#6B7A99]">
+                            {editMode ? "Editing — changes save to your downloads" : "Copy, edit, or download your tailored resume"}
+                          </span>
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => navigator.clipboard.writeText(result.tailoredResume)}
+                              onClick={() => setEditMode(!editMode)}
+                              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+                              style={editMode
+                                ? { background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.3)", color: "#DEC27A" }
+                                : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#6B7A99" }
+                              }
+                            >
+                              {editMode ? <><Check size={11} />Done</> : <><Pencil size={11} />Edit</>}
+                            </button>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(editedResume)}
                               className="btn-ghost text-xs px-3 py-1.5 rounded-lg"
                             >
                               Copy
@@ -594,12 +621,22 @@ function TailorInner() {
                             </button>
                           </div>
                         </div>
-                        <div
-                          className="p-4 rounded-xl text-xs text-[#9CA3AF] leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono"
-                          style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", maxHeight: "400px" }}
-                        >
-                          {result.tailoredResume}
-                        </div>
+                        {editMode ? (
+                          <textarea
+                            value={editedResume}
+                            onChange={(e) => setEditedResume(e.target.value)}
+                            className="input-luxury w-full px-4 py-4 text-xs text-[#C8D0E0] leading-relaxed font-mono resize-none"
+                            style={{ minHeight: "400px" }}
+                            spellCheck={false}
+                          />
+                        ) : (
+                          <div
+                            className="p-4 rounded-xl text-xs text-[#9CA3AF] leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono"
+                            style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", maxHeight: "400px" }}
+                          >
+                            {editedResume}
+                          </div>
+                        )}
                       </div>
                     )}
                     {activeTab === "compare" && (
