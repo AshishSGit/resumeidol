@@ -143,7 +143,7 @@ function TailorInner() {
   const [editedResume, setEditedResume] = useState("");
   const [isPro, setIsPro] = useState(false);
   const [tailorCount, setTailorCount] = useState(0);
-  const FREE_LIMIT = 50; // TODO: set back to 3 before launch
+  const FREE_LIMIT = 3;
 
   useEffect(() => {
     const pro = localStorage.getItem("resumeidol_pro") === "true";
