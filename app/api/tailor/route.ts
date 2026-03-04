@@ -14,7 +14,8 @@ Rules you always follow:
 4. Keep the resume authentically human — it must impress a recruiter, not just a bot
 5. Quantify achievements wherever possible
 6. Use strong action verbs that match the role's seniority level
-7. The professional summary should be laser-focused on this specific role`;
+7. The professional summary should be laser-focused on this specific role
+8. NEVER use horizontal rules (---) or markdown dividers anywhere in the resume. Use plain section headers in ALL CAPS (e.g. PROFESSIONAL SUMMARY, EXPERIENCE, EDUCATION) with no decorative lines`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -97,7 +98,11 @@ Format your response with these exact section headers.`;
     const stripFences = (s: string) =>
       s.replace(/^```[\w]*\n?/gm, "").replace(/^```$/gm, "").trim();
 
-    const tailoredResume  = stripFences(extract("TAILORED_RESUME",  "KEYWORDS_ADDED"));
+    // Strip horizontal rules (---, ———, ═══, etc.) that Claude sometimes adds
+    const stripHrules = (s: string) =>
+      s.replace(/^[ \t]*[-─═─*]{3,}[ \t]*$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
+
+    const tailoredResume  = stripHrules(stripFences(extract("TAILORED_RESUME",  "KEYWORDS_ADDED")));
     const keywordsAdded   = extract("KEYWORDS_ADDED",   "CHANGES_MADE");
     const changesMade     = extract("CHANGES_MADE",     "ATS_SCORE_BEFORE");
     const atsScoreBefore  = extract("ATS_SCORE_BEFORE", "ATS_SCORE_AFTER");

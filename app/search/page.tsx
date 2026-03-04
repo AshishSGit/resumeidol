@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import JobCard, { Job } from "@/components/JobCard";
@@ -15,7 +15,6 @@ const DATE_POSTED = ["Any time", "Past 24 hours", "Past week", "Past month"];
 const SOURCES = ["All", "LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Dice", "Remotive", "BeBee", "Jooble", "Snagajob"];
 
 const LOCATIONS = [
-  "Anywhere",
   "Remote",
   "New York, NY",
   "San Francisco, CA",
@@ -35,6 +34,37 @@ const LOCATIONS = [
   "Portland, OR",
   "San Diego, CA",
   "Minneapolis, MN",
+  "Detroit, MI",
+  "Nashville, TN",
+  "Las Vegas, NV",
+  "Tampa, FL",
+  "Baltimore, MD",
+  "Sacramento, CA",
+  "Indianapolis, IN",
+  "Columbus, OH",
+  "Charlotte, NC",
+  "Raleigh, NC",
+  "Salt Lake City, UT",
+  "Pittsburgh, PA",
+  "Kansas City, MO",
+  "Cincinnati, OH",
+  "Louisville, KY",
+  "Richmond, VA",
+  "Hartford, CT",
+  "Buffalo, NY",
+  "Milwaukee, WI",
+  "Oklahoma City, OK",
+  "Orlando, FL",
+  "San Antonio, TX",
+  "Houston, TX",
+  "Toronto, Canada",
+  "London, UK",
+  "Sydney, Australia",
+  "Berlin, Germany",
+  "Amsterdam, Netherlands",
+  "Singapore",
+  "Dublin, Ireland",
+  "Vancouver, Canada",
 ];
 
 function FilterSelect({
@@ -66,7 +96,9 @@ function FilterSelect({
 export default function SearchPage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [location, setLocation] = useState("Anywhere");
+  const [locationInput, setLocationInput] = useState("");
+  const [showLocSuggestions, setShowLocSuggestions] = useState(false);
+  const locRef = useRef<HTMLDivElement>(null);
   const [remote, setRemote] = useState(false);
   const [seniority, setSeniority] = useState("Any Level");
   const [jobType, setJobType] = useState("Any Type");
@@ -86,13 +118,15 @@ export default function SearchPage() {
     e?.preventDefault();
     if (!query.trim()) return;
 
+    setShowLocSuggestions(false);
     setLoading(true);
     setSearched(true);
     setJobs([]);
 
     try {
-      const effectiveLocation = location === "Anywhere" ? "" : location;
-      const effectiveRemote = remote || location === "Remote";
+      const locVal = locationInput.trim();
+      const effectiveLocation = locVal === "" || locVal.toLowerCase() === "anywhere" ? "" : locVal;
+      const effectiveRemote = remote || locVal.toLowerCase() === "remote";
 
       const params = new URLSearchParams({
         q: query,
@@ -116,7 +150,7 @@ export default function SearchPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, location, remote, seniority, jobType, datePosted, source]);
+  }, [query, locationInput, remote, seniority, jobType, datePosted, source]);
 
   const handleTailor = (job: Job) => {
     const params = new URLSearchParams({
@@ -134,6 +168,21 @@ export default function SearchPage() {
     setSearched(false);
     inputRef.current?.focus();
   };
+
+  // Click-outside to close location suggestions
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (locRef.current && !locRef.current.contains(e.target as Node)) {
+        setShowLocSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const locSuggestions = locationInput.trim()
+    ? LOCATIONS.filter((l) => l.toLowerCase().includes(locationInput.toLowerCase()))
+    : LOCATIONS;
 
   const activeFilterCount = [
     seniority !== "Any Level",
@@ -192,22 +241,63 @@ export default function SearchPage() {
                 )}
               </div>
 
-              {/* Location dropdown */}
-              <div className="relative sm:w-52">
+              {/* Location autocomplete */}
+              <div className="relative sm:w-52" ref={locRef}>
                 <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#374151] pointer-events-none z-10" />
-                <select
-                  value={location}
+                <input
+                  type="text"
+                  value={locationInput}
                   onChange={(e) => {
-                    setLocation(e.target.value);
-                    if (e.target.value === "Remote") setRemote(true);
-                    else if (e.target.value === "Anywhere") setRemote(false);
+                    setLocationInput(e.target.value);
+                    setShowLocSuggestions(true);
+                    if (!e.target.value.trim()) setRemote(false);
                   }}
-                  className="input-luxury w-full pl-9 pr-8 py-3.5 text-sm appearance-none cursor-pointer"
-                  style={{ color: location !== "Anywhere" ? "#DEC27A" : "#6B7A99" }}
-                >
-                  {LOCATIONS.map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#374151]" />
+                  onFocus={() => setShowLocSuggestions(true)}
+                  placeholder="Location or Remote"
+                  className="input-luxury w-full pl-9 pr-8 py-3.5 text-sm"
+                  style={{ color: locationInput ? "#DEC27A" : undefined }}
+                />
+                {locationInput ? (
+                  <button
+                    type="button"
+                    onClick={() => { setLocationInput(""); setRemote(false); setShowLocSuggestions(false); }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#374151] hover:text-[#6B7A99]"
+                  >
+                    <X size={13} />
+                  </button>
+                ) : (
+                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#374151]" />
+                )}
+                {showLocSuggestions && (
+                  <div
+                    className="absolute top-full left-0 right-0 mt-1 rounded-xl overflow-hidden z-50 shadow-xl"
+                    style={{ background: "#0D1117", border: "1px solid rgba(255,255,255,0.08)", maxHeight: "220px", overflowY: "auto" }}
+                  >
+                    {locSuggestions.slice(0, 10).map((loc) => (
+                      <button
+                        key={loc}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setLocationInput(loc);
+                          setShowLocSuggestions(false);
+                          if (loc === "Remote") setRemote(true);
+                          else setRemote(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2.5 transition-colors"
+                        style={{ color: "#9CA3AF" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                      >
+                        <MapPin size={12} className="text-[#374151] shrink-0" />
+                        {loc}
+                      </button>
+                    ))}
+                    {locSuggestions.length === 0 && (
+                      <div className="px-4 py-3 text-xs text-[#374151]">No matching locations — press Search to use your input</div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <button
