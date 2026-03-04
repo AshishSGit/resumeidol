@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import JobCard, { Job } from "@/components/JobCard";
@@ -14,7 +14,8 @@ const JOB_TYPES = ["Any Type", "Full-time", "Part-time", "Contract", "Remote", "
 const DATE_POSTED = ["Any time", "Past 24 hours", "Past week", "Past month"];
 const SOURCES = ["All", "LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Dice", "Remotive", "BeBee", "Jooble", "Snagajob"];
 
-const LOCATIONS = [
+// Default popular locations shown before the user types
+const DEFAULT_LOCATIONS = [
   "Remote",
   "New York, NY",
   "San Francisco, CA",
@@ -24,48 +25,17 @@ const LOCATIONS = [
   "Austin, TX",
   "Chicago, IL",
   "Boston, MA",
-  "Denver, CO",
-  "Atlanta, GA",
-  "Miami, FL",
-  "Washington, DC",
-  "Dallas, TX",
-  "Philadelphia, PA",
-  "Phoenix, AZ",
-  "Portland, OR",
-  "San Diego, CA",
-  "Minneapolis, MN",
-  "Detroit, MI",
-  "Nashville, TN",
-  "Las Vegas, NV",
-  "Tampa, FL",
-  "Baltimore, MD",
-  "Sacramento, CA",
-  "Indianapolis, IN",
-  "Columbus, OH",
-  "Charlotte, NC",
-  "Raleigh, NC",
-  "Salt Lake City, UT",
-  "Pittsburgh, PA",
-  "Kansas City, MO",
-  "Cincinnati, OH",
-  "Louisville, KY",
-  "Richmond, VA",
-  "Hartford, CT",
-  "Buffalo, NY",
-  "Milwaukee, WI",
-  "Oklahoma City, OK",
-  "Orlando, FL",
-  "San Antonio, TX",
-  "Houston, TX",
-  "Toronto, Canada",
   "London, UK",
+  "Toronto, Canada",
   "Sydney, Australia",
-  "Berlin, Germany",
-  "Amsterdam, Netherlands",
-  "Singapore",
-  "Dublin, Ireland",
-  "Vancouver, Canada",
 ];
+
+// Shorten Nominatim's verbose display_name to "City, Country/State"
+function formatPlace(displayName: string): string {
+  const parts = displayName.split(", ").map((p) => p.trim());
+  if (parts.length >= 2) return `${parts[0]}, ${parts[parts.length - 1]}`;
+  return parts[0];
+}
 
 function FilterSelect({
   value,
@@ -180,9 +150,52 @@ export default function SearchPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const locSuggestions = locationInput.trim()
-    ? LOCATIONS.filter((l) => l.toLowerCase().includes(locationInput.toLowerCase()))
-    : LOCATIONS;
+  // Nominatim city autocomplete — debounced 350ms
+  const [nominatimResults, setNominatimResults] = useState<string[]>([]);
+  const nominatimTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const q = locationInput.trim();
+    if (!q || q.toLowerCase() === "remote") {
+      setNominatimResults([]);
+      return;
+    }
+    if (nominatimTimer.current) clearTimeout(nominatimTimer.current);
+    nominatimTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=8&featuretype=city&addressdetails=0&accept-language=en`,
+          { headers: { "Accept-Language": "en" } }
+        );
+        const data = await res.json();
+        const names: string[] = Array.from(
+          new Set(
+            (data as { display_name: string }[]).map((d) => formatPlace(d.display_name))
+          )
+        );
+        setNominatimResults(names.slice(0, 8));
+      } catch {
+        setNominatimResults([]);
+      }
+    }, 350);
+    return () => { if (nominatimTimer.current) clearTimeout(nominatimTimer.current); };
+  }, [locationInput]);
+
+  // What to show in the dropdown
+  const locSuggestions = useMemo(() => {
+    const q = locationInput.trim().toLowerCase();
+    if (!q) return DEFAULT_LOCATIONS;
+    if (q === "remote") return ["Remote"];
+    // Combine Nominatim results + always include typed value as first option
+    const combined = nominatimResults.length > 0
+      ? nominatimResults
+      : DEFAULT_LOCATIONS.filter((l) => l.toLowerCase().includes(q));
+    // Always prepend the exact typed input so user can search any location
+    if (!combined.some((c) => c.toLowerCase() === locationInput.trim().toLowerCase())) {
+      return [locationInput.trim(), ...combined].slice(0, 9);
+    }
+    return combined;
+  }, [locationInput, nominatimResults]);
 
   const activeFilterCount = [
     seniority !== "Any Level",

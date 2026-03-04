@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, Suspense, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import { createClient } from "@/utils/supabase/client";
 import {
   Upload, FileText, Zap, Download, CheckCircle, AlertCircle,
   RotateCcw, ArrowUp, ChevronRight, Loader2, X, Pencil, Check, ExternalLink
@@ -146,10 +147,24 @@ function TailorInner() {
   const FREE_LIMIT = 3;
 
   useEffect(() => {
-    const pro = localStorage.getItem("resumeidol_pro") === "true";
-    setIsPro(pro);
-    const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
-    setTailorCount(parseInt(localStorage.getItem(monthKey) ?? "0"));
+    const init = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Owner email bypass — unlimited access
+      const ownerEmail = process.env.NEXT_PUBLIC_OWNER_EMAIL;
+      if (user && ownerEmail && user.email === ownerEmail) {
+        setIsPro(true);
+        return;
+      }
+
+      // localStorage fallback (pro purchase or grant-pro page)
+      const pro = localStorage.getItem("resumeidol_pro") === "true";
+      setIsPro(pro);
+      const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
+      setTailorCount(parseInt(localStorage.getItem(monthKey) ?? "0"));
+    };
+    init();
   }, []);
 
   const handleFile = useCallback(async (file: File) => {

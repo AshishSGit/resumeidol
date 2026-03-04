@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Target, Search, FileText, LayoutDashboard, Menu, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Target, Search, FileText, LayoutDashboard, Menu, X, LogOut, Crown } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 const NAV_LINKS = [
   { href: "/search", label: "Job Search", icon: Search },
@@ -13,14 +15,50 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isPro, setIsPro] = useState(false);
 
   useEffect(() => {
     const handle = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handle, { passive: true });
     return () => window.removeEventListener("scroll", handle);
   }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      if (user) {
+        const ownerEmail = process.env.NEXT_PUBLIC_OWNER_EMAIL;
+        setIsPro(!!ownerEmail && user.email === ownerEmail);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) {
+        const ownerEmail = process.env.NEXT_PUBLIC_OWNER_EMAIL;
+        setIsPro(!!ownerEmail && u.email === ownerEmail);
+      } else {
+        setIsPro(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setIsPro(false);
+    router.push("/");
+  };
 
   return (
     <nav
@@ -81,12 +119,35 @@ export default function Navbar() {
 
         {/* Desktop right */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/search" className="btn-ghost text-sm px-4 py-2 rounded-lg">
-            Sign in
-          </Link>
-          <Link href="/search" className="btn-gold text-sm px-5 py-2 rounded-lg">
-            Start Free
-          </Link>
+          {user ? (
+            <div className="flex items-center gap-3">
+              {isPro && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                  style={{ background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.25)", color: "#DEC27A" }}>
+                  <Crown size={11} />
+                  Pro
+                </div>
+              )}
+              <span className="text-xs text-[#6B7A99] max-w-[140px] truncate">{user.email}</span>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-1.5 text-xs text-[#6B7A99] hover:text-[#9CA3AF] px-3 py-2 rounded-lg transition-colors"
+                style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+              >
+                <LogOut size={13} />
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link href="/signin" className="btn-ghost text-sm px-4 py-2 rounded-lg">
+                Sign in
+              </Link>
+              <Link href="/tailor" className="btn-gold text-sm px-5 py-2 rounded-lg">
+                Start Free
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -123,13 +184,29 @@ export default function Navbar() {
                 </Link>
               );
             })}
-            <Link
-              href="/search"
-              className="btn-gold text-sm px-5 py-3 rounded-xl text-center mt-2 font-semibold"
-              onClick={() => setMobileOpen(false)}
-            >
-              Start Free →
-            </Link>
+            {user ? (
+              <>
+                <div className="px-4 py-2 text-xs text-[#6B7A99] flex items-center gap-2">
+                  {isPro && <Crown size={11} className="text-[#C9A84C]" />}
+                  {user.email}
+                </div>
+                <button
+                  onClick={() => { setMobileOpen(false); handleSignOut(); }}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm text-[#6B7A99] hover:text-white transition-all"
+                >
+                  <LogOut size={15} />
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/signin"
+                className="btn-gold text-sm px-5 py-3 rounded-xl text-center mt-2 font-semibold"
+                onClick={() => setMobileOpen(false)}
+              >
+                Sign in →
+              </Link>
+            )}
           </div>
         </div>
       )}
