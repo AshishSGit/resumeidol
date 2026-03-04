@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -28,14 +28,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { error: "OPENAI_API_KEY not configured. Add it to .env.local." },
+        { error: "ANTHROPIC_API_KEY not configured." },
         { status: 500 }
       );
     }
 
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const userPrompt = `Job to apply for:
 Title: ${jobTitle}
@@ -64,18 +64,16 @@ Please provide:
 
 Format your response with these exact section headers.`;
 
-    const completion = await client.chat.completions.create({
-      model: "gpt-4o",
+    const message = await client.messages.create({
+      model: "claude-sonnet-4-6",
       max_tokens: 4000,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
     });
 
-    const raw = completion.choices[0]?.message?.content ?? "";
+    const raw = message.content[0].type === "text" ? message.content[0].text : "";
 
-    // GPT-4o sometimes wraps headers in **bold** or ## markdown — strip those
+    // Claude sometimes wraps headers in **bold** or ## markdown — strip those
     const text = raw.replace(/\*\*(.*?)\*\*/g, "$1").replace(/^#{1,3} /gm, "");
 
     // Flexible section extractor — matches "SECTION_NAME" regardless of surrounding formatting
@@ -118,7 +116,7 @@ Format your response with these exact section headers.`;
       atsScoreBefore: parseScore(atsScoreBefore),
       atsScoreAfter:  parseScore(atsScoreAfter),
       gaps,
-      tokensUsed: completion.usage?.total_tokens ?? 0,
+      tokensUsed: message.usage.input_tokens + message.usage.output_tokens,
     });
   } catch (error) {
     console.error("Tailor API error:", error);

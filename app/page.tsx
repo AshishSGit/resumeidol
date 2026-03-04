@@ -78,12 +78,13 @@ const PRICING = [
     period: "forever",
     desc: "For the curious job seeker",
     features: [
-      "15 job searches / day",
       "3 AI resume tailors / month",
-      "10 tracked applications",
-      "Basic match score",
+      "ATS score before & after",
+      "Keyword gap analysis",
+      "DOCX + PDF download",
     ],
     cta: "Start for Free",
+    plan: "free",
     featured: false,
   },
   {
@@ -92,14 +93,15 @@ const PRICING = [
     period: "per month",
     desc: "For the serious job seeker",
     features: [
-      "Unlimited job searches",
-      "50 AI resume tailors / month",
-      "Cover letter generator",
-      "Full application tracker",
-      "Salary intelligence",
-      "Job alert emails",
+      "Unlimited AI resume tailoring",
+      "ATS score before & after",
+      "Keyword gap analysis",
+      "DOCX + PDF download",
+      "Word-level diff comparison",
+      "Cancel anytime",
     ],
-    cta: "Start Pro",
+    cta: "Start Pro — $19/mo",
+    plan: "pro",
     featured: true,
     badge: "Most Popular",
   },
@@ -110,13 +112,13 @@ const PRICING = [
     desc: "Pay once, own forever",
     features: [
       "Everything in Pro",
-      "Interview prep AI",
-      "Company intelligence",
-      "AI Career Coach chat",
-      "Chrome extension",
+      "Unlimited tailoring — forever",
+      "All future features included",
+      "No renewals, no expiry",
       "Priority support",
     ],
-    cta: "Get Lifetime Access",
+    cta: "Get Lifetime — $249",
+    plan: "lifetime",
     featured: false,
     badge: "Best Value",
   },
@@ -223,6 +225,25 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
+  const handleCheckout = async (plan: string) => {
+    if (plan === "free") { window.location.href = "/tailor"; return; }
+    setCheckoutLoading(plan);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -446,7 +467,7 @@ export default function LandingPage() {
               <span>Simple 3-step process</span>
             </div>
             <h2 className="heading-lg text-[#F0F2F7] mb-4">
-              From resume to offer,<br />
+              From resume to interview,<br />
               <span className="text-gold-gradient">in minutes</span>
             </h2>
           </div>
@@ -530,12 +551,13 @@ export default function LandingPage() {
                 ))}
               </ul>
 
-              <Link
-                href="/search"
-                className={`block text-center py-3 rounded-xl font-semibold text-sm transition-all ${plan.featured ? "btn-gold" : "btn-ghost"}`}
+              <button
+                onClick={() => handleCheckout(plan.plan)}
+                disabled={checkoutLoading !== null}
+                className={`w-full text-center py-3 rounded-xl font-semibold text-sm transition-all ${plan.featured ? "btn-gold" : "btn-ghost"} disabled:opacity-60`}
               >
-                {plan.cta}
-              </Link>
+                {checkoutLoading === plan.plan ? "Redirecting…" : plan.cta}
+              </button>
             </div>
           ))}
         </div>

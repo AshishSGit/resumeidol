@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, Suspense, useMemo } from "react";
+import { useState, useCallback, useRef, Suspense, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import {
@@ -139,6 +139,16 @@ function TailorInner() {
   const [originalResumeText, setOriginalResumeText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"resume" | "compare" | "keywords" | "changes" | "gaps">("resume");
+  const [isPro, setIsPro] = useState(false);
+  const [tailorCount, setTailorCount] = useState(0);
+  const FREE_LIMIT = 3;
+
+  useEffect(() => {
+    const pro = localStorage.getItem("resumeidol_pro") === "true";
+    setIsPro(pro);
+    const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
+    setTailorCount(parseInt(localStorage.getItem(monthKey) ?? "0"));
+  }, []);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file) return;
@@ -192,6 +202,11 @@ function TailorInner() {
       return;
     }
 
+    if (!isPro && tailorCount >= FREE_LIMIT) {
+      setError(`You've used all ${FREE_LIMIT} free tailors this month. Upgrade to Pro for unlimited tailoring.`);
+      return;
+    }
+
     setTailoring(true);
     setError(null);
     setResult(null);
@@ -212,6 +227,13 @@ function TailorInner() {
 
       setResult(data);
       setActiveTab("resume");
+      // Increment usage counter
+      if (!isPro) {
+        const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
+        const newCount = tailorCount + 1;
+        localStorage.setItem(monthKey, String(newCount));
+        setTailorCount(newCount);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -445,6 +467,20 @@ function TailorInner() {
             {!canTailor && (
               <p className="text-center text-xs text-[#374151]">
                 Add your resume and job description to continue
+              </p>
+            )}
+            {/* Usage indicator */}
+            {!isPro && (
+              <p className="text-center text-xs text-[#374151]">
+                {tailorCount >= FREE_LIMIT ? (
+                  <span className="text-[#ef4444]">
+                    Free limit reached.{" "}
+                    <a href="/#pricing" className="text-[#C9A84C] hover:underline">Upgrade to Pro</a>
+                    {" "}for unlimited tailoring.
+                  </span>
+                ) : (
+                  <span>{FREE_LIMIT - tailorCount} free tailor{FREE_LIMIT - tailorCount !== 1 ? "s" : ""} remaining this month</span>
+                )}
               </p>
             )}
           </div>
