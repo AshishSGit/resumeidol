@@ -7,7 +7,9 @@ export async function GET(request: NextRequest) {
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const code = searchParams.get("code");
-  const next = "/tailor";
+  // next must be a relative path to prevent open-redirect
+  const rawNext = searchParams.get("next") ?? "/tailor";
+  const next = rawNext.startsWith("/") ? rawNext : "/tailor";
 
   const supabase = await createClient();
 
@@ -15,11 +17,13 @@ export async function GET(request: NextRequest) {
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type });
     if (!error) {
-      return NextResponse.redirect(`https://resumeidol.com${next}`);
+      // Recovery tokens land on the update-password page
+      const dest = type === "recovery" ? "/update-password" : next;
+      return NextResponse.redirect(`https://resumeidol.com${dest}`);
     }
   }
 
-  // PKCE code flow (fallback)
+  // PKCE code flow (OAuth + magic link fallback)
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
