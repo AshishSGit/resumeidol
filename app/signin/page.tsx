@@ -55,6 +55,11 @@ export default function SignInPage() {
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) {
         setError(error.message);
+      } else if (data.user && data.user.identities && data.user.identities.length === 0) {
+        // Supabase returns an empty identities array when the email already exists
+        setError("An account with this email already exists. Sign in instead.");
+        setLoading(false);
+        return;
       } else if (data.session) {
         window.location.href = "/tailor";
       } else {
