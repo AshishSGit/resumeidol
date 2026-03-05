@@ -26,7 +26,13 @@ export async function middleware(request: NextRequest) {
   );
 
   // Refresh session — must not run on static assets
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // LinkedIn-style: authenticated users go straight to the app, not the landing page
+  if (request.nextUrl.pathname === "/" && user) {
+    return NextResponse.redirect(new URL("/tailor", request.url));
+  }
+
   return supabaseResponse;
 }
 

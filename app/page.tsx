@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 import {
   Crown, Search, FileText, BarChart2, Briefcase, Mail,
   ArrowRight, CheckCircle, Star, Zap, Shield, TrendingUp,
@@ -221,11 +223,24 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function LandingPage() {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        router.replace("/tailor");
+      } else {
+        setIsLoggedIn(false);
+      }
+    });
+  }, [router]);
 
   const handleCheckout = async (plan: string) => {
     if (plan === "free") { window.location.href = "/tailor"; return; }
@@ -314,12 +329,20 @@ export default function LandingPage() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/search" className="btn-ghost text-sm px-4 py-2 rounded-lg">
-              Sign in
-            </Link>
-            <Link href="/search" className="btn-gold text-sm px-5 py-2 rounded-lg">
-              Start Free →
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/tailor" className="btn-gold text-sm px-5 py-2 rounded-lg">
+                Go to app →
+              </Link>
+            ) : (
+              <>
+                <Link href="/signin" className="btn-ghost text-sm px-4 py-2 rounded-lg">
+                  Sign in
+                </Link>
+                <Link href="/tailor" className="btn-gold text-sm px-5 py-2 rounded-lg">
+                  Start Free →
+                </Link>
+              </>
+            )}
           </div>
 
           <button
@@ -344,9 +367,15 @@ export default function LandingPage() {
                   {item}
                 </a>
               ))}
-              <Link href="/search" className="btn-gold text-sm px-5 py-2.5 rounded-lg text-center mt-2">
-                Start Free →
-              </Link>
+              {isLoggedIn ? (
+                <Link href="/tailor" className="btn-gold text-sm px-5 py-2.5 rounded-lg text-center mt-2">
+                  Go to app →
+                </Link>
+              ) : (
+                <Link href="/tailor" className="btn-gold text-sm px-5 py-2.5 rounded-lg text-center mt-2">
+                  Start Free →
+                </Link>
+              )}
             </div>
           </div>
         )}
