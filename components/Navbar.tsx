@@ -30,20 +30,22 @@ export default function Navbar() {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUser(user);
       if (user) {
-        const ownerEmail = process.env.NEXT_PUBLIC_OWNER_EMAIL;
-        setIsPro(!!ownerEmail && user.email === ownerEmail);
+        const res = await fetch("/api/pro-status");
+        const { isPro } = await res.json();
+        setIsPro(isPro);
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user ?? null;
       setUser(u);
       if (u) {
-        const ownerEmail = process.env.NEXT_PUBLIC_OWNER_EMAIL;
-        setIsPro(!!ownerEmail && u.email === ownerEmail);
+        const res = await fetch("/api/pro-status");
+        const { isPro } = await res.json();
+        setIsPro(isPro);
       } else {
         setIsPro(false);
       }

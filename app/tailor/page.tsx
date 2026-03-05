@@ -148,17 +148,15 @@ function TailorInner() {
 
   useEffect(() => {
     const init = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-
-      // Owner email bypass — unlimited access
-      const ownerEmail = process.env.NEXT_PUBLIC_OWNER_EMAIL;
-      if (user && ownerEmail && user.email === ownerEmail) {
+      // Server-side pro check (owner bypass via OWNER_EMAIL env var)
+      const res = await fetch("/api/pro-status");
+      const { isPro: serverPro } = await res.json();
+      if (serverPro) {
         setIsPro(true);
         return;
       }
 
-      // localStorage fallback (pro purchase or grant-pro page)
+      // localStorage fallback (pro purchase)
       const pro = localStorage.getItem("resumeidol_pro") === "true";
       setIsPro(pro);
       const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
