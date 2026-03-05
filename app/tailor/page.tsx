@@ -50,7 +50,7 @@ function BulletList({ content, icon: Icon, iconColor }: { content: string; icon:
   const lines = content
     .split("\n")
     .map((l) => l.replace(/^[-•*]\s*/, "").trim())
-    .filter(Boolean);
+    .filter((l) => l.length > 0 && !/^[-─═*]{2,}$/.test(l));
 
   return (
     <ul className="space-y-2">
@@ -69,8 +69,8 @@ type DiffOp = { type: "eq" | "del" | "ins"; text: string };
 
 function computeWordDiff(oldText: string, newText: string): { left: DiffOp[]; right: DiffOp[] } {
   const tok = (s: string) => s.split(/(\s+)/).filter(Boolean);
-  const a = tok(oldText).slice(0, 600);
-  const b = tok(newText).slice(0, 600);
+  const a = tok(oldText).slice(0, 3000);
+  const b = tok(newText).slice(0, 3000);
   const m = a.length, n = b.length;
 
   const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
