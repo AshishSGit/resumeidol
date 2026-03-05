@@ -668,9 +668,20 @@ export default function LandingPage() {
               </a>
             ))}
           </div>
-          <p className="text-[#374151] text-sm">
-            © 2026 ResumeIdol. All rights reserved.
-          </p>
+          <div className="flex flex-col items-center md:items-end gap-1">
+            <p className="text-[#374151] text-sm">
+              © 2026 ResumeIdol. All rights reserved.
+            </p>
+            <a
+              href="https://anthropic.com/claude"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 opacity-50 hover:opacity-75 transition-opacity"
+            >
+              <span className="text-[#4B5563] text-xs">Powered by</span>
+              <span className="text-[#C9A84C] text-xs font-medium tracking-wide">Claude</span>
+            </a>
+          </div>
         </div>
       </footer>
     </div>
