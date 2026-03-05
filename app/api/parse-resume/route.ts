@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
       const result = await mammoth.extractRawText({ buffer });
       text = result.value;
     } else if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-      // PDF → plain text via pdf-parse
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pdfParse = (await import("pdf-parse")) as any;
-      const data = await (pdfParse.default ?? pdfParse)(buffer);
+      // Import directly from lib to avoid pdf-parse's test-file loader (Next.js bug workaround)
+      // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
+      const pdfParse = require("pdf-parse/lib/pdf-parse.js") as any;
+      const data = await pdfParse(buffer);
       text = data.text;
     } else if (file.type === "text/plain" || file.name.endsWith(".txt")) {
       text = buffer.toString("utf-8");
