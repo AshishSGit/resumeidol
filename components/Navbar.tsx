@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Target, Search, FileText, LayoutDashboard, Menu, X, LogOut, Crown, ChevronDown, User as UserIcon } from "lucide-react";
+import { Search, FileText, LayoutDashboard, Menu, X, LogOut, Crown, ChevronDown, User as UserIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -94,7 +94,7 @@ export default function Navbar() {
               boxShadow: "0 0 16px rgba(201,168,76,0.35)",
             }}
           >
-            <Target size={18} className="text-[#07090F]" strokeWidth={2.5} />
+            <Crown size={18} className="text-[#07090F]" strokeWidth={2.5} />
           </div>
           <span
             style={{
