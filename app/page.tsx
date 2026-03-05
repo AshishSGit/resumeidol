@@ -89,7 +89,7 @@ const PRICING = [
   },
   {
     name: "Pro",
-    price: "19",
+    price: "18",
     period: "per month",
     desc: "For the serious job seeker",
     features: [
@@ -100,7 +100,7 @@ const PRICING = [
       "Word-level diff comparison",
       "Cancel anytime",
     ],
-    cta: "Start Pro — $19/mo",
+    cta: "Start Pro — $18/mo",
     plan: "pro",
     featured: true,
     badge: "Most Popular",
