@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Target, CheckCircle, XCircle } from "lucide-react";
+import { Crown, CheckCircle, XCircle } from "lucide-react";
 
 function GrantProInner() {
   const searchParams = useSearchParams();
@@ -26,7 +26,7 @@ function GrantProInner() {
     <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: "#07090F" }}>
       <Link href="/" className="flex items-center gap-2.5 mb-12">
         <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #C9A84C, #B8952F)" }}>
-          <Target size={16} className="text-[#07090F]" strokeWidth={2.5} />
+          <Crown size={16} className="text-[#07090F]" strokeWidth={2.5} />
         </div>
         <span style={{ fontFamily: "Playfair Display, serif", fontWeight: 700, fontSize: "1.2rem", color: "#F0F2F7" }}>
           ResumeIdol

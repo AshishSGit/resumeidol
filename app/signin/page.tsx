@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Target, Mail, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Crown, Mail, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
 export default function SignInPage() {
@@ -44,7 +44,7 @@ export default function SignInPage() {
           className="w-8 h-8 rounded-xl flex items-center justify-center"
           style={{ background: "linear-gradient(135deg, #C9A84C, #B8952F)" }}
         >
-          <Target size={16} className="text-[#07090F]" strokeWidth={2.5} />
+          <Crown size={16} className="text-[#07090F]" strokeWidth={2.5} />
         </div>
         <span
           style={{

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Target } from "lucide-react";
+import { Crown } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,7 +14,7 @@ export default function TermsPage() {
       <nav className="h-16 flex items-center px-6 border-b border-[rgba(255,255,255,0.05)]">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #C9A84C, #B8952F)" }}>
-            <Target size={16} className="text-[#07090F]" strokeWidth={2.5} />
+            <Crown size={16} className="text-[#07090F]" strokeWidth={2.5} />
           </div>
           <span style={{ fontFamily: "Playfair Display, serif", fontWeight: 700, fontSize: "1.2rem", color: "#F0F2F7" }}>
             ResumeIdol

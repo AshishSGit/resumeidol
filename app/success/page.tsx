@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, Loader2, Target, ArrowRight, Zap } from "lucide-react";
+import { CheckCircle, Loader2, Crown, ArrowRight, Zap } from "lucide-react";
 
 function SuccessContent() {
   const params = useSearchParams();
@@ -156,7 +156,7 @@ export default function SuccessPage() {
             className="w-8 h-8 rounded-xl flex items-center justify-center"
             style={{ background: "linear-gradient(135deg, #C9A84C, #B8952F)" }}
           >
-            <Target size={16} className="text-[#07090F]" strokeWidth={2.5} />
+            <Crown size={16} className="text-[#07090F]" strokeWidth={2.5} />
           </div>
           <span
             style={{

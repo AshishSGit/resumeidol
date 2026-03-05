@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
-  Target, Search, FileText, BarChart2, Briefcase, Mail,
+  Crown, Search, FileText, BarChart2, Briefcase, Mail,
   ArrowRight, CheckCircle, Star, Zap, Shield, TrendingUp,
   ChevronDown, Menu, X
 } from "lucide-react";
@@ -298,7 +298,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #C9A84C, #B8952F)", boxShadow: "0 0 16px rgba(201,168,76,0.35)" }}>
-              <Target size={18} className="text-[#07090F]" strokeWidth={2.5} />
+              <Crown size={18} className="text-[#07090F]" strokeWidth={2.5} />
             </div>
             <span style={{ fontFamily: "Playfair Display, serif", fontWeight: 700, fontSize: "1.35rem", color: "#F0F2F7", letterSpacing: "-0.01em" }}>
               ResumeIdol
@@ -609,7 +609,7 @@ export default function LandingPage() {
           >
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-px" style={{ background: "linear-gradient(90deg, transparent, #C9A84C, transparent)" }} />
             <div className="badge-gold mb-6 mx-auto w-fit">
-              <Target size={11} />
+              <Crown size={11} />
               <span>Launch offer — limited spots</span>
             </div>
             <h2 className="heading-lg text-[#F0F2F7] mb-4">
@@ -651,7 +651,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "linear-gradient(135deg, #C9A84C, #B8952F)" }}>
-              <Target size={12} className="text-[#07090F]" />
+              <Crown size={12} className="text-[#07090F]" />
             </div>
             <span style={{ fontFamily: "Playfair Display, serif", fontWeight: 700, color: "#9CA3AF", fontSize: "0.95rem" }}>
               ResumeIdol
