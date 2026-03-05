@@ -39,7 +39,10 @@ export default function SignInPage() {
     setError(null);
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://resumeidol.com/auth/callback" },
+      options: {
+        redirectTo: "https://resumeidol.com/auth/callback",
+        queryParams: { prompt: "select_account" },
+      },
     });
   };
 
