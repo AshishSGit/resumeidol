@@ -10,71 +10,37 @@ export async function GET() {
           background: "#07090F",
           borderRadius: 36,
           display: "flex",
-          position: "relative",
-          overflow: "hidden",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        {/* Crown body */}
-        <div
-          style={{
-            position: "absolute",
-            left: 25,
-            top: 34,
-            width: 110,
-            height: 80,
-            background: "linear-gradient(135deg, #F5DC78, #C9A84C, #8B6410)",
-            clipPath:
-              "polygon(0% 100%, 0% 20%, 30% 57.5%, 50% 0%, 70% 57.5%, 100% 20%, 100% 100%)",
-          }}
-        />
-        {/* Base bar */}
-        <div
-          style={{
-            position: "absolute",
-            left: 23,
-            top: 114,
-            width: 114,
-            height: 15,
-            background: "linear-gradient(90deg, #C9A84C, #F0CC60, #C9A84C)",
-            borderRadius: 8,
-          }}
-        />
-        {/* Center gem */}
-        <div
-          style={{
-            position: "absolute",
-            left: 71,
-            top: 25,
-            width: 18,
-            height: 18,
-            background: "#FFFBE8",
-            borderRadius: 9999,
-          }}
-        />
-        {/* Left gem */}
-        <div
-          style={{
-            position: "absolute",
-            left: 18,
-            top: 43,
-            width: 14,
-            height: 14,
-            background: "rgba(255,251,232,0.8)",
-            borderRadius: 9999,
-          }}
-        />
-        {/* Right gem */}
-        <div
-          style={{
-            position: "absolute",
-            left: 128,
-            top: 43,
-            width: 14,
-            height: 14,
-            background: "rgba(255,251,232,0.8)",
-            borderRadius: 9999,
-          }}
-        />
+        {/* SVG crown — polygon/circle/rect are all Satori-safe */}
+        <svg width="114" height="96" viewBox="0 0 114 96">
+          {/* Crown body */}
+          <polygon
+            points="0,80 0,22 32,50 57,0 82,50 114,22 114,80"
+            fill="#C9A84C"
+          />
+          {/* Lighter highlight on left face of crown */}
+          <polygon
+            points="0,22 32,50 57,0 42,0 20,42"
+            fill="#F0CC60"
+            opacity="0.35"
+          />
+          {/* Base bar */}
+          <rect x="0" y="80" width="114" height="13" rx="6.5" fill="#D4A843" />
+          {/* Base bar shimmer */}
+          <rect x="22" y="83" width="70" height="5" rx="2.5" fill="#F5DC78" opacity="0.4" />
+          {/* Center gem (brightest) */}
+          <circle cx="57" cy="0" r="8" fill="#FFFBE8" />
+          <circle cx="57" cy="0" r="4.5" fill="white" />
+          {/* Left gem */}
+          <circle cx="0" cy="22" r="6" fill="#FFFBE8" opacity="0.85" />
+          <circle cx="0" cy="22" r="3" fill="white" opacity="0.8" />
+          {/* Right gem */}
+          <circle cx="114" cy="22" r="6" fill="#FFFBE8" opacity="0.85" />
+          <circle cx="114" cy="22" r="3" fill="white" opacity="0.8" />
+        </svg>
       </div>
     ),
     { width: 160, height: 160 }
