@@ -492,8 +492,8 @@ function TailorInner() {
                 {tailorCount >= FREE_LIMIT ? (
                   <span className="text-[#ef4444]">
                     Free limit reached.{" "}
-                    <a href="/#pricing" className="text-[#C9A84C] hover:underline">Upgrade to Pro</a>
-                    {" "}for 30/mo, or Lifetime for unlimited.
+                    <a href="/#pricing" className="text-[#C9A84C] hover:underline">Upgrade to Pro ($18/mo)</a>
+                    {" "}for 30 tailors, or Lifetime ($249) for unlimited.
                   </span>
                 ) : (
                   <span>{FREE_LIMIT - tailorCount} free tailor{FREE_LIMIT - tailorCount !== 1 ? "s" : ""} remaining this month</span>
