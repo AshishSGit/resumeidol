@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import { createClient } from "@/utils/supabase/client";
 import {
   Upload, FileText, Zap, Download, CheckCircle, AlertCircle,
-  RotateCcw, ArrowUp, ChevronRight, Loader2, X, Pencil, Check, ExternalLink
+  RotateCcw, ArrowUp, ChevronRight, Loader2, X, Pencil, Check, ExternalLink, Link2
 } from "lucide-react";
 
 interface TailorResult {
@@ -130,6 +130,9 @@ function TailorInner() {
   const [company, setCompany] = useState(searchParams.get("company") || "");
   const [jobDescription, setJobDescription] = useState(searchParams.get("jobDescription") || "");
   const [applyUrl] = useState(searchParams.get("applyUrl") || "");
+  const [jobUrl, setJobUrl] = useState("");
+  const [fetchingJd, setFetchingJd] = useState(false);
+  const [fetchJdError, setFetchJdError] = useState<string | null>(null);
 
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeText, setResumeText] = useState("");
@@ -238,6 +241,37 @@ function TailorInner() {
     const file = e.dataTransfer.files[0];
     if (file) handleFile(file);
   }, [handleFile]);
+
+  const handleFetchJd = async () => {
+    if (!jobUrl.trim()) return;
+    setFetchingJd(true);
+    setFetchJdError(null);
+    try {
+      const res = await fetch("/api/fetch-jd", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: jobUrl.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setFetchJdError(data.error || "Could not fetch job description.");
+        return;
+      }
+      setJobDescription(data.text);
+      // Try to parse job title + company from page title (e.g. "Senior Engineer at Stripe | Greenhouse")
+      if (data.pageTitle && !jobTitle && !company) {
+        const atMatch = data.pageTitle.match(/^(.+?)\s+(?:at|@)\s+(.+?)(?:\s*[|\-–]|$)/i);
+        if (atMatch) {
+          setJobTitle(atMatch[1].trim());
+          setCompany(atMatch[2].trim());
+        }
+      }
+    } catch {
+      setFetchJdError("Could not fetch that URL. Please paste the job description manually.");
+    } finally {
+      setFetchingJd(false);
+    }
+  };
 
   const handleTailor = async () => {
     if (!resumeText.trim() || !jobDescription.trim()) {
@@ -393,10 +427,43 @@ function TailorInner() {
                   <label className="text-xs text-[#6B7A99] mb-1.5 block">
                     Job Description <span className="text-[#ef4444]">*</span>
                   </label>
+
+                  {/* URL fetch bar */}
+                  <div className="flex gap-2 mb-2">
+                    <div className="relative flex-1">
+                      <Link2 size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4B5563]" />
+                      <input
+                        type="url"
+                        value={jobUrl}
+                        onChange={(e) => { setJobUrl(e.target.value); setFetchJdError(null); }}
+                        onKeyDown={(e) => e.key === "Enter" && handleFetchJd()}
+                        placeholder="Paste job URL to auto-fill (Greenhouse, Lever, Workday…)"
+                        className="input-luxury w-full pl-8 pr-3 py-2 text-xs"
+                      />
+                    </div>
+                    <button
+                      onClick={handleFetchJd}
+                      disabled={!jobUrl.trim() || fetchingJd}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                      style={{ background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.25)", color: "#DEC27A" }}
+                    >
+                      {fetchingJd ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
+                      {fetchingJd ? "Fetching…" : "Auto-fill"}
+                    </button>
+                  </div>
+                  {fetchJdError && (
+                    <p className="text-xs text-[#f87171] mb-2">{fetchJdError}</p>
+                  )}
+                  {jobDescription && jobUrl && !fetchingJd && !fetchJdError && (
+                    <p className="text-xs text-[#22c55e] mb-2 flex items-center gap-1">
+                      <CheckCircle size={11} /> Job description loaded from URL
+                    </p>
+                  )}
+
                   <textarea
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
-                    placeholder="Paste the full job description here..."
+                    placeholder="Paste the full job description here, or use the URL auto-fill above..."
                     rows={8}
                     className="input-luxury w-full px-3.5 py-2.5 text-sm resize-none"
                     style={{ fontFamily: "Inter, sans-serif" }}
