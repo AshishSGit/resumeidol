@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Crown, Mail, Lock, Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
-type Mode = "signin" | "signup" | "forgot" | "magic" | "sent_magic" | "sent_reset";
+type Mode = "signin" | "signup" | "forgot" | "magic" | "sent_magic" | "sent_signup" | "sent_reset";
 
 function GoogleIcon() {
   return (
@@ -56,7 +56,7 @@ export default function SignInPage() {
         window.location.href = "/tailor";
       } else {
         // Email confirmation required
-        reset("sent_magic");
+        setMode("sent_signup");
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -100,8 +100,22 @@ export default function SignInPage() {
   };
 
   // ── Sent states ─────────────────────────────────────────────────────────────
-  if (mode === "sent_magic" || mode === "sent_reset") {
-    const isMagic = mode === "sent_magic";
+  if (mode === "sent_magic" || mode === "sent_signup" || mode === "sent_reset") {
+    const headlines: Record<string, string> = {
+      sent_magic: "Check your inbox",
+      sent_signup: "Confirm your email",
+      sent_reset: "Check your inbox",
+    };
+    const messages: Record<string, string> = {
+      sent_magic: " Click it to sign in — no password needed.",
+      sent_signup: " Click the confirmation link to activate your account, then sign in.",
+      sent_reset: " Click it to choose a new password.",
+    };
+    const prefix: Record<string, string> = {
+      sent_magic: "We sent a magic link to ",
+      sent_signup: "We sent a confirmation email to ",
+      sent_reset: "We sent a password reset link to ",
+    };
     return (
       <Shell>
         <div className="text-center py-4">
@@ -112,13 +126,14 @@ export default function SignInPage() {
             <CheckCircle size={26} className="text-[#22c55e]" />
           </div>
           <h2 className="text-[#F0F2F7] font-semibold text-lg mb-2" style={{ fontFamily: "Playfair Display, serif" }}>
-            Check your inbox
+            {headlines[mode]}
           </h2>
           <p className="text-[#6B7A99] text-sm leading-relaxed">
-            {isMagic ? "We sent a magic link to " : "We sent a password reset link to "}
+            {prefix[mode]}
             <span className="text-[#DEC27A] font-medium">{email}</span>.
-            {isMagic ? " Click it to sign in — no password needed." : " Click it to choose a new password."}
+            {messages[mode]}
           </p>
+          <p className="text-[#4B5563] text-xs mt-3">Don&apos;t see it? Check your spam folder.</p>
           <button onClick={() => reset("signin")} className="mt-6 text-xs text-[#6B7A99] hover:text-[#9CA3AF] underline underline-offset-2">
             Back to sign in
           </button>
