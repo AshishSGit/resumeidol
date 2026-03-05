@@ -182,6 +182,23 @@ function TailorInner() {
       }
     };
     init();
+
+    // Clear personal data when user signs out
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        setResumeText("");
+        setResumeFile(null);
+        setUsingCloudResume(false);
+        setSavedResumeName(null);
+        setSavedResumeDate(null);
+        setResult(null);
+        setError(null);
+        setOriginalResumeText("");
+        setEditedResume("");
+      }
+    });
+    return () => subscription.unsubscribe();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
