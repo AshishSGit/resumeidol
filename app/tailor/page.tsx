@@ -482,13 +482,13 @@ function TailorInner() {
               )}
             </button>
             {!canTailor && (
-              <p className="text-center text-xs text-[#374151]">
+              <p className="text-center text-xs text-[#6B7A99]">
                 Add your resume and job description to continue
               </p>
             )}
             {/* Usage indicator */}
             {!isPro && (
-              <p className="text-center text-xs text-[#374151]">
+              <p className="text-center text-xs text-[#6B7A99]">
                 {tailorCount >= FREE_LIMIT ? (
                   <span className="text-[#ef4444]">
                     Free limit reached.{" "}

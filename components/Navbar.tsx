@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Target, Search, FileText, LayoutDashboard, Menu, X, LogOut, Crown } from "lucide-react";
+import { Target, Search, FileText, LayoutDashboard, Menu, X, LogOut, Crown, ChevronDown, User as UserIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -20,6 +20,18 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isPro, setIsPro] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+        setAccountOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   useEffect(() => {
     const handle = () => setScrolled(window.scrollY > 10);
@@ -130,15 +142,50 @@ export default function Navbar() {
                   Pro
                 </div>
               )}
-              <span className="text-xs text-[#6B7A99] max-w-[140px] truncate">{user.email}</span>
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-1.5 text-xs text-[#6B7A99] hover:text-[#9CA3AF] px-3 py-2 rounded-lg transition-colors"
-                style={{ border: "1px solid rgba(255,255,255,0.06)" }}
-              >
-                <LogOut size={13} />
-                Sign out
-              </button>
+              {/* Account dropdown */}
+              <div className="relative" ref={accountRef}>
+                <button
+                  onClick={() => setAccountOpen(!accountOpen)}
+                  className="flex items-center gap-1.5 text-xs text-[#9CA3AF] hover:text-[#DEC27A] px-3 py-2 rounded-lg transition-colors"
+                  style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+                >
+                  <UserIcon size={13} />
+                  <span className="max-w-[130px] truncate">{user.email}</span>
+                  <ChevronDown size={11} className={`transition-transform ${accountOpen ? "rotate-180" : ""}`} />
+                </button>
+                {accountOpen && (
+                  <div
+                    className="absolute right-0 top-full mt-2 w-64 rounded-xl p-1 z-50"
+                    style={{ background: "#0D1018", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 16px 40px rgba(0,0,0,0.6)" }}
+                  >
+                    <div className="px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
+                      <p className="text-xs text-[#6B7A99] mb-0.5">Signed in as</p>
+                      <p className="text-sm text-[#F0F2F7] truncate font-medium">{user.email}</p>
+                      <p className="text-xs mt-1.5" style={{ color: isPro ? "#DEC27A" : "#6B7A99" }}>
+                        {isPro ? "✦ Pro plan — 30 tailors/month" : "Free plan — 3 tailors/month"}
+                      </p>
+                    </div>
+                    {!isPro && (
+                      <Link
+                        href="/#pricing"
+                        onClick={() => setAccountOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-xs rounded-lg transition-colors hover:bg-[rgba(201,168,76,0.08)]"
+                        style={{ color: "#C9A84C" }}
+                      >
+                        <Crown size={12} />
+                        Upgrade to Pro
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => { setAccountOpen(false); handleSignOut(); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-xs text-[#6B7A99] hover:text-[#9CA3AF] rounded-lg transition-colors hover:bg-[rgba(255,255,255,0.04)]"
+                    >
+                      <LogOut size={12} />
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <>
