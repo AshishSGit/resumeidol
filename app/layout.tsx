@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/og-image.png",
+        url: "/opengraph-image",
         width: 1200,
         height: 630,
         alt: "ResumeIdol — AI Resume Tailor",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     title: "ResumeIdol — AI Resume Tailor That Gets You Hired",
     description:
       "Tailor your resume to any job in seconds. Beat ATS filters and land more interviews.",
-    images: ["/og-image.png"],
+    images: ["/opengraph-image"],
     site: "@resumeidol",
     creator: "@resumeidol",
   },
@@ -118,7 +118,7 @@ const jsonLd = {
         },
         {
           "@type": "Offer",
-          price: "19",
+          price: "18",
           priceCurrency: "USD",
           name: "Pro Plan",
           description: "Unlimited resume tailors and job searches",
