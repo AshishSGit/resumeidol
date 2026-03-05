@@ -133,6 +133,9 @@ function TailorInner() {
 
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeText, setResumeText] = useState("");
+  const [savedResumeName, setSavedResumeName] = useState<string | null>(null);
+  const [savedResumeDate, setSavedResumeDate] = useState<string | null>(null);
+  const [usingCloudResume, setUsingCloudResume] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [tailoring, setTailoring] = useState(false);
@@ -153,16 +156,30 @@ function TailorInner() {
       const { isPro: serverPro } = await res.json();
       if (serverPro) {
         setIsPro(true);
-        return;
+      } else {
+        // localStorage fallback (pro purchase)
+        const pro = localStorage.getItem("resumeidol_pro") === "true";
+        setIsPro(pro);
       }
-
-      // localStorage fallback (pro purchase)
-      const pro = localStorage.getItem("resumeidol_pro") === "true";
-      setIsPro(pro);
       const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
       setTailorCount(parseInt(localStorage.getItem(monthKey) ?? "0"));
+
+      // Auto-load saved resume from cloud
+      try {
+        const savedRes = await fetch("/api/resume");
+        const { resume } = await savedRes.json();
+        if (resume?.resume_text && !resumeText) {
+          setResumeText(resume.resume_text);
+          setSavedResumeName(resume.file_name ?? "Saved resume");
+          setSavedResumeDate(new Date(resume.updated_at).toLocaleDateString());
+          setUsingCloudResume(true);
+        }
+      } catch {
+        // Silent — saved resume is a nice-to-have
+      }
     };
     init();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFile = useCallback(async (file: File) => {
@@ -178,24 +195,35 @@ function TailorInner() {
     setParsing(true);
 
     try {
+      let parsed = "";
       if (file.type === "text/plain") {
-        const text = await file.text();
-        setResumeText(text);
+        parsed = await file.text();
+        setResumeText(parsed);
       } else {
-        // For PDF/DOCX, send to a parse endpoint or read as text
-        // For MVP, we read the file and send raw to Claude for extraction
         const formData = new FormData();
         formData.append("file", file);
 
         const res = await fetch("/api/parse-resume", { method: "POST", body: formData });
         if (res.ok) {
           const data = await res.json();
-          setResumeText(data.text);
+          parsed = data.text;
+          setResumeText(parsed);
         } else {
-          // Fallback: tell user to paste
           setResumeText("");
           setError("Auto-parsing unavailable — please paste your resume text below.");
         }
+      }
+
+      // Auto-save to cloud if we got text
+      if (parsed.trim()) {
+        setUsingCloudResume(false);
+        setSavedResumeName(file.name);
+        setSavedResumeDate(new Date().toLocaleDateString());
+        fetch("/api/resume", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ resume_text: parsed, file_name: file.name }),
+        }).catch(() => {});
       }
     } catch {
       setError("Could not read file. Please paste your resume text below.");
@@ -392,6 +420,26 @@ function TailorInner() {
                 Your Resume
               </h2>
 
+              {/* Saved resume banner */}
+              {usingCloudResume && savedResumeName && (
+                <div className="flex items-center justify-between px-3.5 py-2.5 rounded-lg mb-3"
+                  style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle size={14} className="text-[#C9A84C] shrink-0" />
+                    <div>
+                      <span className="text-xs text-[#DEC27A] font-medium">Using saved resume</span>
+                      <span className="text-xs text-[#6B7A99] ml-1.5">{savedResumeName} · {savedResumeDate}</span>
+                    </div>
+                  </div>
+                  <button
+                    className="text-xs text-[#6B7A99] hover:text-[#9CA3AF] transition-colors"
+                    onClick={() => { setResumeText(""); setResumeFile(null); setUsingCloudResume(false); }}
+                  >
+                    Replace
+                  </button>
+                </div>
+              )}
+
               {/* Drop zone */}
               <div
                 className={`upload-zone p-6 text-center mb-4 cursor-pointer ${dragOver ? "dragover" : ""}`}
@@ -446,7 +494,17 @@ function TailorInner() {
                 </label>
                 <textarea
                   value={resumeText}
-                  onChange={(e) => setResumeText(e.target.value)}
+                  onChange={(e) => { setResumeText(e.target.value); setUsingCloudResume(false); }}
+                  onBlur={(e) => {
+                    const text = e.target.value.trim();
+                    if (text.length > 50) {
+                      fetch("/api/resume", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ resume_text: text, file_name: "Pasted resume" }),
+                      }).catch(() => {});
+                    }
+                  }}
                   placeholder="Paste your resume content here..."
                   rows={10}
                   className="input-luxury w-full px-3.5 py-2.5 text-sm resize-none font-mono text-xs"
