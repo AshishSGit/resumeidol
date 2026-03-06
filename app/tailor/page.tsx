@@ -40,33 +40,35 @@ function ScoreRing({ before, after }: { before: number; after: number }) {
   }, [before, after]);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-6">
-      <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
+    <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
+      <div className="relative w-32 h-32 sm:w-36 sm:h-36 shrink-0">
+        {/* Glow halo */}
+        <div className="absolute inset-0 rounded-full" style={{ background: `radial-gradient(circle, ${color}18 0%, transparent 70%)`, filter: "blur(8px)" }} />
         <svg viewBox="0 0 100 100" className="w-full h-full" style={{ transform: "rotate(-90deg)" }}>
-          <circle cx="50" cy="50" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="9" />
+          <circle cx="50" cy="50" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="7" />
           <circle
             cx="50" cy="50" r={radius} fill="none"
-            stroke={color} strokeWidth="9"
+            stroke={color} strokeWidth="7"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            style={{ transition: "stroke-dashoffset 0.05s linear, stroke 0.4s ease" }}
+            style={{ transition: "stroke-dashoffset 0.05s linear, stroke 0.4s ease", filter: `drop-shadow(0 0 8px ${color}80)` }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-bold text-2xl leading-none" style={{ color, fontFamily: "Playfair Display, serif" }}>{displayed}</span>
-          <span className="text-[10px] text-[#6B7A99] mt-0.5">/ 100</span>
+          <span className="font-bold text-4xl leading-none" style={{ color, fontFamily: "Playfair Display, serif" }}>{displayed}</span>
+          <span className="text-xs text-[#6B7A99] mt-1 tracking-wider uppercase">/ 100</span>
         </div>
       </div>
       <div className="flex-1">
-        <p className="text-xs text-[#6B7A99] mb-1">ATS Match Score</p>
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className="text-[#4B5563] text-sm line-through">{before}%</span>
-          <span className="text-2xl font-bold" style={{ color, fontFamily: "Playfair Display, serif" }}>{after}%</span>
+        <p className="text-sm text-[#6B7A99] mb-2 font-medium">ATS Match Score</p>
+        <div className="flex items-baseline gap-3 mb-2">
+          <span className="text-[#4B5563] text-base line-through">{before}%</span>
+          <span className="text-4xl font-bold" style={{ color, fontFamily: "Playfair Display, serif" }}>{after}%</span>
         </div>
         {diff > 0 && (
-          <span className="inline-flex items-center gap-1 text-sm font-medium text-[#22c55e]">
-            <ArrowUp size={13} />+{diff}% improvement
+          <span className="inline-flex items-center gap-1.5 text-base font-semibold text-[#22c55e]">
+            <ArrowUp size={15} />+{diff}% improvement
           </span>
         )}
       </div>
@@ -81,10 +83,10 @@ function BulletList({ content, icon: Icon, iconColor }: { content: string; icon:
     .filter((l) => l.length > 0 && !/^[-─═*]{2,}$/.test(l));
 
   return (
-    <ul className="space-y-2">
+    <ul className="space-y-3">
       {lines.map((line, i) => (
-        <li key={i} className="flex items-start gap-2.5 text-sm text-[#9CA3AF]">
-          <Icon size={14} className="shrink-0 mt-0.5" style={{ color: iconColor }} />
+        <li key={i} className="flex items-start gap-3 text-[0.9rem] text-[#9CA3AF] leading-relaxed">
+          <Icon size={16} className="shrink-0 mt-0.5" style={{ color: iconColor }} />
           {line}
         </li>
       ))}
@@ -438,49 +440,51 @@ function TailorInner() {
 
   return (
     <div className="min-h-screen relative" style={{ background: "#07090F" }}>
-      {/* Ambient orbs */}
-      <div className="orb-1 absolute top-32 left-1/4 w-[700px] h-[700px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 65%)", zIndex: 0 }} />
-      <div className="orb-2 absolute top-2/3 right-1/5 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(99,102,241,0.035) 0%, transparent 65%)", zIndex: 0 }} />
+      {/* Ambient background */}
+      <div className="dot-grid absolute inset-0 pointer-events-none" style={{ opacity: 0.35, zIndex: 0 }} />
+      <div className="orb-1 absolute top-32 left-1/4 w-[700px] h-[700px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 65%)", zIndex: 0 }} />
+      <div className="orb-2 absolute top-2/3 right-1/5 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 65%)", zIndex: 0 }} />
       <Navbar />
 
-      <div className="relative z-10 pt-24 pb-16 max-w-7xl mx-auto px-6">
+      <div className="relative z-10 pt-24 pb-20 max-w-7xl mx-auto px-6">
         {/* Header */}
-        <div className="mb-12 card-enter" style={{ animationDelay: "0ms" }}>
-          <div className="badge-gold mb-5">
+        <div className="mb-14 card-enter" style={{ animationDelay: "0ms" }}>
+          <div className="badge-gold mb-6">
             <Zap size={11} />
             <span>AI Resume Tailor</span>
           </div>
           <h1
-            style={{ fontFamily: "Playfair Display, serif", fontSize: "clamp(1.9rem, 3.5vw, 2.75rem)", fontWeight: 700, color: "#F0F2F7", lineHeight: 1.15 }}
+            style={{ fontFamily: "Playfair Display, serif", fontSize: "clamp(2.25rem, 4vw, 3.5rem)", fontWeight: 700, color: "#F0F2F7", lineHeight: 1.1 }}
           >
             Tailor your resume.<br />
             <span className="shimmer-text">Beat ATS. Win interviews.</span>
           </h1>
-          <p className="text-[#6B7A99] mt-4 max-w-xl text-[0.95rem] leading-relaxed">
-            Paste the job description, upload your resume, and let AI rewrite it to maximise your match score — without losing your authentic voice.
+          <p className="text-[#8A97AA] mt-5 max-w-xl text-base leading-relaxed">
+            Paste a job URL or description, upload your resume, and let ResumeIdol rewrite it to maximise your match score — preserving your authentic voice.
           </p>
+          <div className="gold-line mt-8 max-w-sm" />
         </div>
 
         {/* Onboarding hint — first visit only */}
         {showOnboarding && (
           <div
-            className="mb-6 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 stagger-reveal"
+            className="mb-8 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 stagger-reveal"
             style={{ background: "rgba(201,168,76,0.05)", border: "1px solid rgba(201,168,76,0.2)" }}
           >
             <div className="flex-1">
-              <p className="text-[#DEC27A] text-sm font-semibold mb-2.5 flex items-center gap-1.5">
+              <p className="text-[#DEC27A] text-sm font-semibold mb-3 flex items-center gap-1.5">
                 <Zap size={13} />
                 Get started in 3 steps
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
                 {[
                   "Paste a job URL or the full description",
                   "Upload your resume or paste the text",
                   "Hit Tailor — ResumeIdol rewrites it for you",
                 ].map((step, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs text-[#9CA3AF]">
+                  <div key={i} className="flex items-start gap-2.5 text-sm text-[#9CA3AF]">
                     <span
-                      className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5"
+                      className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
                       style={{ background: "rgba(201,168,76,0.15)", color: "#DEC27A", border: "1px solid rgba(201,168,76,0.3)" }}
                     >
                       {i + 1}
@@ -500,72 +504,77 @@ function TailorInner() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
           {/* ── LEFT PANEL: Inputs ── */}
-          <div className="space-y-5">
+          <div className="space-y-6">
             {/* Job info */}
-            <div className="card-input p-6 card-enter" style={{ animationDelay: "80ms" }}>
-              <h2 className="text-[#F0F2F7] font-semibold mb-4 flex items-center gap-2">
-                <FileText size={16} className="text-[#C9A84C]" />
-                Job Details
-              </h2>
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="card-input p-8 card-enter" style={{ animationDelay: "80ms" }}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                  <FileText size={16} className="text-[#C9A84C]" />
+                </div>
+                <div>
+                  <h2 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.15rem", fontWeight: 600, color: "#F0F2F7", lineHeight: 1.2 }}>Job Details</h2>
+                  <p className="text-xs text-[#4B5563] mt-0.5">The role you&apos;re applying for</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs text-[#6B7A99] mb-1.5 block">Job Title</label>
+                    <label className="text-sm text-[#6B7A99] mb-2 block font-medium">Job Title</label>
                     <input
                       type="text"
                       value={jobTitle}
                       onChange={(e) => setJobTitle(e.target.value)}
                       placeholder="e.g. Senior Designer"
-                      className="input-luxury w-full px-3.5 py-2.5 text-sm"
+                      className="input-luxury w-full px-4 py-3.5 text-sm"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#6B7A99] mb-1.5 block">Company</label>
+                    <label className="text-sm text-[#6B7A99] mb-2 block font-medium">Company</label>
                     <input
                       type="text"
                       value={company}
                       onChange={(e) => setCompany(e.target.value)}
                       placeholder="e.g. Linear"
-                      className="input-luxury w-full px-3.5 py-2.5 text-sm"
+                      className="input-luxury w-full px-4 py-3.5 text-sm"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-[#6B7A99] mb-1.5 block">
+                  <label className="text-sm text-[#6B7A99] mb-2 block font-medium">
                     Job Description <span className="text-[#ef4444]">*</span>
                   </label>
 
                   {/* URL fetch bar */}
-                  <div className="flex gap-2 mb-2">
+                  <div className="flex gap-2 mb-3">
                     <div className="relative flex-1">
-                      <Link2 size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4B5563]" />
+                      <Link2 size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#4B5563]" />
                       <input
                         type="url"
                         value={jobUrl}
                         onChange={(e) => { setJobUrl(e.target.value); setFetchJdError(null); }}
                         onKeyDown={(e) => e.key === "Enter" && handleFetchJd()}
                         placeholder="Paste job URL to auto-fill (Greenhouse, Lever, Workday…)"
-                        className="input-luxury w-full pl-8 pr-3 py-2 text-xs"
+                        className="input-luxury w-full pl-9 pr-3 py-3 text-sm"
                       />
                     </div>
                     <button
                       onClick={handleFetchJd}
                       disabled={!jobUrl.trim() || fetchingJd}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                      className="flex items-center gap-1.5 px-4 py-3 rounded-lg text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                       style={{ background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.25)", color: "#DEC27A" }}
                     >
-                      {fetchingJd ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
+                      {fetchingJd ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />}
                       {fetchingJd ? "Fetching…" : "Auto-fill"}
                     </button>
                   </div>
                   {fetchJdError && (
-                    <p className="text-xs text-[#f87171] mb-2">{fetchJdError}</p>
+                    <p className="text-sm text-[#f87171] mb-2">{fetchJdError}</p>
                   )}
                   {jobDescription && jobUrl && !fetchingJd && !fetchJdError && (
-                    <p className="text-xs text-[#22c55e] mb-2 flex items-center gap-1">
-                      <CheckCircle size={11} /> Job description loaded from URL
+                    <p className="text-sm text-[#22c55e] mb-2 flex items-center gap-1.5">
+                      <CheckCircle size={13} /> Job description loaded from URL
                     </p>
                   )}
 
@@ -573,11 +582,11 @@ function TailorInner() {
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
                     placeholder="Paste the full job description here, or use the URL auto-fill above..."
-                    rows={8}
-                    className="input-luxury w-full px-3.5 py-2.5 text-sm resize-none"
-                    style={{ fontFamily: "Inter, sans-serif" }}
+                    rows={10}
+                    className="input-luxury w-full px-4 py-3.5 text-sm resize-none"
+                    style={{ fontFamily: "Inter, sans-serif", lineHeight: 1.7 }}
                   />
-                  <div className="flex items-center justify-between mt-1">
+                  <div className="flex items-center justify-between mt-2">
                     <span className="text-xs text-[#4B5563]">{jobDescription.length} chars</span>
                     {applyUrl && (
                       <a href={applyUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[#6B7A99] hover:text-[#C9A84C] transition-colors flex items-center gap-1">
@@ -590,25 +599,30 @@ function TailorInner() {
             </div>
 
             {/* Resume upload */}
-            <div className="card-input p-6 card-enter" style={{ animationDelay: "160ms" }}>
-              <h2 className="text-[#F0F2F7] font-semibold mb-4 flex items-center gap-2">
-                <Upload size={16} className="text-[#C9A84C]" />
-                Your Resume
-              </h2>
+            <div className="card-input p-8 card-enter" style={{ animationDelay: "160ms" }}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                  <Upload size={16} className="text-[#C9A84C]" />
+                </div>
+                <div>
+                  <h2 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.15rem", fontWeight: 600, color: "#F0F2F7", lineHeight: 1.2 }}>Your Resume</h2>
+                  <p className="text-xs text-[#4B5563] mt-0.5">Upload a file or paste text below</p>
+                </div>
+              </div>
 
               {/* Saved resume banner */}
               {usingCloudResume && savedResumeName && (
-                <div className="flex items-center justify-between px-3.5 py-2.5 rounded-lg mb-3"
+                <div className="flex items-center justify-between px-4 py-3 rounded-xl mb-4"
                   style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)" }}>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle size={14} className="text-[#C9A84C] shrink-0" />
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle size={15} className="text-[#C9A84C] shrink-0" />
                     <div>
-                      <span className="text-xs text-[#DEC27A] font-medium">Using saved resume</span>
-                      <span className="text-xs text-[#6B7A99] ml-1.5">{savedResumeName} · {savedResumeDate}</span>
+                      <span className="text-sm text-[#DEC27A] font-medium">Using saved resume</span>
+                      <span className="text-xs text-[#6B7A99] ml-2">{savedResumeName} · {savedResumeDate}</span>
                     </div>
                   </div>
                   <button
-                    className="text-xs text-[#6B7A99] hover:text-[#9CA3AF] transition-colors"
+                    className="text-sm text-[#6B7A99] hover:text-[#9CA3AF] transition-colors"
                     onClick={() => { setResumeText(""); setResumeFile(null); setUsingCloudResume(false); }}
                   >
                     Replace
@@ -618,7 +632,7 @@ function TailorInner() {
 
               {/* Drop zone */}
               <div
-                className={`upload-zone p-6 text-center mb-4 cursor-pointer ${dragOver ? "dragover" : ""}`}
+                className={`upload-zone py-10 px-8 text-center mb-5 cursor-pointer ${dragOver ? "dragover" : ""}`}
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
@@ -632,40 +646,42 @@ function TailorInner() {
                   onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
                 />
                 {parsing ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <Loader2 size={24} className="text-[#C9A84C] animate-spin" />
-                    <span className="text-sm text-[#6B7A99]">Parsing resume...</span>
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 size={28} className="text-[#C9A84C] animate-spin" />
+                    <span className="text-base text-[#6B7A99]">Parsing resume...</span>
                   </div>
                 ) : resumeFile ? (
                   <div className="flex items-center justify-center gap-3">
-                    <FileText size={20} className="text-[#C9A84C]" />
+                    <FileText size={24} className="text-[#C9A84C]" />
                     <div className="text-left">
-                      <p className="text-[#F0F2F7] text-sm font-medium">{resumeFile.name}</p>
-                      <p className="text-[#6B7A99] text-xs">{(resumeFile.size / 1024).toFixed(0)} KB</p>
+                      <p className="text-[#F0F2F7] text-base font-medium">{resumeFile.name}</p>
+                      <p className="text-[#6B7A99] text-sm">{(resumeFile.size / 1024).toFixed(0)} KB</p>
                     </div>
                     <button
-                      className="ml-2 text-[#374151] hover:text-[#6B7A99]"
+                      className="ml-3 text-[#4B5563] hover:text-[#6B7A99] transition-colors"
                       onClick={(e) => { e.stopPropagation(); setResumeFile(null); setResumeText(""); }}
                     >
-                      <X size={16} />
+                      <X size={18} />
                     </button>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center gap-2">
-                    <Upload size={24} className="text-[#C9A84C] opacity-60" />
-                    <div>
-                      <span className="text-[#6B7A99] text-sm font-medium">Drop your resume here</span>
-                      <span className="text-[#6B7A99] text-sm"> or click to browse</span>
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.18)" }}>
+                      <Upload size={22} className="text-[#C9A84C]" />
                     </div>
-                    <span className="text-[#4B5563] text-xs">PDF, DOCX, or TXT</span>
+                    <div>
+                      <p className="text-[#9CA3AF] text-base font-medium">Drop your resume here</p>
+                      <p className="text-[#6B7A99] text-sm mt-0.5">or click to browse</p>
+                    </div>
+                    <span className="text-xs text-[#4B5563] px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>PDF · DOCX · TXT</span>
                   </div>
                 )}
               </div>
 
               {/* Text fallback */}
               <div>
-                <label className="text-xs text-[#6B7A99] mb-1.5 block">
-                  Resume Text <span className="text-[#4B5563]">(or paste directly)</span>
+                <label className="text-sm text-[#6B7A99] mb-2 block font-medium">
+                  Resume Text <span className="text-[#4B5563] font-normal">(or paste directly)</span>
                   <span className="text-[#ef4444] ml-0.5">*</span>
                 </label>
                 <textarea
@@ -682,8 +698,9 @@ function TailorInner() {
                     }
                   }}
                   placeholder="Paste your resume content here..."
-                  rows={10}
-                  className="input-luxury w-full px-3.5 py-2.5 text-sm resize-none font-mono text-xs"
+                  rows={12}
+                  className="input-luxury w-full px-4 py-3.5 resize-none font-mono"
+                  style={{ fontSize: "0.8rem", lineHeight: 1.7 }}
                 />
                 <span className="text-xs text-[#4B5563]">{resumeText.split(/\s+/).filter(Boolean).length} words</span>
               </div>
@@ -691,9 +708,9 @@ function TailorInner() {
 
             {/* Error */}
             {error && (
-              <div className="flex items-start gap-3 p-4 rounded-xl text-sm" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                <AlertCircle size={16} className="text-[#f87171] shrink-0 mt-0.5" />
-                <span className="text-[#f87171]">{error}</span>
+              <div className="flex items-start gap-3 p-5 rounded-xl" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                <AlertCircle size={17} className="text-[#f87171] shrink-0 mt-0.5" />
+                <span className="text-[#f87171] text-sm">{error}</span>
               </div>
             )}
 
@@ -701,32 +718,32 @@ function TailorInner() {
             <button
               onClick={handleTailor}
               disabled={!canTailor || tailoring}
-              className={`btn-gold w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 text-base disabled:opacity-40 disabled:cursor-not-allowed${canTailor && !tailoring ? " btn-gold-hero" : ""}`}
+              className={`btn-gold w-full py-5 rounded-2xl font-semibold flex items-center justify-center gap-2.5 text-lg disabled:opacity-40 disabled:cursor-not-allowed${canTailor && !tailoring ? " btn-gold-hero" : ""}`}
             >
               {tailoring ? (
                 <>
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 size={20} className="animate-spin" />
                   ResumeIdol is tailoring your resume...
                 </>
               ) : (
                 <>
-                  <Zap size={18} />
+                  <Zap size={20} />
                   Tailor My Resume with AI
                 </>
               )}
             </button>
             {!canTailor && (
-              <p className="text-center text-xs text-[#6B7A99]">
+              <p className="text-center text-sm text-[#6B7A99]">
                 Add your resume and job description to continue
               </p>
             )}
             {/* Usage indicator */}
             {!isPro && (
-              <div className="text-center text-xs">
+              <div className="text-center">
                 {tailorCount >= FREE_LIMIT ? (
-                  <div className="p-3 rounded-xl" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                    <p className="text-[#f87171] font-medium mb-1">Free limit reached for this month</p>
-                    <p className="text-[#6B7A99]">
+                  <div className="p-4 rounded-xl" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                    <p className="text-[#f87171] font-medium mb-1.5 text-sm">Free limit reached for this month</p>
+                    <p className="text-[#6B7A99] text-sm">
                       <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Upgrade to Pro ($18/mo)</a>
                       {" "}for 30 tailors, or{" "}
                       <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Lifetime ($249)</a>
@@ -734,14 +751,14 @@ function TailorInner() {
                     </p>
                   </div>
                 ) : tailorCount === FREE_LIMIT - 1 ? (
-                  <div className="p-3 rounded-xl" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)" }}>
-                    <p className="text-[#DEC27A] font-medium mb-0.5">This is your last free tailor this month</p>
-                    <p className="text-[#6B7A99]">
+                  <div className="p-4 rounded-xl" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                    <p className="text-[#DEC27A] font-medium mb-1 text-sm">This is your last free tailor this month</p>
+                    <p className="text-[#6B7A99] text-sm">
                       <a href="/#pricing" className="text-[#C9A84C] hover:underline">Upgrade to Pro</a> to keep going after this.
                     </p>
                   </div>
                 ) : (
-                  <p className="text-[#6B7A99]">{FREE_LIMIT - tailorCount} free tailor{FREE_LIMIT - tailorCount !== 1 ? "s" : ""} remaining this month</p>
+                  <p className="text-[#6B7A99] text-sm">{FREE_LIMIT - tailorCount} free tailor{FREE_LIMIT - tailorCount !== 1 ? "s" : ""} remaining this month</p>
                 )}
               </div>
             )}
@@ -752,26 +769,32 @@ function TailorInner() {
             {/* Empty state */}
             {!result && !tailoring && (
               <div
-                className="card-input flex flex-col items-center justify-center text-center py-20 px-8"
-                style={{ minHeight: "520px" }}
+                className="card-input flex flex-col items-center justify-center text-center px-10 py-16"
+                style={{ minHeight: "580px" }}
               >
-                <div className="relative mb-6">
-                  <div className="w-20 h-20 rounded-3xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.14)", boxShadow: "0 0 40px rgba(201,168,76,0.08)" }}>
-                    <Zap size={28} className="text-[#C9A84C]" />
+                {/* Icon with ambient glow */}
+                <div className="relative mb-8">
+                  <div className="absolute -inset-6 rounded-full opacity-30 animate-pulse" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.2) 0%, transparent 70%)" }} />
+                  <div className="w-24 h-24 rounded-3xl flex items-center justify-center relative" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)", boxShadow: "0 0 60px rgba(201,168,76,0.12)" }}>
+                    <Zap size={34} className="text-[#C9A84C]" />
                   </div>
-                  <div className="absolute -inset-2 rounded-3xl opacity-40 animate-pulse" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%)" }} />
                 </div>
-                <h3 className="text-[#F0F2F7] font-semibold text-xl mb-3" style={{ fontFamily: "Playfair Display, serif" }}>
-                  Your tailored resume will appear here
+                <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.6rem", fontWeight: 600, color: "#F0F2F7", lineHeight: 1.2, marginBottom: "0.875rem" }}>
+                  Your tailored resume<br />will appear here
                 </h3>
-                <p className="text-[#6B7A99] text-sm max-w-[260px] leading-relaxed">
-                  Add your resume and the job description, then hit the button. ResumeIdol optimises every line for ATS and human impact.
+                <p className="text-[#6B7A99] text-base max-w-[280px] leading-relaxed mb-12">
+                  Fill in the details on the left, then hit the button below.
                 </p>
-                <div className="mt-10 flex items-center justify-center gap-6">
-                  {[["ATS Score", "+25%", "#C9A84C"], ["Keywords", "Added", "#6366f1"], ["Interview Rate", "↑", "#22c55e"]].map(([label, val, color]) => (
-                    <div key={label} className="text-center">
-                      <div className="font-bold text-xl mb-1" style={{ color, fontFamily: "Playfair Display, serif" }}>{val}</div>
-                      <div className="text-[#6B7A99] text-xs">{label}</div>
+                {/* Outcome preview */}
+                <div className="w-full max-w-xs space-y-3">
+                  {[
+                    { label: "ATS Score Lift", value: "↑ +25 pts avg", color: "#C9A84C", bg: "rgba(201,168,76,0.07)", border: "rgba(201,168,76,0.16)" },
+                    { label: "Keywords Matched", value: "12–18 added", color: "#6366f1", bg: "rgba(99,102,241,0.07)", border: "rgba(99,102,241,0.18)" },
+                    { label: "Interview Rate", value: "3× higher", color: "#22c55e", bg: "rgba(34,197,94,0.07)", border: "rgba(34,197,94,0.15)" },
+                  ].map(({ label, value, color, bg, border }) => (
+                    <div key={label} className="flex items-center justify-between px-4 py-3.5 rounded-xl" style={{ background: bg, border: `1px solid ${border}` }}>
+                      <span className="text-sm text-[#6B7A99]">{label}</span>
+                      <span className="text-sm font-bold" style={{ color, fontFamily: "Playfair Display, serif" }}>{value}</span>
                     </div>
                   ))}
                 </div>
@@ -780,47 +803,59 @@ function TailorInner() {
 
             {/* Loading state — multi-step progress */}
             {tailoring && (
-              <div className="card-input flex flex-col items-center justify-center py-20 px-10" style={{ minHeight: "520px" }}>
-                {/* Pulsing icon */}
-                <div className="relative mb-8">
-                  <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)" }}>
-                    <Zap size={30} className="text-[#C9A84C]" />
+              <div className="card-input flex flex-col items-center justify-center py-16 px-10" style={{ minHeight: "580px" }}>
+                {/* Orbital animation */}
+                <div className="relative w-32 h-32 mb-10">
+                  {/* Outer ring — slow spin */}
+                  <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "3s", animationTimingFunction: "linear" }} viewBox="0 0 128 128">
+                    <circle cx="64" cy="64" r="58" fill="none" stroke="rgba(201,168,76,0.08)" strokeWidth="2" />
+                    <circle cx="64" cy="64" r="58" fill="none" stroke="rgba(201,168,76,0.6)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="60 305" />
+                  </svg>
+                  {/* Inner ring — reverse spin */}
+                  <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "2s", animationTimingFunction: "linear", animationDirection: "reverse" }} viewBox="0 0 128 128">
+                    <circle cx="64" cy="64" r="44" fill="none" stroke="rgba(201,168,76,0.05)" strokeWidth="1.5" />
+                    <circle cx="64" cy="64" r="44" fill="none" stroke="rgba(201,168,76,0.35)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="35 240" />
+                  </svg>
+                  {/* Center */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.25)", boxShadow: "0 0 30px rgba(201,168,76,0.15)" }}>
+                      <Zap size={24} className="text-[#C9A84C]" />
+                    </div>
                   </div>
-                  <div className="absolute inset-0 rounded-2xl animate-ping" style={{ background: "rgba(201,168,76,0.08)" }} />
                 </div>
 
-                <h3 className="text-[#F0F2F7] font-semibold text-lg mb-2" style={{ fontFamily: "Playfair Display, serif" }}>
+                <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.5rem", fontWeight: 600, color: "#F0F2F7", marginBottom: "0.625rem", textAlign: "center" }}>
                   ResumeIdol is working its magic...
                 </h3>
-                <p className="text-[#6B7A99] text-sm mb-10 text-center max-w-xs">
+                <p className="text-[#6B7A99] text-base mb-12 text-center max-w-xs leading-relaxed">
                   Rewriting every line to maximise your ATS score and human appeal.
                 </p>
 
                 {/* Step list */}
-                <div className="w-full max-w-xs space-y-4">
+                <div className="w-full max-w-[290px] space-y-5">
                   {LOADING_STEPS.map((s, i) => {
                     const done = i < loadingStep;
                     const active = i === loadingStep;
                     return (
-                      <div key={i} className="flex items-center gap-3">
+                      <div key={i} className="flex items-center gap-4">
                         <div
-                          className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-300"
+                          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-300"
                           style={{
                             background: done ? "rgba(34,197,94,0.15)" : active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
                             border: `1px solid ${done ? "rgba(34,197,94,0.4)" : active ? "rgba(201,168,76,0.4)" : "rgba(255,255,255,0.08)"}`,
                           }}
                         >
                           {done ? (
-                            <CheckCircle size={13} className="text-[#22c55e] step-tick" />
+                            <CheckCircle size={14} className="text-[#22c55e] step-tick" />
                           ) : active ? (
-                            <Loader2 size={12} className="text-[#C9A84C] animate-spin" />
+                            <Loader2 size={13} className="text-[#C9A84C] animate-spin" />
                           ) : (
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.15)" }} />
+                            <span className="w-2 h-2 rounded-full" style={{ background: "rgba(255,255,255,0.12)" }} />
                           )}
                         </div>
                         <span
-                          className="text-sm transition-colors duration-300"
-                          style={{ color: done ? "#22c55e" : active ? "#DEC27A" : "#4B5563" }}
+                          className="text-base transition-colors duration-300"
+                          style={{ color: done ? "#22c55e" : active ? "#DEC27A" : "#4B5563", fontWeight: active ? 500 : 400 }}
                         >
                           {s.label}
                           {done && " ✓"}
@@ -835,14 +870,14 @@ function TailorInner() {
             {/* Results */}
             {result && (
               <div className="space-y-4">
-                {/* Score cards */}
-                <div className="card-input p-6 stagger-reveal" style={{ animationDelay: "0ms" }}>
-                  <h3 className="text-[#F0F2F7] font-semibold mb-5 flex items-center gap-2">
-                    <CheckCircle size={16} className="text-[#22c55e]" />
+                {/* Score card */}
+                <div className="card-input p-8 stagger-reveal" style={{ animationDelay: "0ms" }}>
+                  <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.1rem", fontWeight: 600, color: "#F0F2F7", marginBottom: "1.75rem" }} className="flex items-center gap-2.5">
+                    <CheckCircle size={17} className="text-[#22c55e]" />
                     ATS Optimisation Results
                   </h3>
                   <ScoreRing before={result.atsScoreBefore} after={result.atsScoreAfter} />
-                  <div className="flex items-center gap-3 mt-5 p-3 rounded-xl" style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.12)" }}>
+                  <div className="flex items-center gap-3 mt-7 p-4 rounded-xl" style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.12)" }}>
                     <ArrowUp size={16} className="text-[#22c55e] shrink-0" />
                     <span className="text-[#22c55e] text-sm font-medium">
                       You&apos;re now in the top candidate tier for this role
@@ -853,7 +888,7 @@ function TailorInner() {
                       href={applyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn-gold w-full mt-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                      className="btn-gold w-full mt-5 py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
                     >
                       Apply Now with Tailored Resume
                       <ExternalLink size={15} />
@@ -863,34 +898,37 @@ function TailorInner() {
 
                 {/* Tabs */}
                 <div className="card-input overflow-hidden stagger-reveal" style={{ animationDelay: "180ms" }}>
-                  <div className="flex border-b border-[rgba(255,255,255,0.06)] overflow-x-auto">
-                    {([
-                      { id: "resume", label: "Tailored Resume" },
-                      { id: "compare", label: "⚡ Compare" },
-                      { id: "keywords", label: "Keywords" },
-                      { id: "changes", label: "Changes" },
-                      { id: "gaps", label: "Gaps" },
-                    ] as const).map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className="flex-1 py-3 text-xs font-medium transition-all"
-                        style={{
-                          color: activeTab === tab.id ? "#DEC27A" : "#6B7A99",
-                          borderBottom: activeTab === tab.id ? "2px solid #C9A84C" : "2px solid transparent",
-                          background: activeTab === tab.id ? "rgba(201,168,76,0.04)" : "transparent",
-                        }}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
+                  {/* Pill-style tab bar */}
+                  <div className="p-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.15)" }}>
+                    <div className="flex gap-1 overflow-x-auto">
+                      {([
+                        { id: "resume", label: "Tailored Resume" },
+                        { id: "compare", label: "Compare" },
+                        { id: "keywords", label: "Keywords" },
+                        { id: "changes", label: "Changes" },
+                        { id: "gaps", label: "Gaps" },
+                      ] as const).map((tab) => (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id)}
+                          className="flex-1 py-2.5 px-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap"
+                          style={{
+                            color: activeTab === tab.id ? "#07090F" : "#6B7A99",
+                            background: activeTab === tab.id ? "linear-gradient(135deg, #DEC27A 0%, #C9A84C 100%)" : "transparent",
+                            fontWeight: activeTab === tab.id ? 600 : 500,
+                          }}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="p-5">
+                  <div className="p-6">
                     {activeTab === "resume" && (
                       <div>
-                        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
-                          <span className="text-xs text-[#6B7A99]">
+                        <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
+                          <span className="text-sm text-[#6B7A99]">
                             {editMode ? "Editing — changes save to your downloads" : "Copy, edit, or download your tailored resume"}
                           </span>
                           <div className="flex items-center gap-2 flex-wrap">
@@ -933,13 +971,13 @@ function TailorInner() {
                             value={editedResume}
                             onChange={(e) => setEditedResume(e.target.value)}
                             className="input-luxury w-full px-4 py-4 leading-relaxed font-mono resize-none"
-                            style={{ minHeight: "420px", fontSize: "0.78rem", color: "#D4DBE8" }}
+                            style={{ minHeight: "460px", fontSize: "0.8rem", color: "#D4DBE8", lineHeight: 1.75 }}
                             spellCheck={false}
                           />
                         ) : (
                           <div
-                            className="p-4 rounded-xl leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono"
-                            style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.06)", maxHeight: "420px", fontSize: "0.78rem", color: "#C4CEDF", lineHeight: 1.7 }}
+                            className="p-5 rounded-xl leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono"
+                            style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.06)", maxHeight: "460px", fontSize: "0.8rem", color: "#C4CEDF", lineHeight: 1.75 }}
                           >
                             {editedResume}
                           </div>
@@ -948,12 +986,12 @@ function TailorInner() {
                     )}
                     {activeTab === "compare" && (
                       <div>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="flex items-center gap-2 text-xs text-[#6B7A99]">
+                        <div className="flex items-center gap-4 mb-5">
+                          <div className="flex items-center gap-2 text-sm text-[#6B7A99]">
                             <span className="w-3 h-3 rounded-sm inline-block" style={{ background: "rgba(239,68,68,0.25)", border: "1px solid rgba(239,68,68,0.4)" }} />
                             Original
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-[#6B7A99]">
+                          <div className="flex items-center gap-2 text-sm text-[#6B7A99]">
                             <span className="w-3 h-3 rounded-sm inline-block" style={{ background: "rgba(34,197,94,0.2)", border: "1px solid rgba(34,197,94,0.35)" }} />
                             Tailored
                           </div>
@@ -961,20 +999,20 @@ function TailorInner() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-medium" style={{ color: "#f87171" }}>Original</span>
+                              <span className="text-sm font-medium" style={{ color: "#f87171" }}>Original</span>
                               <span className="badge-gold text-[0.65rem]">{result.atsScoreBefore}% ATS</span>
                             </div>
                             <DiffPane ops={diffOps.left} side="left" />
                           </div>
                           <div>
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-medium text-[#4ade80]">Tailored</span>
+                              <span className="text-sm font-medium text-[#4ade80]">Tailored</span>
                               <span className="badge-green text-[0.65rem]">{result.atsScoreAfter}% ATS</span>
                             </div>
                             <DiffPane ops={diffOps.right} side="right" />
                           </div>
                         </div>
-                        <div className="mt-3 flex items-center justify-center gap-2 p-3 rounded-xl text-sm" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.12)" }}>
+                        <div className="mt-4 flex items-center justify-center gap-2 p-4 rounded-xl text-sm" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.12)" }}>
                           <ArrowUp size={14} className="text-[#22c55e]" />
                           <span className="text-[#9CA3AF]">ATS score lifted from <span className="text-[#f87171] font-semibold">{result.atsScoreBefore}%</span> → <span className="text-[#4ade80] font-semibold">{result.atsScoreAfter}%</span> — a <span className="text-[#C9A84C] font-bold">+{result.atsScoreAfter - result.atsScoreBefore}% improvement</span></span>
                         </div>
@@ -982,19 +1020,19 @@ function TailorInner() {
                     )}
                     {activeTab === "keywords" && (
                       <div>
-                        <p className="text-xs text-[#6B7A99] mb-4">These keywords from the job description were naturally woven into your resume:</p>
+                        <p className="text-sm text-[#6B7A99] mb-5 leading-relaxed">These keywords from the job description were naturally woven into your resume:</p>
                         <BulletList content={result.keywordsAdded} icon={CheckCircle} iconColor="#C9A84C" />
                       </div>
                     )}
                     {activeTab === "changes" && (
                       <div>
-                        <p className="text-xs text-[#6B7A99] mb-4">Key improvements made to maximise your impact:</p>
+                        <p className="text-sm text-[#6B7A99] mb-5 leading-relaxed">Key improvements made to maximise your impact:</p>
                         <BulletList content={result.changesMade} icon={ArrowUp} iconColor="#22c55e" />
                       </div>
                     )}
                     {activeTab === "gaps" && (
                       <div>
-                        <p className="text-xs text-[#6B7A99] mb-4">Skills or experience in the JD that don&apos;t appear in your background. Be honest about these in applications:</p>
+                        <p className="text-sm text-[#6B7A99] mb-5 leading-relaxed">Skills in the job description that don&apos;t appear in your background — be upfront about these in applications:</p>
                         <BulletList content={result.gaps} icon={AlertCircle} iconColor="#f59e0b" />
                       </div>
                     )}
@@ -1004,7 +1042,7 @@ function TailorInner() {
                 {/* Re-tailor */}
                 <button
                   onClick={() => { setResult(null); setError(null); }}
-                  className="btn-ghost w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 stagger-reveal"
+                  className="btn-ghost w-full py-4 rounded-xl text-sm flex items-center justify-center gap-2 stagger-reveal"
                   style={{ animationDelay: "320ms" }}
                 >
                   <RotateCcw size={15} />
