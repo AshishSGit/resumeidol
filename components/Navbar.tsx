@@ -10,7 +10,6 @@ import type { User } from "@supabase/supabase-js";
 const NAV_LINKS = [
   { href: "/search", label: "Job Search", icon: Search },
   { href: "/tailor", label: "Resume Tailor", icon: FileText },
-  { href: "/tracker", label: "Tracker", icon: LayoutDashboard },
 ];
 
 export default function Navbar() {

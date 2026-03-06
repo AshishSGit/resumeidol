@@ -42,15 +42,15 @@ const FEATURES = [
     color: "#f59e0b",
   },
   {
-    icon: Briefcase,
-    title: "Application Tracker",
-    desc: "A full CRM for your job search. Kanban board, notes, follow-up reminders. Never lose track.",
+    icon: TrendingUp,
+    title: "ATS Score",
+    desc: "See your resume's ATS score before and after tailoring. Know exactly where you stand.",
     color: "#ec4899",
   },
   {
-    icon: Mail,
-    title: "Cover Letter AI",
-    desc: "One click generates a personalized, compelling cover letter that sounds like you — not a bot.",
+    icon: Briefcase,
+    title: "One-Click Download",
+    desc: "Download your tailored resume as a polished DOCX or PDF, ready to submit instantly.",
     color: "#06b6d4",
   },
 ];
@@ -436,7 +436,7 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <span>Join <strong className="text-[#DEC27A]">2,400+</strong> job seekers already using ResumeIdol</span>
+            <span>Be among the <strong className="text-[#DEC27A]">first to try</strong> ResumeIdol — free to start</span>
           </div>
 
           {/* Board logos */}
