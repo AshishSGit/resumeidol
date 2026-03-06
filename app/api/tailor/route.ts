@@ -15,7 +15,8 @@ Rules you always follow:
 5. Quantify achievements wherever possible
 6. Use strong action verbs that match the role's seniority level
 7. The professional summary should be laser-focused on this specific role
-8. NEVER use horizontal rules (---) or markdown dividers anywhere in the resume. Use plain section headers in ALL CAPS (e.g. PROFESSIONAL SUMMARY, EXPERIENCE, EDUCATION) with no decorative lines`;
+8. NEVER use horizontal rules (---) or markdown dividers anywhere in the resume. Use plain section headers in ALL CAPS (e.g. PROFESSIONAL SUMMARY, EXPERIENCE, EDUCATION) with no decorative lines
+9. NEVER add placeholder contact fields like "LinkedIn: [linkedin profile]" or "GitHub: [github profile]". Only include LinkedIn, GitHub, or portfolio URLs if they were explicitly present in the candidate's original resume`;
 
 export async function POST(request: NextRequest) {
   try {

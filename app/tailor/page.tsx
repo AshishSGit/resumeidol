@@ -437,23 +437,26 @@ function TailorInner() {
   const canTailor = resumeText.trim().length > 50 && jobDescription.trim().length > 50;
 
   return (
-    <div className="min-h-screen" style={{ background: "#07090F" }}>
+    <div className="min-h-screen relative" style={{ background: "#07090F" }}>
+      {/* Ambient orbs */}
+      <div className="orb-1 absolute top-32 left-1/4 w-[700px] h-[700px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 65%)", zIndex: 0 }} />
+      <div className="orb-2 absolute top-2/3 right-1/5 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(99,102,241,0.035) 0%, transparent 65%)", zIndex: 0 }} />
       <Navbar />
 
-      <div className="pt-24 pb-16 max-w-7xl mx-auto px-6">
+      <div className="relative z-10 pt-24 pb-16 max-w-7xl mx-auto px-6">
         {/* Header */}
-        <div className="mb-10">
-          <div className="badge-gold mb-4">
+        <div className="mb-12 card-enter" style={{ animationDelay: "0ms" }}>
+          <div className="badge-gold mb-5">
             <Zap size={11} />
             <span>AI Resume Tailor</span>
           </div>
           <h1
-            style={{ fontFamily: "Playfair Display, serif", fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, color: "#F0F2F7" }}
+            style={{ fontFamily: "Playfair Display, serif", fontSize: "clamp(1.9rem, 3.5vw, 2.75rem)", fontWeight: 700, color: "#F0F2F7", lineHeight: 1.15 }}
           >
             Tailor your resume.<br />
-            <span className="text-gold-gradient">Beat ATS. Win interviews.</span>
+            <span className="shimmer-text">Beat ATS. Win interviews.</span>
           </h1>
-          <p className="text-[#6B7A99] mt-3 max-w-lg text-base">
+          <p className="text-[#6B7A99] mt-4 max-w-xl text-[0.95rem] leading-relaxed">
             Paste the job description, upload your resume, and let Claude rewrite it to maximise your match score — without losing your authentic voice.
           </p>
         </div>
@@ -501,7 +504,7 @@ function TailorInner() {
           {/* ── LEFT PANEL: Inputs ── */}
           <div className="space-y-5">
             {/* Job info */}
-            <div className="card p-6">
+            <div className="card-input p-6 card-enter" style={{ animationDelay: "80ms" }}>
               <h2 className="text-[#F0F2F7] font-semibold mb-4 flex items-center gap-2">
                 <FileText size={16} className="text-[#C9A84C]" />
                 Job Details
@@ -587,7 +590,7 @@ function TailorInner() {
             </div>
 
             {/* Resume upload */}
-            <div className="card p-6">
+            <div className="card-input p-6 card-enter" style={{ animationDelay: "160ms" }}>
               <h2 className="text-[#F0F2F7] font-semibold mb-4 flex items-center gap-2">
                 <Upload size={16} className="text-[#C9A84C]" />
                 Your Resume
@@ -745,26 +748,29 @@ function TailorInner() {
           </div>
 
           {/* ── RIGHT PANEL: Results ── */}
-          <div>
+          <div className="card-enter" style={{ animationDelay: "120ms" }}>
             {/* Empty state */}
             {!result && !tailoring && (
               <div
-                className="card flex flex-col items-center justify-center text-center py-20 px-8"
-                style={{ minHeight: "500px" }}
+                className="card-input flex flex-col items-center justify-center text-center py-20 px-8"
+                style={{ minHeight: "520px" }}
               >
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.12)" }}>
-                  <Zap size={24} className="text-[#C9A84C] opacity-70" />
+                <div className="relative mb-6">
+                  <div className="w-20 h-20 rounded-3xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.14)", boxShadow: "0 0 40px rgba(201,168,76,0.08)" }}>
+                    <Zap size={28} className="text-[#C9A84C]" />
+                  </div>
+                  <div className="absolute -inset-2 rounded-3xl opacity-40 animate-pulse" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%)" }} />
                 </div>
-                <h3 className="text-[#F0F2F7] font-semibold text-lg mb-2" style={{ fontFamily: "Playfair Display, serif" }}>
+                <h3 className="text-[#F0F2F7] font-semibold text-xl mb-3" style={{ fontFamily: "Playfair Display, serif" }}>
                   Your tailored resume will appear here
                 </h3>
-                <p className="text-[#6B7A99] text-sm max-w-xs leading-relaxed">
-                  Add your resume and the job description, then hit the button. Claude will optimise every line for maximum ATS and human impact.
+                <p className="text-[#6B7A99] text-sm max-w-[260px] leading-relaxed">
+                  Add your resume and the job description, then hit the button. Claude optimises every line for ATS and human impact.
                 </p>
-                <div className="mt-8 grid grid-cols-3 gap-4 w-full max-w-xs">
-                  {[["ATS Score", "+25%"], ["Keywords", "Added"], ["Interview", "Rate ↑"]].map(([label, val]) => (
+                <div className="mt-10 flex items-center justify-center gap-6">
+                  {[["ATS Score", "+25%", "#C9A84C"], ["Keywords", "Added", "#6366f1"], ["Interview Rate", "↑", "#22c55e"]].map(([label, val, color]) => (
                     <div key={label} className="text-center">
-                      <div className="text-[#C9A84C] font-bold text-lg">{val}</div>
+                      <div className="font-bold text-xl mb-1" style={{ color, fontFamily: "Playfair Display, serif" }}>{val}</div>
                       <div className="text-[#374151] text-xs">{label}</div>
                     </div>
                   ))}
@@ -774,7 +780,7 @@ function TailorInner() {
 
             {/* Loading state — multi-step progress */}
             {tailoring && (
-              <div className="card flex flex-col items-center justify-center py-20 px-10" style={{ minHeight: "500px" }}>
+              <div className="card-input flex flex-col items-center justify-center py-20 px-10" style={{ minHeight: "520px" }}>
                 {/* Pulsing icon */}
                 <div className="relative mb-8">
                   <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)" }}>
@@ -830,7 +836,7 @@ function TailorInner() {
             {result && (
               <div className="space-y-4">
                 {/* Score cards */}
-                <div className="card p-6 stagger-reveal" style={{ animationDelay: "0ms" }}>
+                <div className="card-input p-6 stagger-reveal" style={{ animationDelay: "0ms" }}>
                   <h3 className="text-[#F0F2F7] font-semibold mb-5 flex items-center gap-2">
                     <CheckCircle size={16} className="text-[#22c55e]" />
                     ATS Optimisation Results
@@ -856,7 +862,7 @@ function TailorInner() {
                 </div>
 
                 {/* Tabs */}
-                <div className="card overflow-hidden stagger-reveal" style={{ animationDelay: "180ms" }}>
+                <div className="card-input overflow-hidden stagger-reveal" style={{ animationDelay: "180ms" }}>
                   <div className="flex border-b border-[rgba(255,255,255,0.06)] overflow-x-auto">
                     {([
                       { id: "resume", label: "Tailored Resume" },
@@ -926,14 +932,14 @@ function TailorInner() {
                           <textarea
                             value={editedResume}
                             onChange={(e) => setEditedResume(e.target.value)}
-                            className="input-luxury w-full px-4 py-4 text-xs text-[#C8D0E0] leading-relaxed font-mono resize-none"
-                            style={{ minHeight: "400px" }}
+                            className="input-luxury w-full px-4 py-4 leading-relaxed font-mono resize-none"
+                            style={{ minHeight: "420px", fontSize: "0.78rem", color: "#D4DBE8" }}
                             spellCheck={false}
                           />
                         ) : (
                           <div
-                            className="p-4 rounded-xl text-xs text-[#9CA3AF] leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono"
-                            style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", maxHeight: "400px" }}
+                            className="p-4 rounded-xl leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono"
+                            style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.06)", maxHeight: "420px", fontSize: "0.78rem", color: "#C4CEDF", lineHeight: 1.7 }}
                           >
                             {editedResume}
                           </div>

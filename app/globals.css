@@ -418,3 +418,37 @@ body {
   border-color: transparent;
   box-shadow: 0 0 16px rgba(201,168,76,0.3);
 }
+
+/* === Input card (luxury variant — input panels) === */
+.card-input {
+  position: relative;
+  background: linear-gradient(150deg, #111827 0%, #0D1119 100%);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+.card-input::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.28), transparent);
+  pointer-events: none;
+}
+.card-input:focus-within {
+  border-color: rgba(201,168,76,0.18);
+  box-shadow: 0 0 48px rgba(201,168,76,0.05), inset 0 0 32px rgba(201,168,76,0.02);
+}
+
+/* === Tailor page section fade-in === */
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card-enter {
+  opacity: 0;
+  animation: cardEnter 0.5s ease-out forwards;
+}
