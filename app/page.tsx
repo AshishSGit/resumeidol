@@ -129,6 +129,8 @@ const PRICING = [
   },
 ];
 
+const COMPANIES = ["Google", "Stripe", "Netflix", "Apple", "Anthropic", "Linear", "OpenAI", "Figma"];
+
 const FAQS = [
   {
     q: "How is ResumeIdol different from just using LinkedIn or Indeed?",
@@ -443,6 +445,35 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
+function TiltCard({ children, className, style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  return (
+    <div
+      ref={cardRef}
+      className={className}
+      style={{
+        ...style,
+        transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+        transition: tilt.x === 0 && tilt.y === 0 ? "transform 0.5s ease" : "transform 0.12s ease",
+        transformOrigin: "center center",
+        willChange: "transform",
+      }}
+      onMouseMove={(e) => {
+        const card = cardRef.current;
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        setTilt({ x: y * 7, y: -x * 7 });
+      }}
+      onMouseLeave={() => setTilt({ x: 0, y: 0 })}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -450,6 +481,21 @@ export default function LandingPage() {
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [annual, setAnnual] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+  const [spotlight, setSpotlight] = useState({ x: 0, y: 0, visible: false });
+  const [companyIdx, setCompanyIdx] = useState(0);
+  const [companyFading, setCompanyFading] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCompanyFading(true);
+      setTimeout(() => {
+        setCompanyIdx(i => (i + 1) % COMPANIES.length);
+        setCompanyFading(false);
+      }, 380);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -578,7 +624,26 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden hero-glow dot-grid">
+      <section
+        ref={heroRef}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden hero-glow dot-grid"
+        onMouseMove={(e) => {
+          const rect = heroRef.current?.getBoundingClientRect();
+          if (!rect) return;
+          setSpotlight({ x: e.clientX - rect.left, y: e.clientY - rect.top, visible: true });
+        }}
+        onMouseLeave={() => setSpotlight(p => ({ ...p, visible: false }))}
+      >
+        {/* Cursor spotlight */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: spotlight.visible
+              ? `radial-gradient(400px circle at ${spotlight.x}px ${spotlight.y}px, rgba(201,168,76,0.08) 0%, transparent 70%)`
+              : "none",
+            zIndex: 1,
+          }}
+        />
         {/* Animated ambient orbs */}
         <div className="orb-1 absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 65%)" }} />
         <div className="orb-2 absolute bottom-1/3 right-1/4 w-[420px] h-[420px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)" }} />
@@ -608,6 +673,28 @@ export default function LandingPage() {
           >
             ResumeIdol searches 500+ job boards, scores every listing against your profile, and tailors your resume with AI — so you apply to fewer jobs and land more interviews.
           </p>
+
+          {/* Morphing company pill */}
+          <div
+            className="flex items-center justify-center gap-2.5 mb-8"
+            style={{ animation: "fadeUp 0.6s 0.26s ease-out both" }}
+          >
+            <span className="text-[#4B5563] text-sm">Recently tailored for roles at</span>
+            <span
+              className="text-sm font-semibold px-3 py-1 rounded-full"
+              style={{
+                background: "rgba(201,168,76,0.1)",
+                border: "1px solid rgba(201,168,76,0.25)",
+                color: "#DEC27A",
+                opacity: companyFading ? 0 : 1,
+                transform: companyFading ? "translateY(-5px)" : "translateY(0px)",
+                transition: "opacity 0.32s ease, transform 0.32s ease",
+                display: "inline-block",
+              }}
+            >
+              {COMPANIES[companyIdx]}
+            </span>
+          </div>
 
           {/* CTAs */}
           <div
@@ -686,7 +773,7 @@ export default function LandingPage() {
           {FEATURES.map((f, i) => {
             const Icon = f.icon;
             return (
-              <div key={f.title} className="card-feature p-6 fade-section" style={{ animationDelay: `${i * 0.08}s`, ["--card-glow" as string]: `linear-gradient(90deg, transparent, ${f.color}40, transparent)` }}>
+              <TiltCard key={f.title} className="card-feature p-6 fade-section" style={{ animationDelay: `${i * 0.08}s`, ["--card-glow" as string]: `linear-gradient(90deg, transparent, ${f.color}40, transparent)` }}>
                 <div
                   className="feature-icon-wrap w-11 h-11 rounded-xl flex items-center justify-center mb-4"
                   style={{ background: `${f.color}18`, border: `1px solid ${f.color}30`, ["--icon-glow" as string]: `${f.color}40` }}
@@ -695,7 +782,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-[#F0F2F7] font-semibold mb-2 text-[1.05rem]">{f.title}</h3>
                 <p className="text-[#8A9AB8] text-[0.9rem] leading-relaxed">{f.desc}</p>
-              </div>
+              </TiltCard>
             );
           })}
         </div>

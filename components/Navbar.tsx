@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { Search, FileText, LayoutDashboard, Menu, X, LogOut, Crown, ChevronDown, User as UserIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -32,8 +33,16 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const [scrollProgress, setScrollProgress] = useState(0);
+
   useEffect(() => {
-    const handle = () => setScrolled(window.scrollY > 10);
+    const handle = () => {
+      setScrolled(window.scrollY > 10);
+      const doc = document.documentElement;
+      const scrollTop = window.scrollY;
+      const scrollHeight = doc.scrollHeight - doc.clientHeight;
+      setScrollProgress(scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0);
+    };
     window.addEventListener("scroll", handle, { passive: true });
     return () => window.removeEventListener("scroll", handle);
   }, []);
@@ -83,6 +92,15 @@ export default function Navbar() {
         borderBottom: "1px solid rgba(255,255,255,0.05)",
       }}
     >
+      {/* Scroll progress bar */}
+      <div
+        className="absolute bottom-0 left-0 h-[2px] transition-all duration-150"
+        style={{
+          width: `${scrollProgress}%`,
+          background: "linear-gradient(90deg, #DEC27A, #C9A84C)",
+          opacity: scrollProgress > 0 ? 1 : 0,
+        }}
+      />
       <div className="max-w-7xl mx-auto px-6 h-15 flex items-center justify-between" style={{ height: "60px" }}>
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
@@ -116,15 +134,21 @@ export default function Navbar() {
               <Link
                 key={href}
                 href={href}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-                style={{
-                  color: active ? "#DEC27A" : "#6B7A99",
-                  background: active ? "rgba(201,168,76,0.08)" : "transparent",
-                  border: active ? "1px solid rgba(201,168,76,0.15)" : "1px solid transparent",
-                }}
+                className="relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                style={{ color: active ? "#DEC27A" : "#6B7A99" }}
               >
-                <Icon size={15} />
-                {label}
+                {active && (
+                  <motion.div
+                    layoutId="nav-active-pill"
+                    className="absolute inset-0 rounded-lg"
+                    style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.15)" }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <Icon size={15} />
+                  {label}
+                </span>
               </Link>
             );
           })}

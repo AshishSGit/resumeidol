@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import JobCard, { Job } from "@/components/JobCard";
 import {
@@ -365,16 +366,29 @@ export default function SearchPage() {
             </div>
           )}
 
-          {/* Loading */}
+          {/* Loading — cinematic scan */}
           {loading && (
             <div>
-              <div className="flex items-center gap-3 mb-6">
-                <Loader2 size={15} className="text-[#C9A84C] animate-spin shrink-0" />
-                <span className="text-[#6B7A99] text-sm">Scanning 500+ job boards for <span className="text-[#DEC27A] font-medium">&ldquo;{query}&rdquo;</span>...</span>
+              <div className="relative overflow-hidden rounded-2xl mb-6 px-6 py-5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                <div className="flex items-center gap-4">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 animate-pulse" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                    <Search size={15} className="text-[#C9A84C]" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#DEC27A] font-medium">Scanning 500+ job boards...</p>
+                    <p className="text-xs text-[#4B5563] mt-0.5">Finding the best matches for &ldquo;{query}&rdquo;</p>
+                  </div>
+                  <div className="ml-auto flex gap-1.5">
+                    {[0, 1, 2].map(i => (
+                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#C9A84C] animate-pulse" style={{ animationDelay: `${i * 200}ms`, opacity: 0.7 }} />
+                    ))}
+                  </div>
+                </div>
+                <div className="scan-beam" />
               </div>
               <div className="space-y-4">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="card p-5">
+                  <div key={i} className="card p-5" style={{ animationDelay: `${i * 80}ms` }}>
                     <div className="flex gap-4">
                       <div className="skeleton w-12 h-12 rounded-xl" />
                       <div className="flex-1 space-y-2.5">
@@ -404,7 +418,16 @@ export default function SearchPage() {
           {/* Results */}
           {!loading && jobs.length > 0 && (
             <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-4"}>
-              {jobs.map((job) => <JobCard key={job.id} job={job} onTailor={handleTailor} compact={viewMode === "grid"} />)}
+              {jobs.map((job, i) => (
+                <motion.div
+                  key={job.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: i * 0.055, ease: "easeOut" }}
+                >
+                  <JobCard job={job} onTailor={handleTailor} compact={viewMode === "grid"} />
+                </motion.div>
+              ))}
             </div>
           )}
 

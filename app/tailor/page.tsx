@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, Suspense, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/utils/supabase/client";
 import {
@@ -20,11 +21,21 @@ interface TailorResult {
 
 function ScoreRing({ before, after }: { before: number; after: number }) {
   const [displayed, setDisplayed] = useState(before);
+  const [pulsed, setPulsed] = useState(false);
+  const [showParticles, setShowParticles] = useState(false);
   const radius = 44;
   const circumference = 2 * Math.PI * radius;
   const color = displayed >= 80 ? "#22c55e" : displayed >= 60 ? "#C9A84C" : "#ef4444";
   const offset = circumference - (displayed / 100) * circumference;
   const diff = after - before;
+
+  const particles = useMemo(() =>
+    Array.from({ length: 12 }, (_, i) => ({
+      id: i,
+      angle: (i / 12) * 360,
+      distance: 68 + (i % 3) * 14,
+      size: 3 + (i % 3),
+    })), []);
 
   useEffect(() => {
     const duration = 1600;
@@ -34,16 +45,62 @@ function ScoreRing({ before, after }: { before: number; after: number }) {
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplayed(Math.round(before + (after - before) * eased));
-      if (progress >= 1) clearInterval(timer);
+      if (progress >= 1) {
+        clearInterval(timer);
+        setPulsed(true);
+        setTimeout(() => setPulsed(false), 600);
+        if (after >= 85) {
+          setShowParticles(true);
+          setTimeout(() => setShowParticles(false), 900);
+        }
+      }
     }, 16);
     return () => clearInterval(timer);
   }, [before, after]);
 
   return (
     <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-      <div className="relative w-32 h-32 sm:w-36 sm:h-36 shrink-0">
+      <div className="relative w-32 h-32 sm:w-36 sm:h-36 shrink-0" style={{ overflow: "visible" }}>
+        {/* Gold particle burst on high score */}
+        <AnimatePresence>
+          {showParticles && particles.map(p => {
+            const rad = (p.angle * Math.PI) / 180;
+            const tx = Math.cos(rad) * p.distance;
+            const ty = Math.sin(rad) * p.distance;
+            return (
+              <motion.span
+                key={p.id}
+                initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                animate={{ x: tx, y: ty, opacity: 0, scale: 0 }}
+                transition={{ duration: 0.75, ease: "easeOut" }}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  width: p.size,
+                  height: p.size,
+                  borderRadius: "50%",
+                  background: "#C9A84C",
+                  boxShadow: "0 0 6px rgba(201,168,76,0.9)",
+                  marginLeft: -p.size / 2,
+                  marginTop: -p.size / 2,
+                  pointerEvents: "none",
+                  zIndex: 20,
+                  display: "block",
+                }}
+              />
+            );
+          })}
+        </AnimatePresence>
         {/* Glow halo */}
-        <div className="absolute inset-0 rounded-full" style={{ background: `radial-gradient(circle, ${color}18 0%, transparent 70%)`, filter: "blur(8px)" }} />
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: `radial-gradient(circle, ${color}${pulsed ? "40" : "18"} 0%, transparent 70%)`,
+            filter: `blur(${pulsed ? "16px" : "8px"})`,
+            transition: "all 0.4s ease",
+          }}
+        />
         <svg viewBox="0 0 100 100" className="w-full h-full" style={{ transform: "rotate(-90deg)" }}>
           <circle cx="50" cy="50" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="7" />
           <circle
@@ -190,6 +247,9 @@ function TailorInner() {
   const FREE_LIMIT = 3;
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [streamedResume, setStreamedResume] = useState("");
+  const [streamComplete, setStreamComplete] = useState(true);
+  const streamTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -373,6 +433,21 @@ function TailorInner() {
       setResult(data);
       setEditedResume(data.tailoredResume);
       setEditMode(false);
+      // Stream the tailored resume line by line
+      if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+      setStreamedResume("");
+      setStreamComplete(false);
+      const resumeLines = data.tailoredResume.split("\n");
+      let lineIdx = 0;
+      streamTimerRef.current = setInterval(() => {
+        lineIdx++;
+        setStreamedResume(resumeLines.slice(0, lineIdx).join("\n"));
+        if (lineIdx >= resumeLines.length) {
+          if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+          setStreamComplete(true);
+          setStreamedResume(data.tailoredResume);
+        }
+      }, 75);
       setActiveTab("resume");
       // Increment usage counter
       if (!isPro) {
@@ -869,7 +944,12 @@ function TailorInner() {
 
             {/* Results */}
             {result && (
-              <div className="space-y-4">
+              <motion.div
+                className="space-y-4"
+                initial={{ opacity: 0, x: 40, scale: 0.98 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
                 {/* Score card */}
                 <div className="card-input p-8 stagger-reveal" style={{ animationDelay: "0ms" }}>
                   <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.1rem", fontWeight: 600, color: "#F0F2F7", marginBottom: "1.75rem" }} className="flex items-center gap-2.5">
@@ -924,7 +1004,15 @@ function TailorInner() {
                     </div>
                   </div>
 
-                  <div className="p-6">
+                  <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, x: 8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -8 }}
+                    transition={{ duration: 0.18, ease: "easeInOut" }}
+                    className="p-6"
+                  >
                     {activeTab === "resume" && (
                       <div>
                         <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
@@ -979,7 +1067,13 @@ function TailorInner() {
                             className="p-5 rounded-xl leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono"
                             style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.06)", maxHeight: "460px", fontSize: "0.8rem", color: "#C4CEDF", lineHeight: 1.75 }}
                           >
-                            {editedResume}
+                            {streamComplete ? editedResume : streamedResume}
+                            {!streamComplete && (
+                              <span
+                                className="inline-block animate-pulse"
+                                style={{ width: "2px", height: "13px", background: "#C9A84C", marginLeft: "2px", verticalAlign: "text-bottom" }}
+                              />
+                            )}
                           </div>
                         )}
                       </div>
@@ -1036,7 +1130,8 @@ function TailorInner() {
                         <BulletList content={result.gaps} icon={AlertCircle} iconColor="#f59e0b" />
                       </div>
                     )}
-                  </div>
+                  </motion.div>
+                  </AnimatePresence>
                 </div>
 
                 {/* Re-tailor */}
@@ -1048,7 +1143,7 @@ function TailorInner() {
                   <RotateCcw size={15} />
                   Start over with a different job
                 </button>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
