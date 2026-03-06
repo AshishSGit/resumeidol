@@ -1118,7 +1118,7 @@ export default function LandingPage() {
         </div>
 
         <p className="text-center text-[#6B7A99] text-sm mt-10 fade-section">
-          14-day money-back guarantee on all paid plans. No questions asked.
+          7-day money-back guarantee on all paid plans. No questions asked.
         </p>
       </section>
 

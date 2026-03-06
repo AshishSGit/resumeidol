@@ -26,7 +26,7 @@ export default function PrivacyPage() {
         <h1 style={{ fontFamily: "Playfair Display, serif", fontSize: "2.25rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.5rem" }}>
           Privacy Policy
         </h1>
-        <p className="text-[#6B7A99] text-sm mb-12">Last updated: March 3, 2026</p>
+        <p className="text-[#6B7A99] text-sm mb-12">Last updated: March 6, 2026</p>
 
         <div className="space-y-10 text-[#9CA3AF] leading-relaxed">
 
@@ -38,9 +38,10 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-[#F0F2F7] text-lg font-semibold mb-3">2. Information we collect</h2>
             <ul className="list-disc list-inside space-y-2">
-              <li><strong className="text-[#DEC27A]">Resume content</strong> — text you upload or paste, used only to generate your tailored resume. We do not store your resume after your session ends.</li>
-              <li><strong className="text-[#DEC27A]">Job descriptions</strong> — text you paste into the tailor tool. Not stored after your session.</li>
-              <li><strong className="text-[#DEC27A]">Email address</strong> — if you join the waitlist or contact us.</li>
+              <li><strong className="text-[#DEC27A]">Resume content</strong> — text you upload or paste, used to generate your tailored resume. If you are signed in, your most recent resume is saved to your account in our database so it auto-loads on your next visit. You can delete it at any time by contacting us.</li>
+              <li><strong className="text-[#DEC27A]">Account data</strong> — your email address, collected when you create an account via magic link sign-in. Stored in Supabase (our database provider).</li>
+              <li><strong className="text-[#DEC27A]">Job descriptions</strong> — text you paste into the tailor tool. Not stored after your session unless you are signed in and saving results.</li>
+              <li><strong className="text-[#DEC27A]">Subscription status</strong> — your plan tier (Free, Pro, or Lifetime) is stored to enforce usage limits.</li>
               <li><strong className="text-[#DEC27A]">Payment information</strong> — handled entirely by Stripe. We never see or store your card details.</li>
               <li><strong className="text-[#DEC27A]">Usage data</strong> — anonymized analytics (pages visited, feature usage) to improve the product.</li>
             </ul>
@@ -61,15 +62,21 @@ export default function PrivacyPage() {
             <p className="mb-3">We use the following third-party services:</p>
             <ul className="list-disc list-inside space-y-2">
               <li><strong className="text-[#DEC27A]">Anthropic</strong> — processes resume and job description text to generate tailored resumes. See <a href="https://www.anthropic.com/privacy" className="text-[#C9A84C] hover:underline" target="_blank" rel="noopener noreferrer">Anthropic&apos;s Privacy Policy</a>.</li>
-              <li><strong className="text-[#DEC27A]">Stripe</strong> — handles all payment processing. See <a href="https://stripe.com/privacy" className="text-[#C9A84C] hover:underline" target="_blank" rel="noopener noreferrer">Stripe&apos;s Privacy Policy</a>.</li>
+              <li><strong className="text-[#DEC27A]">Supabase</strong> — stores your account data (email, resume text, subscription status) in a secure cloud database. See <a href="https://supabase.com/privacy" className="text-[#C9A84C] hover:underline" target="_blank" rel="noopener noreferrer">Supabase&apos;s Privacy Policy</a>.</li>
+              <li><strong className="text-[#DEC27A]">Stripe</strong> — handles all payment processing. We never receive your card details. See <a href="https://stripe.com/privacy" className="text-[#C9A84C] hover:underline" target="_blank" rel="noopener noreferrer">Stripe&apos;s Privacy Policy</a>.</li>
               <li><strong className="text-[#DEC27A]">JSearch (RapidAPI)</strong> — provides job listing data. See <a href="https://rapidapi.com/privacy" className="text-[#C9A84C] hover:underline" target="_blank" rel="noopener noreferrer">RapidAPI&apos;s Privacy Policy</a>.</li>
-              <li><strong className="text-[#DEC27A]">Railway</strong> — hosts the application. See <a href="https://railway.app/legal/privacy" className="text-[#C9A84C] hover:underline" target="_blank" rel="noopener noreferrer">Railway&apos;s Privacy Policy</a>.</li>
+              <li><strong className="text-[#DEC27A]">Railway</strong> — hosts the application infrastructure. See <a href="https://railway.app/legal/privacy" className="text-[#C9A84C] hover:underline" target="_blank" rel="noopener noreferrer">Railway&apos;s Privacy Policy</a>.</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-[#F0F2F7] text-lg font-semibold mb-3">5. Data retention</h2>
-            <p>Resume and job description text is processed in real time and not retained after your session. Email addresses collected via the waitlist are retained until you request removal. Payment records are retained by Stripe per their policies.</p>
+            <ul className="list-disc list-inside space-y-2">
+              <li><strong className="text-[#DEC27A]">Resume text</strong> — retained for signed-in users until you delete your account or request removal. Not retained for unauthenticated sessions.</li>
+              <li><strong className="text-[#DEC27A]">Account data (email)</strong> — retained for as long as your account is active. Deleted upon request.</li>
+              <li><strong className="text-[#DEC27A]">Subscription records</strong> — retained for the duration of your subscription and up to 3 years after for tax and legal compliance.</li>
+              <li><strong className="text-[#DEC27A]">Payment records</strong> — retained by Stripe per their data retention policies.</li>
+            </ul>
           </section>
 
           <section>

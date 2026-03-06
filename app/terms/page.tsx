@@ -26,7 +26,7 @@ export default function TermsPage() {
         <h1 style={{ fontFamily: "Playfair Display, serif", fontSize: "2.25rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.5rem" }}>
           Terms of Service
         </h1>
-        <p className="text-[#6B7A99] text-sm mb-12">Last updated: March 3, 2026</p>
+        <p className="text-[#6B7A99] text-sm mb-12">Last updated: March 6, 2026</p>
 
         <div className="space-y-10 text-[#9CA3AF] leading-relaxed">
 
@@ -63,7 +63,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-[#F0F2F7] text-lg font-semibold mb-3">5. Refund policy</h2>
-            <p>We offer a <strong className="text-[#DEC27A]">14-day money-back guarantee</strong> on all paid plans. If you are unsatisfied for any reason within 14 days of purchase, email <a href="mailto:hello@resumeidol.com" className="text-[#C9A84C] hover:underline">hello@resumeidol.com</a> and we will issue a full refund — no questions asked. After 14 days, refunds are at our discretion.</p>
+            <p>We offer a <strong className="text-[#DEC27A]">7-day money-back guarantee</strong> on all paid plans. If you are unsatisfied for any reason within 7 days of purchase, email <a href="mailto:hello@resumeidol.com" className="text-[#C9A84C] hover:underline">hello@resumeidol.com</a> and we will issue a full refund — no questions asked. After 7 days, refunds are at our discretion.</p>
           </section>
 
           <section>
