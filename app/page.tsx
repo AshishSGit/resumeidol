@@ -375,7 +375,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
     <div
-      className="border-b border-[rgba(255,255,255,0.06)] py-5 cursor-pointer group"
+      className="faq-item border-b border-[rgba(255,255,255,0.06)] py-5 cursor-pointer group"
       onClick={() => setOpen(!open)}
     >
       <div className="flex items-center justify-between gap-4">
@@ -572,7 +572,7 @@ export default function LandingPage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
             style={{ animation: "fadeUp 0.6s 0.3s ease-out both" }}
           >
-            <Link href="/search" className="btn-gold px-8 py-3.5 rounded-xl text-base flex items-center gap-2">
+            <Link href="/search" className="btn-gold btn-gold-hero px-8 py-3.5 rounded-xl text-base flex items-center gap-2">
               Start for Free
               <ArrowRight size={16} />
             </Link>
@@ -599,6 +599,12 @@ export default function LandingPage() {
 
           {/* Keyword marquee */}
           <KeywordMarquee />
+
+          {/* Scroll hint */}
+          <div className="scroll-hint mt-16 flex flex-col items-center gap-1.5 opacity-40">
+            <span className="text-[#6B7A99] text-xs tracking-widest uppercase">Scroll</span>
+            <ChevronDown size={16} className="text-[#C9A84C]" />
+          </div>
         </div>
       </section>
 
@@ -640,8 +646,8 @@ export default function LandingPage() {
             return (
               <div key={f.title} className="card-feature p-6 fade-section" style={{ animationDelay: `${i * 0.08}s`, ["--card-glow" as string]: `linear-gradient(90deg, transparent, ${f.color}40, transparent)` }}>
                 <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
-                  style={{ background: `${f.color}18`, border: `1px solid ${f.color}30` }}
+                  className="feature-icon-wrap w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: `${f.color}18`, border: `1px solid ${f.color}30`, ["--icon-glow" as string]: `${f.color}40` }}
                 >
                   <Icon size={20} style={{ color: f.color }} />
                 </div>
@@ -760,29 +766,34 @@ export default function LandingPage() {
               >
                 {/* Floating badge above card */}
                 {plan.badge && (
-                  <div className={`absolute -top-4 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap text-xs font-semibold px-3 py-1 rounded-full ${
-                    isPro ? "badge-gold" : isLifetime ? "" : ""
-                  }`}
+                  <div className={`absolute -top-4 left-1/2 -translate-x-1/2 z-10 ${isPro ? "badge-shimmer" : ""}`}
                   style={isLifetime ? {
-                    background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.35)", color: "#a5b4fc"
+                    background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.35)", color: "#a5b4fc",
+                    fontSize: "0.72rem", fontWeight: 600, padding: "0.22rem 0.75rem", borderRadius: "9999px", whiteSpace: "nowrap"
                   } : {}}>
                     {plan.badge}
                   </div>
                 )}
 
                 <div
-                  className="flex flex-col flex-1 rounded-2xl p-8 relative overflow-hidden"
+                  className="card-pricing-interactive flex flex-col flex-1 rounded-2xl p-8 relative overflow-hidden"
                   style={isPro ? {
                     background: "linear-gradient(160deg, #181F33 0%, #0F1420 100%)",
                     border: "1px solid rgba(201,168,76,0.35)",
                     boxShadow: "0 0 80px rgba(201,168,76,0.12), 0 0 0 1px rgba(201,168,76,0.1)",
+                    ["--pricing-hover-shadow" as string]: "0 32px 90px rgba(201,168,76,0.18), 0 0 0 1px rgba(201,168,76,0.25)",
+                    ["--pricing-hover-border" as string]: "rgba(201,168,76,0.6)",
                   } : isLifetime ? {
                     background: "linear-gradient(160deg, #10131F 0%, #0B0E1A 100%)",
                     border: "1px solid rgba(99,102,241,0.25)",
                     boxShadow: "0 0 60px rgba(99,102,241,0.06)",
+                    ["--pricing-hover-shadow" as string]: "0 32px 80px rgba(99,102,241,0.15), 0 0 0 1px rgba(99,102,241,0.3)",
+                    ["--pricing-hover-border" as string]: "rgba(99,102,241,0.5)",
                   } : {
                     background: "#0F1420",
                     border: "1px solid rgba(255,255,255,0.07)",
+                    ["--pricing-hover-shadow" as string]: "0 24px 60px rgba(0,0,0,0.6)",
+                    ["--pricing-hover-border" as string]: "rgba(255,255,255,0.15)",
                   }}
                 >
                   {/* Top accent line */}
@@ -858,7 +869,9 @@ export default function LandingPage() {
                   <button
                     onClick={() => handleCheckout(checkoutPlan)}
                     disabled={checkoutLoading !== null}
-                    className={`w-full text-center py-3.5 rounded-xl font-semibold text-base transition-all disabled:opacity-60 ${isPro ? "btn-gold" : "btn-ghost"}`}
+                    className={`w-full text-center py-3.5 rounded-xl font-semibold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                      isPro ? "btn-gold" : isLifetime ? "btn-indigo" : "btn-ghost"
+                    }`}
                     style={isLifetime ? {
                       background: "rgba(99,102,241,0.15)",
                       border: "1px solid rgba(99,102,241,0.35)",

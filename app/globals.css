@@ -502,3 +502,136 @@ body {
   mask-image: linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%);
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%);
 }
+
+/* ============================================================
+   GLOBAL INTERACTION POLISH
+   ============================================================ */
+
+/* Pointer cursor on all interactive elements */
+a, button, [role="button"] { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+/* Smooth will-change hint */
+.btn-gold, .btn-ghost, .card-feature, .card-pricing-interactive { will-change: transform; }
+
+/* === Enhanced btn-gold hover/active === */
+.btn-gold { cursor: pointer; }
+.btn-gold:not(:disabled):hover {
+  box-shadow: 0 10px 50px rgba(201,168,76,0.55), 0 0 90px rgba(201,168,76,0.14);
+  transform: translateY(-2px) scale(1.025);
+}
+.btn-gold:not(:disabled):active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+  transition-duration: 0.1s;
+}
+
+/* Hero CTA — pulsing glow to draw the eye */
+@keyframes hero-cta-pulse {
+  0%, 100% { box-shadow: 0 8px 32px rgba(201,168,76,0.4), 0 0 60px rgba(201,168,76,0.08); }
+  50%       { box-shadow: 0 8px 52px rgba(201,168,76,0.7), 0 0 100px rgba(201,168,76,0.2); }
+}
+.btn-gold-hero { animation: hero-cta-pulse 2.6s ease-in-out infinite; }
+.btn-gold-hero:hover { animation-play-state: paused; }
+
+/* === Enhanced btn-ghost === */
+.btn-ghost { cursor: pointer; }
+.btn-ghost:not(:disabled):hover {
+  border-color: rgba(201,168,76,0.45);
+  background: rgba(201,168,76,0.07);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+}
+.btn-ghost:not(:disabled):active {
+  transform: translateY(0);
+  transition-duration: 0.1s;
+}
+
+/* === Pricing card — spring-physics hover === */
+.card-pricing-interactive {
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.35s ease,
+              border-color 0.3s ease;
+}
+.card-pricing-interactive:hover {
+  transform: translateY(-12px);
+  box-shadow: var(--pricing-hover-shadow, 0 32px 80px rgba(0,0,0,0.55));
+  border-color: var(--pricing-hover-border, rgba(255,255,255,0.18)) !important;
+}
+
+/* === Feature card icon — spring lift on hover === */
+.feature-icon-wrap {
+  transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.3s ease,
+              background 0.3s ease;
+}
+.card-feature:hover .feature-icon-wrap {
+  transform: scale(1.2) rotate(8deg);
+  box-shadow: 0 0 28px var(--icon-glow, rgba(201,168,76,0.3));
+}
+
+/* === Nav link — underline sweep === */
+.nav-link {
+  position: relative;
+  padding-bottom: 2px;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 1px;
+  background: linear-gradient(90deg, #C9A84C, #E8D5A3);
+  transition: width 0.28s ease;
+  border-radius: 9999px;
+}
+.nav-link:hover { color: #DEC27A; }
+.nav-link:hover::after { width: 100%; }
+
+/* === FAQ row — subtle background highlight === */
+.faq-item {
+  transition: background 0.2s ease;
+  border-radius: 12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin-left: -12px;
+  margin-right: -12px;
+}
+.faq-item:hover { background: rgba(255,255,255,0.025); }
+
+/* === "Most Popular" badge — rolling shimmer === */
+@keyframes badge-roll {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.badge-shimmer {
+  background: linear-gradient(90deg, rgba(201,168,76,0.12) 0%, rgba(240,224,160,0.35) 50%, rgba(201,168,76,0.12) 100%);
+  background-size: 800px 100%;
+  animation: badge-roll 3s linear infinite;
+  border: 1px solid rgba(201,168,76,0.35);
+  color: #F0D885;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.22rem 0.75rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+/* === Scroll-down hint === */
+@keyframes bounce-hint {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50%       { transform: translateY(7px); opacity: 0.9; }
+}
+.scroll-hint { animation: bounce-hint 2.2s ease-in-out infinite; }
+
+/* === Lifetime card "indigo" button hover === */
+.btn-indigo {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.btn-indigo:hover {
+  background: rgba(99,102,241,0.25) !important;
+  border-color: rgba(99,102,241,0.55) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(99,102,241,0.2);
+}
+.btn-indigo:active { transform: translateY(0); transition-duration: 0.1s; }
