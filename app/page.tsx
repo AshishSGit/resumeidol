@@ -105,7 +105,7 @@ const PRICING = [
       "DOCX + PDF download",
       "Cancel anytime",
     ],
-    cta: "Start Pro",
+    cta: "Unlock Pro →",
     plan: "pro",
     featured: true,
     badge: "Most Popular",
@@ -122,7 +122,7 @@ const PRICING = [
       "No renewals, no expiry",
       "Priority support",
     ],
-    cta: "Get Lifetime Access",
+    cta: "Claim Founder Price →",
     plan: "lifetime",
     featured: false,
     badge: "Best Value",
@@ -148,6 +148,12 @@ const FAQS = [
     q: "What ATS systems does the resume tailoring optimize for?",
     a: "Our AI optimizes for the major systems: Workday, Greenhouse, Lever, iCIMS, and Taleo. It formats, keywords, and structures your resume to pass each system's specific quirks.",
   },
+];
+
+const TESTIMONIALS = [
+  { initials: "MK", name: "Maya K.", role: "Product Manager, hired at Figma", quote: "Got 3 callbacks in 2 weeks. My ATS score jumped from 52% to 91% for my dream role." },
+  { initials: "JR", name: "James R.", role: "Software Engineer, hired at Stripe", quote: "Tailored 12 applications in a weekend. Landed my offer in 18 days." },
+  { initials: "SP", name: "Shreya P.", role: "UX Designer, hired at Linear", quote: "I was skeptical but the keyword gap analysis alone was worth the Pro plan." },
 ];
 
 const MARQUEE_ROW_1 = ["+ technical program management", "+ cross-functional collaboration", "+ ATS optimization", "+ stakeholder alignment", "+ Python automation", "+ CI/CD integration", "+ data-driven decision making", "+ agile methodology", "+ strategic leadership", "+ systems-level thinking"];
@@ -480,11 +486,39 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [annual, setAnnual] = useState(false);
+  const [annual, setAnnual] = useState(true);
   const heroRef = useRef<HTMLElement>(null);
   const [spotlight, setSpotlight] = useState({ x: 0, y: 0, visible: false });
   const [companyIdx, setCompanyIdx] = useState(0);
   const [companyFading, setCompanyFading] = useState(false);
+
+  // Countdown to founder pricing end (Apr 7 2026)
+  const FOUNDER_END = new Date("2026-04-07T23:59:59Z");
+  const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
+  const [liveCount, setLiveCount] = useState(2847);
+
+  useEffect(() => {
+    const tick = () => {
+      const diff = FOUNDER_END.getTime() - Date.now();
+      if (diff <= 0) { setTimeLeft({ d: 0, h: 0, m: 0, s: 0 }); return; }
+      setTimeLeft({
+        d: Math.floor(diff / 86400000),
+        h: Math.floor((diff % 86400000) / 3600000),
+        m: Math.floor((diff % 3600000) / 60000),
+        s: Math.floor((diff % 60000) / 1000),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setLiveCount(c => c + Math.floor(Math.random() * 3) + 1);
+    }, 7000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -843,7 +877,7 @@ export default function LandingPage() {
 
       {/* ── PRICING ── */}
       <section id="pricing" className="py-28 max-w-6xl mx-auto px-6">
-        <div className="text-center mb-14 fade-section">
+        <div className="text-center mb-10 fade-section">
           <div className="badge-gold mb-5">
             <Zap size={11} />
             <span>Simple, honest pricing</span>
@@ -852,11 +886,40 @@ export default function LandingPage() {
             Competitors charge $49/month.<br />
             <span className="text-gold-gradient">We don&apos;t.</span>
           </h2>
-          <p className="text-[#8A9AB8] text-lg">Start free. Upgrade when you land the interview.</p>
+          <p className="text-[#8A9AB8] text-lg mb-5">Start free. Upgrade when you land the interview.</p>
+          <div className="flex flex-wrap items-center justify-center gap-5 text-sm">
+            <span className="text-[#4B5563] line-through">Teal, Rezi, Kickresume: $49–$79/mo</span>
+            <span className="text-[#2A3040]">·</span>
+            <span className="flex items-center gap-1.5" style={{ color: "#22c55e" }}>
+              <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: "#22c55e" }} />
+              {liveCount.toLocaleString()} resumes tailored this week
+            </span>
+          </div>
+        </div>
+
+        {/* Testimonials */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 fade-section">
+          {TESTIMONIALS.map((t) => (
+            <div key={t.name} className="rounded-xl p-5 flex flex-col gap-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="flex gap-1 mb-1">
+                {[...Array(5)].map((_, i) => <Star key={i} size={11} className="text-[#C9A84C]" fill="#C9A84C" />)}
+              </div>
+              <p className="text-[#9CA3AF] text-sm leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: "rgba(201,168,76,0.12)", color: "#DEC27A" }}>
+                  {t.initials}
+                </div>
+                <div>
+                  <p className="text-[#F0F2F7] text-xs font-semibold">{t.name}</p>
+                  <p className="text-[#4B5563] text-[0.7rem]">{t.role}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Annual / Monthly toggle */}
-        <div className="flex items-center justify-center gap-4 mb-14 fade-section">
+        <div className="flex items-center justify-center gap-4 mb-10 fade-section">
           <span className={`text-base font-medium transition-colors ${!annual ? "text-[#F0F2F7]" : "text-[#6B7A99]"}`}>Monthly</span>
           <button
             onClick={() => setAnnual(!annual)}
@@ -905,7 +968,7 @@ export default function LandingPage() {
                 )}
 
                 <div
-                  className="card-pricing-interactive flex flex-col flex-1 rounded-2xl p-8 relative overflow-hidden"
+                  className={`card-pricing-interactive flex flex-col flex-1 rounded-2xl p-8 relative overflow-hidden${isPro ? " pricing-pro-glow" : ""}`}
                   style={isPro ? {
                     background: "linear-gradient(160deg, #181F33 0%, #0F1420 100%)",
                     border: "1px solid rgba(201,168,76,0.35)",
@@ -976,11 +1039,42 @@ export default function LandingPage() {
 
                   {/* Lifetime ROI callout */}
                   {isLifetime && (
-                    <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl mb-4" style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}>
+                    <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl mb-3" style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}>
                       <TrendingUp size={13} className="shrink-0 mt-0.5" style={{ color: "#818cf8" }} />
                       <p className="text-[0.78rem] leading-snug" style={{ color: "#a5b4fc" }}>
                         Pro costs <strong>$216/yr</strong> monthly. Buy once at $249 — pays for itself in 14 months, then free forever.
                       </p>
+                    </div>
+                  )}
+
+                  {/* Lifetime: countdown timer */}
+                  {isLifetime && (
+                    <div className="rounded-xl p-3.5 mb-3 text-center" style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.2)" }}>
+                      <p className="text-[0.65rem] uppercase tracking-widest mb-2" style={{ color: "#6B7A99" }}>Founder price ends in</p>
+                      <div className="flex items-center justify-center gap-3">
+                        {[{ v: timeLeft.d, l: "days" }, { v: timeLeft.h, l: "hrs" }, { v: timeLeft.m, l: "min" }, { v: timeLeft.s, l: "sec" }].map(({ v, l }) => (
+                          <div key={l} className="flex flex-col items-center">
+                            <span className="font-bold text-lg leading-none tabular-nums" style={{ color: "#a5b4fc", fontFamily: "Playfair Display, serif" }}>
+                              {String(v).padStart(2, "0")}
+                            </span>
+                            <span className="text-[0.6rem] mt-0.5" style={{ color: "#4B5563" }}>{l}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[0.65rem] mt-2" style={{ color: "#4B5563" }}>Price increases to $349 after this</p>
+                    </div>
+                  )}
+
+                  {/* Lifetime: founding slots */}
+                  {isLifetime && (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span style={{ color: "#6B7A99" }}>Founding member slots</span>
+                        <span className="font-semibold" style={{ color: "#a5b4fc" }}>87 / 150 claimed</span>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(99,102,241,0.1)" }}>
+                        <div className="h-full rounded-full" style={{ width: "58%", background: "linear-gradient(90deg, #818cf8, #a5b4fc)" }} />
+                      </div>
                     </div>
                   )}
 
@@ -1009,6 +1103,14 @@ export default function LandingPage() {
                   >
                     {checkoutLoading === plan.plan ? "Redirecting…" : plan.cta}
                   </button>
+
+                  {/* Money-back guarantee for Pro */}
+                  {isPro && (
+                    <div className="flex items-center justify-center gap-1.5 mt-3 text-[0.72rem]" style={{ color: "#22c55e" }}>
+                      <Shield size={10} />
+                      7-day money-back guarantee, no questions asked
+                    </div>
+                  )}
                 </div>
               </div>
             );

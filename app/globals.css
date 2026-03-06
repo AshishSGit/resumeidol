@@ -685,6 +685,15 @@ button:disabled { cursor: not-allowed; }
   transition-duration: 0.1s;
 }
 
+/* ── Pricing Pro card glow pulse ────────────────────────────────── */
+@keyframes pricingGlow {
+  0%, 100% { box-shadow: 0 0 80px rgba(201,168,76,0.12), 0 0 0 1px rgba(201,168,76,0.1); }
+  50%       { box-shadow: 0 0 120px rgba(201,168,76,0.22), 0 0 0 1px rgba(201,168,76,0.2); }
+}
+.pricing-pro-glow {
+  animation: pricingGlow 3s ease-in-out infinite;
+}
+
 /* Search button — responsive corners */
 .search-btn { border-radius: 0 0 1rem 1rem; }
 @media (min-width: 640px) { .search-btn { border-radius: 0 1rem 1rem 0; } }

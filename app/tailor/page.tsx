@@ -512,6 +512,9 @@ function TailorInner() {
   );
 
   const canTailor = resumeText.trim().length > 50 && jobDescription.trim().length > 50;
+  const step1Done = jobTitle.trim().length > 1 && jobDescription.trim().length > 30;
+  const step2Done = resumeText.trim().length > 50;
+  const currentStep = !step1Done ? 1 : !step2Done ? 2 : 3;
 
   return (
     <div className="min-h-screen relative" style={{ background: "#07090F" }}>
@@ -579,7 +582,44 @@ function TailorInner() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
+        {/* ── Step Indicator ── */}
+        <div className="mb-10 card-enter" style={{ animationDelay: "60ms" }}>
+          <div className="flex items-center justify-center gap-0">
+            {([
+              { n: 1, label: "Job Details" },
+              { n: 2, label: "Your Resume" },
+              { n: 3, label: "Results" },
+            ]).map(({ n, label }, i) => {
+              const done = currentStep > n;
+              const active = currentStep === n;
+              return (
+                <div key={n} className="flex items-center">
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-500 text-sm font-bold"
+                      style={{
+                        background: done ? "rgba(201,168,76,0.2)" : active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
+                        border: done || active ? "1px solid rgba(201,168,76,0.45)" : "1px solid rgba(255,255,255,0.08)",
+                        color: done ? "#C9A84C" : active ? "#DEC27A" : "#4B5563",
+                        boxShadow: active ? "0 0 20px rgba(201,168,76,0.25)" : "none",
+                      }}
+                    >
+                      {done ? <CheckCircle size={16} style={{ color: "#C9A84C" }} /> : n}
+                    </div>
+                    <span className="text-[0.68rem] font-medium transition-colors duration-300" style={{ color: active ? "#DEC27A" : done ? "#C9A84C" : "#4B5563" }}>
+                      {label}
+                    </span>
+                  </div>
+                  {i < 2 && (
+                    <div className="w-20 sm:w-32 h-px mx-2 mb-4 transition-all duration-500" style={{ background: currentStep > n ? "rgba(201,168,76,0.4)" : "rgba(255,255,255,0.06)" }} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className={`grid gap-7 ${tailoring || result ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 max-w-2xl mx-auto w-full"}`}>
           {/* ── LEFT PANEL: Inputs ── */}
           <div className="space-y-6">
             {/* Job info */}
@@ -673,8 +713,15 @@ function TailorInner() {
               </div>
             </div>
 
-            {/* Resume upload */}
-            <div className="card-input p-8 card-enter" style={{ animationDelay: "160ms" }}>
+            {/* Resume upload — revealed when job details filled */}
+            <AnimatePresence>
+            {step1Done && (
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+            <div className="card-input p-8" style={{ border: step2Done ? "1px solid rgba(201,168,76,0.25)" : undefined }}>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)" }}>
                   <Upload size={16} className="text-[#C9A84C]" />
@@ -780,6 +827,9 @@ function TailorInner() {
                 <span className="text-xs text-[#4B5563]">{resumeText.split(/\s+/).filter(Boolean).length} words</span>
               </div>
             </div>
+            </motion.div>
+            )}
+            </AnimatePresence>
 
             {/* Error */}
             {error && (
@@ -789,29 +839,43 @@ function TailorInner() {
               </div>
             )}
 
-            {/* Tailor button */}
-            <button
-              onClick={handleTailor}
-              disabled={!canTailor || tailoring}
-              className={`btn-gold w-full py-5 rounded-2xl font-semibold flex items-center justify-center gap-2.5 text-lg disabled:opacity-40 disabled:cursor-not-allowed${canTailor && !tailoring ? " btn-gold-hero" : ""}`}
-            >
-              {tailoring ? (
-                <>
-                  <Loader2 size={20} className="animate-spin" />
-                  ResumeIdol is tailoring your resume...
-                </>
-              ) : (
-                <>
-                  <Zap size={20} />
-                  Tailor My Resume with AI
-                </>
-              )}
-            </button>
-            {!canTailor && (
-              <p className="text-center text-sm text-[#6B7A99]">
-                Add your resume and job description to continue
-              </p>
+            {/* Tailor button — only shown when resume is ready */}
+            <AnimatePresence>
+            {(step2Done || tailoring) && (
+              <motion.div
+                initial={{ opacity: 0, y: 16, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.38, ease: "easeOut" }}
+              >
+                <button
+                  onClick={handleTailor}
+                  disabled={!canTailor || tailoring}
+                  className={`btn-gold w-full py-5 rounded-2xl font-semibold flex items-center justify-center gap-2.5 text-lg disabled:opacity-40 disabled:cursor-not-allowed${canTailor && !tailoring ? " btn-gold-hero" : ""}`}
+                >
+                  {tailoring ? (
+                    <>
+                      <Loader2 size={20} className="animate-spin" />
+                      ResumeIdol is tailoring your resume...
+                    </>
+                  ) : (
+                    <>
+                      <Zap size={20} />
+                      Tailor My Resume
+                    </>
+                  )}
+                </button>
+              </motion.div>
             )}
+            </AnimatePresence>
+
+            {/* Step hint when not ready */}
+            {!step1Done && (
+              <p className="text-center text-sm text-[#4B5563]">Fill in the job details above to get started</p>
+            )}
+            {step1Done && !step2Done && (
+              <p className="text-center text-sm text-[#4B5563]">Add your resume above to unlock tailoring</p>
+            )}
+
             {/* Usage indicator */}
             {!isPro && (
               <div className="text-center">
@@ -839,43 +903,15 @@ function TailorInner() {
             )}
           </div>
 
-          {/* ── RIGHT PANEL: Results ── */}
-          <div className="card-enter" style={{ animationDelay: "120ms" }}>
-            {/* Empty state */}
-            {!result && !tailoring && (
-              <div
-                className="card-input flex flex-col items-center justify-center text-center px-10 py-16"
-                style={{ minHeight: "580px" }}
-              >
-                {/* Icon with ambient glow */}
-                <div className="relative mb-8">
-                  <div className="absolute -inset-6 rounded-full opacity-30 animate-pulse" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.2) 0%, transparent 70%)" }} />
-                  <div className="w-24 h-24 rounded-3xl flex items-center justify-center relative" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)", boxShadow: "0 0 60px rgba(201,168,76,0.12)" }}>
-                    <Zap size={34} className="text-[#C9A84C]" />
-                  </div>
-                </div>
-                <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.6rem", fontWeight: 600, color: "#F0F2F7", lineHeight: 1.2, marginBottom: "0.875rem" }}>
-                  Your tailored resume<br />will appear here
-                </h3>
-                <p className="text-[#6B7A99] text-base max-w-[280px] leading-relaxed mb-12">
-                  Fill in the details on the left, then hit the button below.
-                </p>
-                {/* Outcome preview */}
-                <div className="w-full max-w-xs space-y-3">
-                  {[
-                    { label: "ATS Score Lift", value: "↑ +25 pts avg", color: "#C9A84C", bg: "rgba(201,168,76,0.07)", border: "rgba(201,168,76,0.16)" },
-                    { label: "Keywords Matched", value: "12–18 added", color: "#6366f1", bg: "rgba(99,102,241,0.07)", border: "rgba(99,102,241,0.18)" },
-                    { label: "Interview Rate", value: "3× higher", color: "#22c55e", bg: "rgba(34,197,94,0.07)", border: "rgba(34,197,94,0.15)" },
-                  ].map(({ label, value, color, bg, border }) => (
-                    <div key={label} className="flex items-center justify-between px-4 py-3.5 rounded-xl" style={{ background: bg, border: `1px solid ${border}` }}>
-                      <span className="text-sm text-[#6B7A99]">{label}</span>
-                      <span className="text-sm font-bold" style={{ color, fontFamily: "Playfair Display, serif" }}>{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
+          {/* ── RIGHT PANEL: Results (only shown when tailoring or result available) ── */}
+          {(tailoring || result) && (
+          <motion.div
+            className="card-enter"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
+            style={{ animationDelay: "120ms" }}
+          >
             {/* Loading state — multi-step progress */}
             {tailoring && (
               <div className="card-input flex flex-col items-center justify-center py-16 px-10" style={{ minHeight: "580px" }}>
@@ -1145,7 +1181,8 @@ function TailorInner() {
                 </button>
               </motion.div>
             )}
-          </div>
+          </motion.div>
+          )}
         </div>
       </div>
     </div>
