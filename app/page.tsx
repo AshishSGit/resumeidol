@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import {
-  Crown, Search, FileText, BarChart2, Briefcase, Mail,
+  Crown, Search, FileText, BarChart2, Briefcase,
   ArrowRight, CheckCircle, Star, Zap, Shield, TrendingUp,
   ChevronDown, Menu, X
 } from "lucide-react";
@@ -145,6 +145,133 @@ const FAQS = [
   },
 ];
 
+function ProductPreview() {
+  return (
+    <div
+      className="rounded-2xl overflow-hidden preview-shadow"
+      style={{ border: "1px solid rgba(201,168,76,0.12)" }}
+    >
+      {/* Browser chrome */}
+      <div className="flex items-center gap-3 px-4 py-2.5" style={{ background: "#0B0E1A", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex gap-1.5">
+          {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+            <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
+          ))}
+        </div>
+        <div className="flex-1 flex justify-center">
+          <div
+            className="flex items-center gap-2 px-3 py-1 rounded-md text-[11px]"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", color: "#6B7A99", maxWidth: 260, width: "100%" }}
+          >
+            <span className="text-[#374151] select-none">🔒</span>
+            <span>resumeidol.com/tailor</span>
+          </div>
+        </div>
+        <div
+          className="hidden sm:flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-md"
+          style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)", color: "#C9A84C" }}
+        >
+          <Zap size={9} />
+          AI Active
+        </div>
+      </div>
+
+      {/* App body */}
+      <div className="grid grid-cols-1 sm:grid-cols-2" style={{ background: "#07090F" }}>
+        {/* Left: inputs */}
+        <div className="p-5 border-b sm:border-b-0 sm:border-r border-[rgba(255,255,255,0.05)]">
+          <p className="text-[10px] text-[#374151] uppercase tracking-widest mb-2 font-medium">Job Description</p>
+          <div className="p-3 rounded-xl mb-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(201,168,76,0.12)" }}>
+            <p className="text-[#DEC27A] text-xs font-semibold mb-0.5">Senior Product Designer</p>
+            <p className="text-[#6B7A99] text-[11px]">Stripe · San Francisco, CA · $160k–$220k</p>
+            <p className="text-[#4B5563] text-[11px] mt-2 leading-relaxed">Looking for a Senior Product Designer to lead user research, design systems, and cross-functional initiatives. 5+ yrs Figma required…</p>
+          </div>
+          <p className="text-[10px] text-[#374151] uppercase tracking-widest mb-2 font-medium">Your Resume</p>
+          <div className="p-3 rounded-xl mb-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <p className="text-[#9CA3AF] text-[11px]">Alex Rivera · Product Designer · 4 yrs · Figma, Sketch, Prototyping · Previously at Notion, Webflow</p>
+          </div>
+          <div className="flex justify-end">
+            <div
+              className="text-xs px-4 py-2 rounded-xl font-semibold flex items-center gap-1.5"
+              style={{ background: "linear-gradient(135deg, #DEC27A, #C9A84C)", color: "#07090F" }}
+            >
+              <Zap size={11} />
+              Tailoring…
+            </div>
+          </div>
+        </div>
+
+        {/* Right: output */}
+        <div className="p-5">
+          {/* ATS score comparison */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="text-center">
+              <p className="text-[10px] text-[#374151] mb-1.5">Before</p>
+              <div className="relative w-14 h-14">
+                <svg viewBox="0 0 48 48" className="w-14 h-14" style={{ transform: "rotate(-90deg)" }}>
+                  <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4.5" />
+                  <circle cx="24" cy="24" r="19" fill="none" stroke="#6366f1" strokeWidth="4.5"
+                    strokeDasharray="119" strokeDashoffset="55" strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#6366f1]">54%</div>
+              </div>
+            </div>
+            <ArrowRight size={16} className="text-[#374151] shrink-0" />
+            <div className="text-center">
+              <p className="text-[10px] text-[#374151] mb-1.5">After</p>
+              <div className="relative w-14 h-14">
+                <svg viewBox="0 0 48 48" className="w-14 h-14" style={{ transform: "rotate(-90deg)" }}>
+                  <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4.5" />
+                  <circle cx="24" cy="24" r="19" fill="none" stroke="#C9A84C" strokeWidth="4.5"
+                    strokeDasharray="119" strokeDashoffset="14" strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#C9A84C]">88%</div>
+              </div>
+            </div>
+            <div
+              className="ml-1 px-2 py-1 rounded-full text-[10px] font-bold"
+              style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.25)", color: "#22c55e" }}
+            >
+              +34pts
+            </div>
+          </div>
+
+          {/* Keywords added */}
+          <p className="text-[10px] text-[#374151] uppercase tracking-widest mb-2 font-medium">Keywords Added</p>
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {["user research", "design systems", "A/B testing", "cross-functional"].map((k) => (
+              <span
+                key={k}
+                className="text-[10px] px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}
+              >
+                + {k}
+              </span>
+            ))}
+          </div>
+
+          {/* Tailored resume snippet */}
+          <div className="p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <p className="text-[#F0F2F7] text-xs font-semibold mb-1">Alex Rivera</p>
+            <p className="text-[#6B7A99] text-[11px] leading-relaxed mb-2">Senior Product Designer with 4+ yrs leading user research, design systems, and cross-functional product initiatives at Notion and Webflow.</p>
+            <div className="flex gap-2">
+              {["↓ DOCX", "↓ PDF"].map((l) => (
+                <span
+                  key={l}
+                  className="text-[10px] px-2.5 py-1 rounded-lg font-medium"
+                  style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.18)", color: "#C9A84C" }}
+                >
+                  {l}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AnimatedStat({ value, suffix, label }: { value: string; suffix: string; label: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -226,10 +353,9 @@ export default function LandingPage() {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [annual, setAnnual] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -274,26 +400,6 @@ export default function LandingPage() {
     document.querySelectorAll(".fade-section").forEach((el) => obs.observe(el));
     return () => obs.disconnect();
   }, []);
-
-  const handleWaitlist = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-    try {
-      await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "YOUR_KEY",
-          email,
-          subject: "ResumeIdol Waitlist Signup",
-          message: `New waitlist signup: ${email}`,
-        }),
-      });
-    } catch {
-      // Silent fail — still show success to user
-    }
-    setSubmitted(true);
-  };
 
   return (
     <div className="min-h-screen" style={{ background: "#07090F" }}>
@@ -450,6 +556,11 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── PRODUCT PREVIEW ── */}
+      <section className="pb-24 max-w-5xl mx-auto px-6 -mt-8 fade-section">
+        <ProductPreview />
+      </section>
+
       {/* ── STATS ── */}
       <section className="py-20 relative">
         <div className="gold-line" />
@@ -558,6 +669,30 @@ export default function LandingPage() {
           <p className="text-[#6B7A99] text-lg">Start free. Upgrade when you&apos;re ready. Cancel anytime.</p>
         </div>
 
+        {/* Annual / Monthly toggle */}
+        <div className="flex items-center justify-center gap-4 mb-12 fade-section">
+          <span className={`text-sm font-medium transition-colors ${!annual ? "text-[#F0F2F7]" : "text-[#6B7A99]"}`}>Monthly</span>
+          <button
+            onClick={() => setAnnual(!annual)}
+            aria-label="Toggle annual billing"
+            className={`relative w-11 h-6 rounded-full transition-all duration-300 toggle-track ${annual ? "active" : ""}`}
+          >
+            <span
+              className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"
+              style={{ left: annual ? "calc(100% - 20px)" : "4px" }}
+            />
+          </button>
+          <span className={`text-sm font-medium flex items-center gap-2 transition-colors ${annual ? "text-[#F0F2F7]" : "text-[#6B7A99]"}`}>
+            Annual
+            <span
+              className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+              style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#22c55e" }}
+            >
+              Save 28%
+            </span>
+          </span>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {PRICING.map((plan, i) => (
             <div
@@ -578,10 +713,12 @@ export default function LandingPage() {
                   className={`text-5xl font-bold ${plan.featured ? "text-gold-gradient" : "text-[#F0F2F7]"}`}
                   style={{ fontFamily: "Playfair Display, serif" }}
                 >
-                  {plan.price}
+                  {plan.featured && annual ? "13" : plan.price}
                 </span>
               </div>
-              <p className="text-[#374151] text-sm mb-8">{plan.period}</p>
+              <p className="text-[#374151] text-sm mb-8">
+                {plan.featured && annual ? "per month, billed $156/yr" : plan.period}
+              </p>
 
               <ul className="space-y-3 mb-8">
                 {plan.features.map((f) => (
@@ -593,11 +730,15 @@ export default function LandingPage() {
               </ul>
 
               <button
-                onClick={() => handleCheckout(plan.plan)}
+                onClick={() => handleCheckout(plan.featured && annual ? "pro_annual" : plan.plan)}
                 disabled={checkoutLoading !== null}
                 className={`w-full text-center py-3 rounded-xl font-semibold text-sm transition-all ${plan.featured ? "btn-gold" : "btn-ghost"} disabled:opacity-60`}
               >
-                {checkoutLoading === plan.plan ? "Redirecting…" : plan.cta}
+                {checkoutLoading === plan.plan
+                  ? "Redirecting…"
+                  : plan.featured && annual
+                  ? "Start Pro — $13/mo"
+                  : plan.cta}
               </button>
             </div>
           ))}
@@ -636,38 +777,28 @@ export default function LandingPage() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-px" style={{ background: "linear-gradient(90deg, transparent, #C9A84C, transparent)" }} />
             <div className="badge-gold mb-6 mx-auto w-fit">
               <Crown size={11} />
-              <span>Launch offer — limited spots</span>
+              <span>Free to start — no credit card</span>
             </div>
             <h2 className="heading-lg text-[#F0F2F7] mb-4">
               Stop spraying.<br />
               <span className="text-gold-gradient">Start landing.</span>
             </h2>
-            <p className="text-[#6B7A99] mb-8 text-lg">
-              Join the waitlist and get <strong className="text-[#DEC27A]">3 months of Pro free</strong> when we launch.
+            <p className="text-[#6B7A99] mb-8 text-lg max-w-md mx-auto">
+              Tailor your resume for free. Upgrade to Pro when you&apos;re ready to go all in.
             </p>
 
-            {submitted ? (
-              <div className="flex items-center justify-center gap-3 text-[#22c55e]">
-                <CheckCircle size={20} />
-                <span className="font-medium">You&apos;re on the list! We&apos;ll be in touch.</span>
-              </div>
-            ) : (
-              <form onSubmit={handleWaitlist} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@company.com"
-                  required
-                  className="input-luxury flex-1 px-4 py-3 text-sm"
-                />
-                <button type="submit" className="btn-gold px-6 py-3 rounded-xl text-sm font-semibold whitespace-nowrap">
-                  Join Waitlist
-                </button>
-              </form>
-            )}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link href="/tailor" className="btn-gold px-8 py-3.5 rounded-xl text-sm font-semibold flex items-center gap-2 w-full sm:w-auto justify-center">
+                Start Tailoring Free
+                <ArrowRight size={15} />
+              </Link>
+              <Link href="/search" className="btn-ghost px-8 py-3.5 rounded-xl text-sm font-semibold flex items-center gap-2 w-full sm:w-auto justify-center">
+                <Search size={15} className="text-[#C9A84C]" />
+                Search Jobs
+              </Link>
+            </div>
 
-            <p className="text-[#374151] text-xs mt-4">No spam. Unsubscribe anytime.</p>
+            <p className="text-[#374151] text-xs mt-6">3 free tailors per month. No card required.</p>
           </div>
         </div>
       </section>

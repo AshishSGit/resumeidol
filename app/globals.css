@@ -358,3 +358,63 @@ body {
   100% { opacity: 1; transform: scale(1); }
 }
 .step-tick { animation: step-tick 0.3s ease-out forwards; }
+
+/* === Shimmer text === */
+@keyframes text-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, #C9A84C 0%, #F0E0A0 35%, #E8D5A3 50%, #C9A84C 65%, #B8952F 100%);
+  background-size: 1200px auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: text-shimmer 3.5s linear infinite;
+}
+
+/* === Card luxury (gradient border + top glow) === */
+.card-luxury {
+  position: relative;
+  background: linear-gradient(145deg, #141B2D 0%, #0D1119 100%);
+  border-radius: 20px;
+}
+.card-luxury::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(145deg, rgba(201,168,76,0.35), rgba(255,255,255,0.04) 50%, rgba(201,168,76,0.12));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.card-luxury::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.55), transparent);
+  border-radius: 9999px;
+}
+
+/* === Product preview mock shadow === */
+.preview-shadow {
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.12), 0 0 80px rgba(201,168,76,0.04);
+}
+
+/* === Pricing toggle === */
+.toggle-track {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
+}
+.toggle-track.active {
+  background: linear-gradient(135deg, #DEC27A, #C9A84C);
+  border-color: transparent;
+  box-shadow: 0 0 16px rgba(201,168,76,0.3);
+}

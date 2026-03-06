@@ -186,6 +186,8 @@ function TailorInner() {
   const [isPro, setIsPro] = useState(false);
   const [tailorCount, setTailorCount] = useState(0);
   const FREE_LIMIT = 3;
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -201,6 +203,7 @@ function TailorInner() {
       }
       const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
       setTailorCount(parseInt(localStorage.getItem(monthKey) ?? "0"));
+      if (!localStorage.getItem("resumeidol_onboarded")) setShowOnboarding(true);
 
       // Auto-load saved resume from cloud
       try {
@@ -454,6 +457,45 @@ function TailorInner() {
             Paste the job description, upload your resume, and let Claude rewrite it to maximise your match score — without losing your authentic voice.
           </p>
         </div>
+
+        {/* Onboarding hint — first visit only */}
+        {showOnboarding && (
+          <div
+            className="mb-6 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 stagger-reveal"
+            style={{ background: "rgba(201,168,76,0.05)", border: "1px solid rgba(201,168,76,0.2)" }}
+          >
+            <div className="flex-1">
+              <p className="text-[#DEC27A] text-sm font-semibold mb-2.5 flex items-center gap-1.5">
+                <Zap size={13} />
+                Get started in 3 steps
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
+                {[
+                  "Paste a job URL or the full description",
+                  "Upload your resume or paste the text",
+                  "Hit Tailor — Claude rewrites it for you",
+                ].map((step, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs text-[#9CA3AF]">
+                    <span
+                      className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5"
+                      style={{ background: "rgba(201,168,76,0.15)", color: "#DEC27A", border: "1px solid rgba(201,168,76,0.3)" }}
+                    >
+                      {i + 1}
+                    </span>
+                    {step}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={() => { localStorage.setItem("resumeidol_onboarded", "1"); setShowOnboarding(false); }}
+              className="text-xs text-[#4B5563] hover:text-[#6B7A99] transition-colors shrink-0 px-3 py-1.5 rounded-lg"
+              style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+            >
+              Got it ✕
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* ── LEFT PANEL: Inputs ── */}
@@ -857,10 +899,18 @@ function TailorInner() {
                               {editMode ? <><Check size={11} />Done</> : <><Pencil size={11} />Edit</>}
                             </button>
                             <button
-                              onClick={() => navigator.clipboard.writeText(editedResume)}
-                              className="btn-ghost text-xs px-3 py-1.5 rounded-lg"
+                              onClick={() => {
+                                navigator.clipboard.writeText(editedResume);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 1500);
+                              }}
+                              className="text-xs px-3 py-1.5 rounded-lg transition-all"
+                              style={copied
+                                ? { background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", color: "#22c55e" }
+                                : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#6B7A99" }
+                              }
                             >
-                              Copy
+                              {copied ? "✓ Copied!" : "Copy"}
                             </button>
                             <button onClick={handleDownloadDocx} className="btn-ghost text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">
                               <Download size={11} />
