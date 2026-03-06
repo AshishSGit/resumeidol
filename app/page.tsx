@@ -77,32 +77,35 @@ const PRICING = [
   {
     name: "Free",
     price: "0",
-    period: "forever",
-    desc: "For the curious job seeker",
+    period: "No credit card needed",
+    desc: "Try it before you commit",
     features: [
       "3 AI resume tailors / month",
       "ATS score before & after",
       "Keyword gap analysis",
       "DOCX + PDF download",
     ],
-    cta: "Start for Free",
+    cta: "Start Free",
     plan: "free",
     featured: false,
+    badge: null,
   },
   {
     name: "Pro",
     price: "18",
+    annualPrice: "12",
     period: "per month",
-    desc: "For the serious job seeker",
+    annualPeriod: "per month, billed $144/yr",
+    desc: "For the focused job seeker",
     features: [
       "30 AI resume tailors / month",
       "ATS score before & after",
       "Keyword gap analysis",
-      "DOCX + PDF download",
       "Word-level diff comparison",
+      "DOCX + PDF download",
       "Cancel anytime",
     ],
-    cta: "Start Pro — $18/mo",
+    cta: "Start Pro",
     plan: "pro",
     featured: true,
     badge: "Most Popular",
@@ -110,16 +113,16 @@ const PRICING = [
   {
     name: "Lifetime",
     price: "249",
-    period: "one-time",
-    desc: "Pay once, own forever",
+    period: "one-time payment",
+    desc: "The last resume tool you'll ever buy",
     features: [
-      "Everything in Pro",
       "Unlimited tailoring — forever",
+      "Everything in Pro",
       "All future features included",
       "No renewals, no expiry",
       "Priority support",
     ],
-    cta: "Get Lifetime — $249",
+    cta: "Get Lifetime Access",
     plan: "lifetime",
     featured: false,
     badge: "Best Value",
@@ -392,7 +395,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
           transition: "max-height 0.35s ease",
         }}
       >
-        <p className="text-[#6B7A99] text-sm leading-relaxed pt-3">{a}</p>
+        <p className="text-[#8A9AB8] text-[0.92rem] leading-relaxed pt-3">{a}</p>
       </div>
     </div>
   );
@@ -558,7 +561,7 @@ export default function LandingPage() {
 
           {/* Sub */}
           <p
-            className="text-[#6B7A99] text-lg max-w-2xl mx-auto mb-10 leading-relaxed"
+            className="text-[#8A9AB8] text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
             style={{ animation: "fadeUp 0.6s 0.2s ease-out both" }}
           >
             ResumeIdol searches 500+ job boards, scores every listing against your profile, and tailors your resume with AI — so you apply to fewer jobs and land more interviews.
@@ -626,7 +629,7 @@ export default function LandingPage() {
             The unfair advantage<br />
             <span className="text-gold-gradient">every job seeker deserves</span>
           </h2>
-          <p className="text-[#6B7A99] text-lg max-w-xl mx-auto">
+          <p className="text-[#8A9AB8] text-lg max-w-xl mx-auto">
             One platform covers your entire job search — from finding the right roles to walking into the interview prepared.
           </p>
         </div>
@@ -643,7 +646,7 @@ export default function LandingPage() {
                   <Icon size={20} style={{ color: f.color }} />
                 </div>
                 <h3 className="text-[#F0F2F7] font-semibold mb-2 text-[1.05rem]">{f.title}</h3>
-                <p className="text-[#6B7A99] text-sm leading-relaxed">{f.desc}</p>
+                <p className="text-[#8A9AB8] text-[0.9rem] leading-relaxed">{f.desc}</p>
               </div>
             );
           })}
@@ -705,95 +708,173 @@ export default function LandingPage() {
 
       {/* ── PRICING ── */}
       <section id="pricing" className="py-28 max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16 fade-section">
-          <div className="badge-gold mb-4">
+        <div className="text-center mb-14 fade-section">
+          <div className="badge-gold mb-5">
             <Zap size={11} />
             <span>Simple, honest pricing</span>
           </div>
           <h2 className="heading-lg text-[#F0F2F7] mb-4">
-            Stop paying $50/month<br />
-            <span className="text-gold-gradient">for a tool that doesn&apos;t work</span>
+            Competitors charge $49/month.<br />
+            <span className="text-gold-gradient">We don&apos;t.</span>
           </h2>
-          <p className="text-[#6B7A99] text-lg">Start free. Upgrade when you&apos;re ready. Cancel anytime.</p>
+          <p className="text-[#8A9AB8] text-lg">Start free. Upgrade when you land the interview.</p>
         </div>
 
         {/* Annual / Monthly toggle */}
-        <div className="flex items-center justify-center gap-4 mb-12 fade-section">
-          <span className={`text-sm font-medium transition-colors ${!annual ? "text-[#F0F2F7]" : "text-[#6B7A99]"}`}>Monthly</span>
+        <div className="flex items-center justify-center gap-4 mb-14 fade-section">
+          <span className={`text-base font-medium transition-colors ${!annual ? "text-[#F0F2F7]" : "text-[#6B7A99]"}`}>Monthly</span>
           <button
             onClick={() => setAnnual(!annual)}
             aria-label="Toggle annual billing"
-            className={`relative w-11 h-6 rounded-full transition-all duration-300 toggle-track ${annual ? "active" : ""}`}
+            className={`relative w-12 h-6 rounded-full transition-all duration-300 toggle-track ${annual ? "active" : ""}`}
           >
             <span
               className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"
               style={{ left: annual ? "calc(100% - 20px)" : "4px" }}
             />
           </button>
-          <span className={`text-sm font-medium flex items-center gap-2 transition-colors ${annual ? "text-[#F0F2F7]" : "text-[#6B7A99]"}`}>
+          <span className={`text-base font-medium flex items-center gap-2.5 transition-colors ${annual ? "text-[#F0F2F7]" : "text-[#6B7A99]"}`}>
             Annual
             <span
-              className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
-              style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#22c55e" }}
+              className="text-xs px-2 py-0.5 rounded-full font-semibold"
+              style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.25)", color: "#22c55e" }}
             >
-              Save 28%
+              Save $72 / year
             </span>
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {PRICING.map((plan, i) => (
-            <div
-              key={plan.name}
-              className={`pricing-card p-8 fade-section ${plan.featured ? "featured" : ""}`}
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              {plan.badge && (
-                <div className={`${plan.featured ? "badge-gold" : "badge-green"} text-xs mb-5 w-fit`}>
-                  {plan.badge}
-                </div>
-              )}
-              <h3 className="text-[#F0F2F7] font-semibold text-lg mb-1">{plan.name}</h3>
-              <p className="text-[#6B7A99] text-sm mb-6">{plan.desc}</p>
-              <div className="flex items-end gap-1 mb-2">
-                <span className="text-[#6B7A99] text-lg">$</span>
-                <span
-                  className={`text-5xl font-bold ${plan.featured ? "text-gold-gradient" : "text-[#F0F2F7]"}`}
-                  style={{ fontFamily: "Playfair Display, serif" }}
-                >
-                  {plan.featured && annual ? "13" : plan.price}
-                </span>
-              </div>
-              <p className="text-[#6B7A99] text-sm mb-8">
-                {plan.featured && annual ? "per month, billed $156/yr" : plan.period}
-              </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+          {PRICING.map((plan, i) => {
+            const isLifetime = plan.plan === "lifetime";
+            const isPro = plan.featured;
+            const displayPrice = isPro && annual ? plan.annualPrice! : plan.price;
+            const displayPeriod = isPro && annual ? plan.annualPeriod! : plan.period;
+            const checkoutPlan = isPro && annual ? "pro_annual" : plan.plan;
 
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-sm text-[#9CA3AF]">
-                    <CheckCircle size={15} className="text-[#C9A84C] shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={() => handleCheckout(plan.featured && annual ? "pro_annual" : plan.plan)}
-                disabled={checkoutLoading !== null}
-                className={`w-full text-center py-3 rounded-xl font-semibold text-sm transition-all ${plan.featured ? "btn-gold" : "btn-ghost"} disabled:opacity-60`}
+            return (
+              <div
+                key={plan.name}
+                className={`relative flex flex-col fade-section ${isPro ? "md:-mt-4 md:mb-4" : ""}`}
+                style={{ animationDelay: `${i * 0.1}s` }}
               >
-                {checkoutLoading === plan.plan
-                  ? "Redirecting…"
-                  : plan.featured && annual
-                  ? "Start Pro — $13/mo"
-                  : plan.cta}
-              </button>
-            </div>
-          ))}
+                {/* Floating badge above card */}
+                {plan.badge && (
+                  <div className={`absolute -top-4 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap text-xs font-semibold px-3 py-1 rounded-full ${
+                    isPro ? "badge-gold" : isLifetime ? "" : ""
+                  }`}
+                  style={isLifetime ? {
+                    background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.35)", color: "#a5b4fc"
+                  } : {}}>
+                    {plan.badge}
+                  </div>
+                )}
+
+                <div
+                  className="flex flex-col flex-1 rounded-2xl p-8 relative overflow-hidden"
+                  style={isPro ? {
+                    background: "linear-gradient(160deg, #181F33 0%, #0F1420 100%)",
+                    border: "1px solid rgba(201,168,76,0.35)",
+                    boxShadow: "0 0 80px rgba(201,168,76,0.12), 0 0 0 1px rgba(201,168,76,0.1)",
+                  } : isLifetime ? {
+                    background: "linear-gradient(160deg, #10131F 0%, #0B0E1A 100%)",
+                    border: "1px solid rgba(99,102,241,0.25)",
+                    boxShadow: "0 0 60px rgba(99,102,241,0.06)",
+                  } : {
+                    background: "#0F1420",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                  }}
+                >
+                  {/* Top accent line */}
+                  <div className="absolute top-0 left-12 right-12 h-px" style={{
+                    background: isPro
+                      ? "linear-gradient(90deg, transparent, rgba(201,168,76,0.6), transparent)"
+                      : isLifetime
+                      ? "linear-gradient(90deg, transparent, rgba(99,102,241,0.4), transparent)"
+                      : "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
+                  }} />
+
+                  {/* Plan name + desc */}
+                  <h3
+                    className="text-xl font-bold mb-1 mt-1"
+                    style={{ color: isPro ? "#DEC27A" : isLifetime ? "#a5b4fc" : "#F0F2F7", fontFamily: "Playfair Display, serif" }}
+                  >
+                    {plan.name}
+                  </h3>
+                  <p className="text-[#6B7A99] text-sm mb-6">{plan.desc}</p>
+
+                  {/* Price */}
+                  <div className="mb-1">
+                    <div className="flex items-start gap-1">
+                      {plan.plan !== "free" && (
+                        <span className="text-[#6B7A99] text-xl font-medium mt-3">$</span>
+                      )}
+                      <span
+                        className={`font-bold leading-none ${isPro ? "text-gold-gradient" : isLifetime ? "" : "text-[#F0F2F7]"}`}
+                        style={{
+                          fontFamily: "Playfair Display, serif",
+                          fontSize: plan.plan === "free" ? "3.5rem" : "4.5rem",
+                          color: isLifetime ? "#a5b4fc" : undefined,
+                        }}
+                      >
+                        {displayPrice === "0" ? "Free" : displayPrice}
+                      </span>
+                    </div>
+
+                    {/* Annual savings callout */}
+                    {isPro && annual && (
+                      <div className="flex items-center gap-2 mt-2 mb-1">
+                        <span className="text-[#4B5563] text-sm line-through">${plan.price}/mo</span>
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#22c55e" }}>
+                          You save $72/yr
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="text-[#6B7A99] text-sm mb-2">{displayPeriod}</p>
+
+                  {/* Lifetime ROI callout */}
+                  {isLifetime && (
+                    <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl mb-4" style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}>
+                      <TrendingUp size={13} className="shrink-0 mt-0.5" style={{ color: "#818cf8" }} />
+                      <p className="text-[0.78rem] leading-snug" style={{ color: "#a5b4fc" }}>
+                        Pro costs <strong>$216/yr</strong> monthly. Buy once at $249 — pays for itself in 14 months, then free forever.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Features */}
+                  <ul className="space-y-3 mb-8 flex-1">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-center gap-3 text-[0.88rem] text-[#9CA3AF]">
+                        <CheckCircle size={15} className="shrink-0" style={{ color: isPro ? "#C9A84C" : isLifetime ? "#818cf8" : "#6B7A99" }} />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA */}
+                  <button
+                    onClick={() => handleCheckout(checkoutPlan)}
+                    disabled={checkoutLoading !== null}
+                    className={`w-full text-center py-3.5 rounded-xl font-semibold text-base transition-all disabled:opacity-60 ${isPro ? "btn-gold" : "btn-ghost"}`}
+                    style={isLifetime ? {
+                      background: "rgba(99,102,241,0.15)",
+                      border: "1px solid rgba(99,102,241,0.35)",
+                      color: "#a5b4fc",
+                    } : {}}
+                  >
+                    {checkoutLoading === plan.plan ? "Redirecting…" : plan.cta}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        <p className="text-center text-[#6B7A99] text-sm mt-8 fade-section">
-          All plans include a 14-day money-back guarantee. No questions asked.
+        <p className="text-center text-[#6B7A99] text-sm mt-10 fade-section">
+          14-day money-back guarantee on all paid plans. No questions asked.
         </p>
       </section>
 
@@ -831,7 +912,7 @@ export default function LandingPage() {
               Stop spraying.<br />
               <span className="text-gold-gradient">Start landing.</span>
             </h2>
-            <p className="text-[#6B7A99] mb-8 text-lg max-w-md mx-auto">
+            <p className="text-[#8A9AB8] mb-8 text-lg max-w-md mx-auto">
               Tailor your resume for free. Upgrade to Pro when you&apos;re ready to go all in.
             </p>
 
