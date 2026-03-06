@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 import {
   Crown, Search, FileText, BarChart2, Briefcase,
   ArrowRight, CheckCircle, Star, Zap, Shield, TrendingUp,
-  ChevronDown, Menu, X
+  ChevronDown, Menu, X, AlertCircle
 } from "lucide-react";
 
 const STATS = [
@@ -26,7 +26,7 @@ const FEATURES = [
   {
     icon: FileText,
     title: "AI Resume Tailor",
-    desc: "Claude AI rewrites your resume for each job. Beats ATS while staying readable to humans.",
+    desc: "AI rewrites your resume for each specific job. Beats ATS filters while staying authentic and readable to humans.",
     color: "#C9A84C",
   },
   {
@@ -133,7 +133,7 @@ const FAQS = [
   },
   {
     q: "Does the AI-tailored resume still sound like me?",
-    a: "Yes. Claude AI doesn't replace your content — it repositions and refines it. Your voice, your experience, your achievements. Just framed for the exact role you're applying to.",
+    a: "Yes. Our AI doesn't replace your content — it repositions and refines it. Your voice, your experience, your achievements. Just framed for the exact role you're applying to.",
   },
   {
     q: "What job boards does ResumeIdol pull from?",
@@ -153,8 +153,8 @@ function KeywordMarquee() {
   const row2 = [...MARQUEE_ROW_2, ...MARQUEE_ROW_2];
   return (
     <div className="mt-16 fade-section" style={{ animationDelay: "0.5s" }}>
-      <p className="text-center text-[#374151] text-[11px] uppercase tracking-widest mb-5 font-medium">
-        Keywords Claude weaves into your resume
+      <p className="text-center text-[#4B5563] text-[11px] uppercase tracking-widest mb-5 font-medium">
+        Keywords woven into your resume
       </p>
       <div className="space-y-2.5 overflow-hidden marquee-fade">
         <div className="marquee-track gap-2.5">
@@ -176,55 +176,148 @@ function KeywordMarquee() {
   );
 }
 
-function ResultShowcase() {
+const PREVIEW_TABS = [
+  { id: "resume",   label: "Tailored Resume" },
+  { id: "compare",  label: "Compare" },
+  { id: "keywords", label: "Keywords" },
+  { id: "gaps",     label: "Gaps" },
+] as const;
+type PreviewTab = typeof PREVIEW_TABS[number]["id"];
+
+function OutputPreview() {
+  const [tab, setTab] = useState<PreviewTab>("resume");
+
   return (
-    <div className="pb-28 max-w-2xl mx-auto px-6 fade-section">
-      <div
-        className="rounded-3xl p-8 sm:p-10 relative overflow-hidden"
-        style={{
-          background: "linear-gradient(145deg, #111827 0%, #0C101A 100%)",
-          border: "1px solid rgba(201,168,76,0.15)",
-          boxShadow: "0 40px 100px rgba(0,0,0,0.5), 0 0 80px rgba(201,168,76,0.06)",
-        }}
-      >
-        <div className="absolute top-0 left-1/4 right-1/4 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.45), transparent)" }} />
+    <section className="pb-28 max-w-3xl mx-auto px-6 fade-section">
+      <div className="text-center mb-12">
+        <div className="badge-gold mb-4 mx-auto w-fit"><Zap size={10} /><span>Live output preview</span></div>
+        <h2 className="heading-lg text-[#F0F2F7] mb-3">See exactly what you get</h2>
+        <p className="text-[#8A9AB8] text-base max-w-lg mx-auto">Every tailor produces four powerful outputs — not just a rewritten resume.</p>
+      </div>
 
-        <div className="flex flex-wrap items-center gap-3 mb-8">
-          <div className="badge-gold">
-            <Zap size={10} />
-            <span>Tailored in 14 seconds</span>
-          </div>
-          <span className="text-[#F0F2F7] font-semibold text-sm">Senior Product Designer · Stripe</span>
-        </div>
+      <div className="rounded-3xl overflow-hidden" style={{ background: "linear-gradient(145deg, #111827 0%, #0C101A 100%)", border: "1px solid rgba(201,168,76,0.15)", boxShadow: "0 40px 100px rgba(0,0,0,0.5), 0 0 80px rgba(201,168,76,0.06)" }}>
+        <div className="h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.45), transparent)" }} />
 
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[#6B7A99] text-xs font-medium uppercase tracking-widest">ATS Match Score</span>
-            <span className="text-[#22c55e] text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)" }}>
-              +34 points
-            </span>
+        {/* Card header */}
+        <div className="px-6 pt-5 pb-4 flex flex-wrap items-center justify-between gap-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+          <div className="flex items-center gap-3">
+            <div className="badge-gold"><Zap size={10} /><span>Tailored in 14s</span></div>
+            <span className="text-[#C4CEDF] font-semibold text-sm">Senior Product Designer · Stripe</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-[#4B5563] text-2xl font-bold line-through" style={{ fontFamily: "Playfair Display, serif" }}>54%</span>
-            <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-              <div className="h-full rounded-full fill-bar" style={{ background: "linear-gradient(90deg, #C9A84C, #E8D5A3)", boxShadow: "0 0 16px rgba(201,168,76,0.35)" }} />
-            </div>
-            <span className="text-[#C9A84C] text-2xl font-bold" style={{ fontFamily: "Playfair Display, serif" }}>88%</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[#6B7A99] text-xs">ATS</span>
+            <span className="text-[#4B5563] text-sm font-bold line-through">54%</span>
+            <span className="text-[#22c55e] text-sm font-bold">→ 88%</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#22c55e" }}>+34 pts</span>
           </div>
         </div>
 
-        <div>
-          <p className="text-[#374151] text-[11px] uppercase tracking-widest mb-3 font-medium">14 keywords woven in</p>
-          <div className="flex flex-wrap gap-2">
-            {["user research", "design systems", "A/B testing", "cross-functional", "stakeholder alignment", "information architecture", "user journey mapping", "design tokens"].map((k) => (
-              <span key={k} className="text-xs px-2.5 py-1 rounded-full" style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}>
-                + {k}
-              </span>
+        {/* Tabs */}
+        <div className="px-5 pt-4">
+          <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.05)" }}>
+            {PREVIEW_TABS.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className="flex-1 py-2 text-xs font-medium rounded-lg transition-all"
+                style={{
+                  background: tab === t.id ? "rgba(201,168,76,0.14)" : "transparent",
+                  color: tab === t.id ? "#DEC27A" : "#6B7A99",
+                  border: tab === t.id ? "1px solid rgba(201,168,76,0.28)" : "1px solid transparent",
+                }}
+              >
+                {t.label}
+              </button>
             ))}
           </div>
         </div>
+
+        {/* Tab content */}
+        <div className="p-5">
+          {tab === "resume" && (
+            <div className="rounded-xl p-4 text-[0.72rem] leading-loose overflow-hidden" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", color: "#B0BBC8", fontFamily: "JetBrains Mono, monospace", maxHeight: "260px" }}>
+              <p className="text-[#DEC27A] font-semibold text-[0.7rem] tracking-widest mb-2.5">PROFESSIONAL SUMMARY</p>
+              <p className="mb-4">Results-driven Product Designer with 7+ years leading end-to-end design for high-growth SaaS products. Deep expertise in <span style={{ color: "#4ade80" }}>design systems</span>, <span style={{ color: "#4ade80" }}>user journey mapping</span>, and <span style={{ color: "#4ade80" }}>stakeholder alignment</span> across cross-functional teams.</p>
+              <p className="text-[#DEC27A] font-semibold text-[0.7rem] tracking-widest mb-2.5">EXPERIENCE</p>
+              <p className="text-[#C9A84C] mb-1.5">Senior Product Designer — Figma · 2021–Present</p>
+              <p className="mb-1">• Led <span style={{ color: "#4ade80" }}>design systems</span> overhaul reducing inconsistencies by 40% across 8 product squads</p>
+              <p className="mb-1">• Established <span style={{ color: "#4ade80" }}>A/B testing</span> framework improving feature adoption by 23%</p>
+              <p className="mb-1">• Drove <span style={{ color: "#4ade80" }}>stakeholder alignment</span> workshops for 3 flagship product launches</p>
+              <p className="mt-3 text-[#445568]">↓ continues for 2 more roles...</p>
+            </div>
+          )}
+
+          {tab === "compare" && (
+            <div>
+              <p className="text-[#6B7A99] text-xs mb-3">Word-level diff — red is removed, green is added</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[#6B7A99] text-[10px] uppercase tracking-wider mb-2 font-medium">Original</p>
+                  <div className="rounded-xl p-3 text-[0.7rem] leading-relaxed" style={{ background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.12)", color: "#9CA3AF", fontFamily: "JetBrains Mono, monospace" }}>
+                    <span>Designed user interfaces for </span>
+                    <span style={{ background: "rgba(239,68,68,0.3)", color: "#f87171", textDecoration: "line-through", borderRadius: "2px", padding: "0 2px" }}>web applications</span>
+                    <span> and worked with </span>
+                    <span style={{ background: "rgba(239,68,68,0.3)", color: "#f87171", textDecoration: "line-through", borderRadius: "2px", padding: "0 2px" }}>teams</span>
+                    <span> on new features.</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[#6B7A99] text-[10px] uppercase tracking-wider mb-2 font-medium">Tailored</p>
+                  <div className="rounded-xl p-3 text-[0.7rem] leading-relaxed" style={{ background: "rgba(34,197,94,0.04)", border: "1px solid rgba(34,197,94,0.15)", color: "#9CA3AF", fontFamily: "JetBrains Mono, monospace" }}>
+                    <span>Led </span>
+                    <span style={{ background: "rgba(34,197,94,0.22)", color: "#4ade80", borderRadius: "2px", padding: "0 2px" }}>design systems</span>
+                    <span> and </span>
+                    <span style={{ background: "rgba(34,197,94,0.22)", color: "#4ade80", borderRadius: "2px", padding: "0 2px" }}>user journey mapping</span>
+                    <span> for </span>
+                    <span style={{ background: "rgba(34,197,94,0.22)", color: "#4ade80", borderRadius: "2px", padding: "0 2px" }}>cross-functional</span>
+                    <span> teams, driving </span>
+                    <span style={{ background: "rgba(34,197,94,0.22)", color: "#4ade80", borderRadius: "2px", padding: "0 2px" }}>stakeholder alignment</span>
+                    <span>.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === "keywords" && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[#8A9AB8] text-xs">Woven in naturally — not a keyword dump</p>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#22c55e" }}>14 added</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {["design systems", "user journey mapping", "A/B testing", "cross-functional", "stakeholder alignment", "information architecture", "design tokens", "accessibility standards", "product roadmap", "sprint planning", "metrics & KPIs", "user research", "agile methodology", "data-driven decisions"].map((k) => (
+                  <span key={k} className="text-xs px-2.5 py-1 rounded-full flex items-center gap-1" style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}>
+                    <span style={{ fontSize: "0.6rem" }}>+</span> {k}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {tab === "gaps" && (
+            <div>
+              <p className="text-[#8A9AB8] text-xs mb-4">Honest gaps identified — so you know what to address before applying or in the interview</p>
+              <div className="space-y-3">
+                {[
+                  { skill: "Figma Advanced Prototyping", note: "Job requires deep prototyping experience — only mentioned briefly on your resume" },
+                  { skill: "SQL / data querying", note: "Stripe emphasizes data-driven design — no SQL experience visible on resume" },
+                  { skill: "B2B enterprise experience", note: "Stripe is enterprise B2B — your resume focuses on consumer product design" },
+                ].map((gap, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.15)" }}>
+                    <AlertCircle size={14} className="shrink-0 mt-0.5" style={{ color: "#f59e0b" }} />
+                    <div>
+                      <p className="text-[#DEC27A] text-xs font-semibold mb-0.5">{gap.skill}</p>
+                      <p className="text-[#8A9AB8] text-xs">{gap.note}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -487,9 +580,18 @@ export default function LandingPage() {
           </div>
 
           {/* Trust */}
-          <div className="flex items-center justify-center gap-2 text-sm" style={{ animation: "fadeUp 0.6s 0.4s ease-out both" }}>
-            <span className="text-[#6B7A99]">Used by candidates targeting</span>
-            <span className="font-semibold" style={{ color: "#DEC27A" }}>Google · Meta · Stripe · Amazon · Apple</span>
+          <div className="flex items-center justify-center gap-3 text-sm" style={{ animation: "fadeUp 0.6s 0.4s ease-out both" }}>
+            {[
+              { icon: "✦", label: "3 free tailors" },
+              { icon: "✦", label: "DOCX + PDF export" },
+              { icon: "✦", label: "No credit card" },
+            ].map(({ icon, label }, i) => (
+              <span key={i} className="flex items-center gap-1.5">
+                {i > 0 && <span className="text-[#2A3040]">·</span>}
+                <span style={{ color: "#C9A84C", fontSize: "0.55rem" }}>{icon}</span>
+                <span className="text-[#6B7A99]">{label}</span>
+              </span>
+            ))}
           </div>
 
           {/* Keyword marquee */}
@@ -497,8 +599,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── RESULT SHOWCASE ── */}
-      <ResultShowcase />
+      {/* ── OUTPUT PREVIEW ── */}
+      <OutputPreview />
 
       {/* ── STATS ── */}
       <section className="py-20 relative">
@@ -662,7 +764,7 @@ export default function LandingPage() {
                   {plan.featured && annual ? "13" : plan.price}
                 </span>
               </div>
-              <p className="text-[#374151] text-sm mb-8">
+              <p className="text-[#6B7A99] text-sm mb-8">
                 {plan.featured && annual ? "per month, billed $156/yr" : plan.period}
               </p>
 
@@ -690,7 +792,7 @@ export default function LandingPage() {
           ))}
         </div>
 
-        <p className="text-center text-[#374151] text-sm mt-8 fade-section">
+        <p className="text-center text-[#6B7A99] text-sm mt-8 fade-section">
           All plans include a 14-day money-back guarantee. No questions asked.
         </p>
       </section>
@@ -744,7 +846,7 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <p className="text-[#374151] text-xs mt-6">3 free tailors per month. No card required.</p>
+            <p className="text-[#6B7A99] text-xs mt-6">3 free tailors per month. No card required.</p>
           </div>
         </div>
       </section>
@@ -766,13 +868,13 @@ export default function LandingPage() {
               { label: "Terms", href: "/terms" },
               { label: "Contact", href: "mailto:hello@resumeidol.com" },
             ].map((item) => (
-              <a key={item.label} href={item.href} className="text-[#374151] text-sm hover:text-[#6B7A99] transition-colors">
+              <a key={item.label} href={item.href} className="text-[#6B7A99] text-sm hover:text-[#9CA3AF] transition-colors">
                 {item.label}
               </a>
             ))}
           </div>
           <div className="flex flex-col items-center md:items-end gap-1">
-            <p className="text-[#374151] text-sm">
+            <p className="text-[#4B5563] text-sm">
               © 2026 ResumeIdol. All rights reserved.
             </p>
             <a

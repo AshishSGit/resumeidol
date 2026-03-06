@@ -457,7 +457,7 @@ function TailorInner() {
             <span className="shimmer-text">Beat ATS. Win interviews.</span>
           </h1>
           <p className="text-[#6B7A99] mt-4 max-w-xl text-[0.95rem] leading-relaxed">
-            Paste the job description, upload your resume, and let Claude rewrite it to maximise your match score — without losing your authentic voice.
+            Paste the job description, upload your resume, and let AI rewrite it to maximise your match score — without losing your authentic voice.
           </p>
         </div>
 
@@ -578,7 +578,7 @@ function TailorInner() {
                     style={{ fontFamily: "Inter, sans-serif" }}
                   />
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-xs text-[#374151]">{jobDescription.length} chars</span>
+                    <span className="text-xs text-[#4B5563]">{jobDescription.length} chars</span>
                     {applyUrl && (
                       <a href={applyUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[#6B7A99] hover:text-[#C9A84C] transition-colors flex items-center gap-1">
                         View original posting <ChevronRight size={11} />
@@ -685,7 +685,7 @@ function TailorInner() {
                   rows={10}
                   className="input-luxury w-full px-3.5 py-2.5 text-sm resize-none font-mono text-xs"
                 />
-                <span className="text-xs text-[#374151]">{resumeText.split(/\s+/).filter(Boolean).length} words</span>
+                <span className="text-xs text-[#4B5563]">{resumeText.split(/\s+/).filter(Boolean).length} words</span>
               </div>
             </div>
 

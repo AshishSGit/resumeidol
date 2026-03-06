@@ -169,7 +169,7 @@ body {
   background: rgba(201,168,76,0.04);
   box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
 }
-.input-luxury::placeholder { color: #374151; }
+.input-luxury::placeholder { color: #445568; }
 
 /* === Cards === */
 .card {
