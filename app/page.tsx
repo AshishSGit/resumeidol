@@ -492,26 +492,7 @@ export default function LandingPage() {
   const [companyIdx, setCompanyIdx] = useState(0);
   const [companyFading, setCompanyFading] = useState(false);
 
-  // Countdown to founder pricing end (Apr 7 2026)
-  const FOUNDER_END = new Date("2026-04-07T23:59:59Z");
-  const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
   const [liveCount, setLiveCount] = useState(2847);
-
-  useEffect(() => {
-    const tick = () => {
-      const diff = FOUNDER_END.getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft({ d: 0, h: 0, m: 0, s: 0 }); return; }
-      setTimeLeft({
-        d: Math.floor(diff / 86400000),
-        h: Math.floor((diff % 86400000) / 3600000),
-        m: Math.floor((diff % 3600000) / 60000),
-        s: Math.floor((diff % 60000) / 1000),
-      });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -883,17 +864,13 @@ export default function LandingPage() {
             <span>Simple, honest pricing</span>
           </div>
           <h2 className="heading-lg text-[#F0F2F7] mb-4">
-            Competitors charge $49/month.<br />
-            <span className="text-gold-gradient">We don&apos;t.</span>
+            Premium AI tools.<br />
+            <span className="text-gold-gradient">Without the premium price.</span>
           </h2>
-          <p className="text-[#8A9AB8] text-lg mb-5">Start free. Upgrade when you land the interview.</p>
-          <div className="flex flex-wrap items-center justify-center gap-5 text-sm">
-            <span className="text-[#4B5563] line-through">Teal, Rezi, Kickresume: $49–$79/mo</span>
-            <span className="text-[#2A3040]">·</span>
-            <span className="flex items-center gap-1.5" style={{ color: "#22c55e" }}>
-              <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: "#22c55e" }} />
-              {liveCount.toLocaleString()} resumes tailored this week
-            </span>
+          <p className="text-[#8A9AB8] text-lg mb-5">Start free. Upgrade when you&apos;re ready.</p>
+          <div className="flex items-center justify-center gap-1.5 text-sm" style={{ color: "#22c55e" }}>
+            <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: "#22c55e" }} />
+            {liveCount.toLocaleString()} resumes tailored this week
           </div>
         </div>
 
@@ -1037,44 +1014,13 @@ export default function LandingPage() {
 
                   <p className="text-[#6B7A99] text-sm mb-2">{displayPeriod}</p>
 
-                  {/* Lifetime ROI callout */}
+                  {/* Lifetime value callout */}
                   {isLifetime && (
-                    <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl mb-3" style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}>
+                    <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl mb-4" style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}>
                       <TrendingUp size={13} className="shrink-0 mt-0.5" style={{ color: "#818cf8" }} />
                       <p className="text-[0.78rem] leading-snug" style={{ color: "#a5b4fc" }}>
-                        Pro costs <strong>$216/yr</strong> monthly. Buy once at $249 — pays for itself in 14 months, then free forever.
+                        Pay once. Use it every job search, for every role, for the rest of your career — no renewals, no surprises.
                       </p>
-                    </div>
-                  )}
-
-                  {/* Lifetime: countdown timer */}
-                  {isLifetime && (
-                    <div className="rounded-xl p-3.5 mb-3 text-center" style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.2)" }}>
-                      <p className="text-[0.65rem] uppercase tracking-widest mb-2" style={{ color: "#6B7A99" }}>Founder price ends in</p>
-                      <div className="flex items-center justify-center gap-3">
-                        {[{ v: timeLeft.d, l: "days" }, { v: timeLeft.h, l: "hrs" }, { v: timeLeft.m, l: "min" }, { v: timeLeft.s, l: "sec" }].map(({ v, l }) => (
-                          <div key={l} className="flex flex-col items-center">
-                            <span className="font-bold text-lg leading-none tabular-nums" style={{ color: "#a5b4fc", fontFamily: "Playfair Display, serif" }}>
-                              {String(v).padStart(2, "0")}
-                            </span>
-                            <span className="text-[0.6rem] mt-0.5" style={{ color: "#4B5563" }}>{l}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <p className="text-[0.65rem] mt-2" style={{ color: "#4B5563" }}>Price increases to $349 after this</p>
-                    </div>
-                  )}
-
-                  {/* Lifetime: founding slots */}
-                  {isLifetime && (
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span style={{ color: "#6B7A99" }}>Founding member slots</span>
-                        <span className="font-semibold" style={{ color: "#a5b4fc" }}>87 / 150 claimed</span>
-                      </div>
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(99,102,241,0.1)" }}>
-                        <div className="h-full rounded-full" style={{ width: "58%", background: "linear-gradient(90deg, #818cf8, #a5b4fc)" }} />
-                      </div>
                     </div>
                   )}
 
