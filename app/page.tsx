@@ -59,7 +59,7 @@ const HOW_IT_WORKS = [
   {
     step: "01",
     title: "Upload Your Resume",
-    desc: "Drop your PDF or Word file. Our AI instantly parses your experience, skills, and achievements — building your Career Profile.",
+    desc: "Drop your PDF or Word file. Instantly parses your experience, skills, and achievements — building your Career Profile.",
   },
   {
     step: "02",
@@ -69,7 +69,7 @@ const HOW_IT_WORKS = [
   {
     step: "03",
     title: "Apply with Precision",
-    desc: "Click any job. AI tailors your resume specifically for that role in seconds. Download and apply. Track everything in one place.",
+    desc: "Click any job. ResumeIdol tailors your resume specifically for that role in seconds. Download and apply. Track everything in one place.",
   },
 ];
 

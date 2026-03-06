@@ -75,7 +75,7 @@ export default function SearchPage() {
   const [jobType, setJobType] = useState("Any Type");
   const [datePosted, setDatePosted] = useState("Past week");
   const [source, setSource] = useState("All");
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -311,12 +311,6 @@ export default function SearchPage() {
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: remote ? "#22c55e" : "#4B5563" }} />
                 Remote only
               </button>
-              <div className="hidden sm:flex items-center gap-2 flex-wrap">
-                <FilterSelect value={seniority} onChange={setSeniority} options={SENIORITY} active={seniority !== "Any Level"} />
-                <FilterSelect value={jobType} onChange={setJobType} options={JOB_TYPES} active={jobType !== "Any Type"} />
-                <FilterSelect value={datePosted} onChange={setDatePosted} options={DATE_POSTED} active={datePosted !== "Any time"} />
-                <FilterSelect value={source} onChange={setSource} options={SOURCES} active={source !== "All"} />
-              </div>
               <button type="button" onClick={() => setShowFilters(!showFilters)} className="btn-ghost flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-lg ml-auto shrink-0">
                 <SlidersHorizontal size={13} />
                 {activeFilterCount > 0 && <span className="w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center" style={{ background: "#C9A84C", color: "#07090F" }}>{activeFilterCount}</span>}
@@ -324,7 +318,7 @@ export default function SearchPage() {
               </button>
             </div>
             {showFilters && (
-              <div className="sm:hidden flex flex-wrap gap-2 pt-2">
+              <div className="flex flex-wrap gap-2 pt-2">
                 <FilterSelect value={seniority} onChange={setSeniority} options={SENIORITY} active={seniority !== "Any Level"} />
                 <FilterSelect value={jobType} onChange={setJobType} options={JOB_TYPES} active={jobType !== "Any Type"} />
                 <FilterSelect value={datePosted} onChange={setDatePosted} options={DATE_POSTED} active={datePosted !== "Any time"} />
