@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 import {
   Crown, Search, FileText, BarChart2, Briefcase,
   ArrowRight, CheckCircle, Star, Zap, Shield, TrendingUp,
-  ChevronDown, Menu, X, AlertCircle
+  ChevronDown, Menu, X, AlertCircle, ArrowLeftRight, Tag, Target
 } from "lucide-react";
 
 const STATS = [
@@ -202,19 +202,28 @@ function OutputPreview() {
           Most tools hand you a rewrite and call it done.<br className="hidden sm:block" />
           ResumeIdol gives you <strong className="text-[#C4CEDF] font-semibold">four outputs</strong> that put you in control of every application.
         </p>
-        {/* 4 output highlights */}
-        <div className="flex items-start justify-center flex-wrap gap-3">
-          {[
-            { emoji: "📄", label: "Tailored Resume", sub: "Fully rewritten, not tweaked" },
-            { emoji: "⚡", label: "Word-level Diff", sub: "See every change made" },
-            { emoji: "✅", label: "Keywords Added", sub: "Avg. 14 keywords per tailor" },
-            { emoji: "🎯", label: "Honest Gaps", sub: "Know before you apply" },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-              <span className="text-base leading-none">{item.emoji}</span>
+        {/* 4 output feature tiles */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8 max-w-2xl mx-auto">
+          {([
+            { icon: FileText,       label: "Tailored Resume", sub: "Fully rewritten for this role",      color: "#C9A84C" },
+            { icon: ArrowLeftRight, label: "Word Diff",        sub: "Every change, word by word",        color: "#6366f1" },
+            { icon: Tag,            label: "Keywords",         sub: "14 avg. woven in naturally",        color: "#22c55e" },
+            { icon: Target,         label: "Skill Gaps",       sub: "Know what to address first",        color: "#f59e0b" },
+          ] as const).map(({ icon: Icon, label, sub, color }) => (
+            <div
+              key={label}
+              className="flex flex-col items-start gap-3 p-4 rounded-2xl"
+              style={{ background: `${color}0D`, border: `1px solid ${color}22` }}
+            >
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                style={{ background: `${color}18`, border: `1px solid ${color}28` }}
+              >
+                <Icon size={14} strokeWidth={1.75} style={{ color }} />
+              </div>
               <div>
-                <div className="text-[#C4CEDF] text-xs font-semibold">{item.label}</div>
-                <div className="text-[#6B7A99] text-[0.7rem]">{item.sub}</div>
+                <p className="text-[#D4DBE8] text-xs font-semibold mb-0.5 leading-tight">{label}</p>
+                <p className="text-[#6B7A99] text-[0.68rem] leading-snug">{sub}</p>
               </div>
             </div>
           ))}
