@@ -40,8 +40,8 @@ function ScoreRing({ before, after }: { before: number; after: number }) {
   }, [before, after]);
 
   return (
-    <div className="flex items-center gap-6">
-      <div className="relative w-28 h-28 shrink-0">
+    <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-6">
+      <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
         <svg viewBox="0 0 100 100" className="w-full h-full" style={{ transform: "rotate(-90deg)" }}>
           <circle cx="50" cy="50" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="9" />
           <circle
@@ -465,7 +465,7 @@ function TailorInner() {
                 Job Details
               </h2>
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs text-[#6B7A99] mb-1.5 block">Job Title</label>
                     <input
@@ -677,17 +677,28 @@ function TailorInner() {
             )}
             {/* Usage indicator */}
             {!isPro && (
-              <p className="text-center text-xs text-[#6B7A99]">
+              <div className="text-center text-xs">
                 {tailorCount >= FREE_LIMIT ? (
-                  <span className="text-[#ef4444]">
-                    Free limit reached.{" "}
-                    <a href="/#pricing" className="text-[#C9A84C] hover:underline">Upgrade to Pro ($18/mo)</a>
-                    {" "}for 30 tailors, or Lifetime ($249) for unlimited.
-                  </span>
+                  <div className="p-3 rounded-xl" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                    <p className="text-[#f87171] font-medium mb-1">Free limit reached for this month</p>
+                    <p className="text-[#6B7A99]">
+                      <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Upgrade to Pro ($18/mo)</a>
+                      {" "}for 30 tailors, or{" "}
+                      <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Lifetime ($249)</a>
+                      {" "}for unlimited.
+                    </p>
+                  </div>
+                ) : tailorCount === FREE_LIMIT - 1 ? (
+                  <div className="p-3 rounded-xl" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                    <p className="text-[#DEC27A] font-medium mb-0.5">This is your last free tailor this month</p>
+                    <p className="text-[#6B7A99]">
+                      <a href="/#pricing" className="text-[#C9A84C] hover:underline">Upgrade to Pro</a> to keep going after this.
+                    </p>
+                  </div>
                 ) : (
-                  <span>{FREE_LIMIT - tailorCount} free tailor{FREE_LIMIT - tailorCount !== 1 ? "s" : ""} remaining this month</span>
+                  <p className="text-[#6B7A99]">{FREE_LIMIT - tailorCount} free tailor{FREE_LIMIT - tailorCount !== 1 ? "s" : ""} remaining this month</p>
                 )}
-              </p>
+              </div>
             )}
           </div>
 
@@ -834,7 +845,7 @@ function TailorInner() {
                           <span className="text-xs text-[#6B7A99]">
                             {editMode ? "Editing — changes save to your downloads" : "Copy, edit, or download your tailored resume"}
                           </span>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <button
                               onClick={() => setEditMode(!editMode)}
                               className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
@@ -891,7 +902,7 @@ function TailorInner() {
                             Tailored
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs font-medium" style={{ color: "#f87171" }}>Original</span>

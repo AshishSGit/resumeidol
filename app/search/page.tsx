@@ -328,12 +328,12 @@ export default function SearchPage() {
             </div>
 
             {/* Quick filters row */}
-            <div className="flex items-center flex-wrap gap-2">
+            <div className="flex items-center gap-2">
               {/* Remote toggle */}
               <button
                 type="button"
                 onClick={() => setRemote(!remote)}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all"
+                className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all shrink-0"
                 style={{
                   background: remote ? "rgba(34,197,94,0.1)" : "rgba(255,255,255,0.03)",
                   border: remote ? "1px solid rgba(34,197,94,0.25)" : "1px solid rgba(255,255,255,0.07)",
@@ -344,42 +344,18 @@ export default function SearchPage() {
                 Remote only
               </button>
 
-              {/* Seniority */}
-              <FilterSelect
-                value={seniority}
-                onChange={setSeniority}
-                options={SENIORITY}
-                active={seniority !== "Any Level"}
-              />
-
-              {/* Job type */}
-              <FilterSelect
-                value={jobType}
-                onChange={setJobType}
-                options={JOB_TYPES}
-                active={jobType !== "Any Type"}
-              />
-
-              {/* Date posted */}
-              <FilterSelect
-                value={datePosted}
-                onChange={setDatePosted}
-                options={DATE_POSTED}
-                active={datePosted !== "Any time"}
-              />
-
-              {/* Source filter */}
-              <FilterSelect
-                value={source}
-                onChange={setSource}
-                options={SOURCES}
-                active={source !== "All"}
-              />
+              {/* Desktop filter selects */}
+              <div className="hidden sm:flex items-center gap-2 flex-wrap">
+                <FilterSelect value={seniority} onChange={setSeniority} options={SENIORITY} active={seniority !== "Any Level"} />
+                <FilterSelect value={jobType} onChange={setJobType} options={JOB_TYPES} active={jobType !== "Any Type"} />
+                <FilterSelect value={datePosted} onChange={setDatePosted} options={DATE_POSTED} active={datePosted !== "Any time"} />
+                <FilterSelect value={source} onChange={setSource} options={SOURCES} active={source !== "All"} />
+              </div>
 
               <button
                 type="button"
                 onClick={() => setShowFilters(!showFilters)}
-                className="btn-ghost flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-lg ml-auto"
+                className="btn-ghost flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-lg ml-auto shrink-0"
               >
                 <SlidersHorizontal size={13} />
                 {activeFilterCount > 0 && (
@@ -393,6 +369,16 @@ export default function SearchPage() {
                 Filters
               </button>
             </div>
+
+            {/* Mobile filter panel */}
+            {showFilters && (
+              <div className="sm:hidden flex flex-wrap gap-2 pt-2">
+                <FilterSelect value={seniority} onChange={setSeniority} options={SENIORITY} active={seniority !== "Any Level"} />
+                <FilterSelect value={jobType} onChange={setJobType} options={JOB_TYPES} active={jobType !== "Any Type"} />
+                <FilterSelect value={datePosted} onChange={setDatePosted} options={DATE_POSTED} active={datePosted !== "Any time"} />
+                <FilterSelect value={source} onChange={setSource} options={SOURCES} active={source !== "All"} />
+              </div>
+            )}
           </form>
         </div>
 
