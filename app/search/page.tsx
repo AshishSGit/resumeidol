@@ -21,12 +21,12 @@ const DEFAULT_LOCATIONS = [
 ];
 
 // Simulated live activity feed shown before first search
-const LIVE_JOBS = [
-  { time: "just now",   title: "Senior Product Designer",     company: "Stripe",     location: "Remote",        salary: "$175k+" },
-  { time: "4 min ago",  title: "Staff Frontend Engineer",     company: "Linear",     location: "San Francisco", salary: "$195k+" },
-  { time: "11 min ago", title: "DevRel Lead",                 company: "Vercel",     location: "Remote",        salary: "$160k+" },
-  { time: "23 min ago", title: "Product Manager, Growth",     company: "Figma",      location: "New York",      salary: "$170k+" },
-  { time: "1 hr ago",   title: "AI Research Engineer",        company: "Anthropic",  location: "Remote",        salary: "$220k+" },
+const TRENDING_ROLES = [
+  { title: "Senior Product Designer",     company: "Stripe",     location: "Remote",        salary: "$175k+" },
+  { title: "Staff Frontend Engineer",     company: "Linear",     location: "San Francisco", salary: "$195k+" },
+  { title: "DevRel Lead",                 company: "Vercel",     location: "Remote",        salary: "$160k+" },
+  { title: "Product Manager, Growth",     company: "Figma",      location: "New York",      salary: "$170k+" },
+  { title: "AI Research Engineer",        company: "Anthropic",  location: "Remote",        salary: "$220k+" },
 ];
 
 const COMPANY_STYLE: Record<string, { bg: string; color: string }> = {
@@ -423,20 +423,13 @@ export default function SearchPage() {
 
               {/* Feed header */}
               <div className="flex items-center gap-3 mb-5 max-w-xl mx-auto">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex w-2 h-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22c55e] opacity-60" />
-                    <span className="relative inline-flex rounded-full w-2 h-2 bg-[#22c55e]" />
-                  </span>
-                  <span className="text-[#6B7A99] text-xs font-medium tracking-wider uppercase">Live postings</span>
-                </div>
+                <span className="text-[#6B7A99] text-xs font-medium tracking-wider uppercase">Trending roles</span>
                 <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.07), transparent)" }} />
-                <span className="text-[#4B5563] text-xs">Updated just now</span>
               </div>
 
-              {/* Live job rows */}
+              {/* Trending role rows */}
               <div className="max-w-xl mx-auto space-y-1.5 mb-12">
-                {LIVE_JOBS.map((job, i) => (
+                {TRENDING_ROLES.map((job, i) => (
                   <button
                     key={i}
                     className="w-full group flex items-center gap-4 px-4 py-3.5 rounded-xl text-left card-enter transition-all"
@@ -464,11 +457,8 @@ export default function SearchPage() {
                       <p className="text-[#C4CEDF] text-sm font-medium truncate group-hover:text-[#F0F2F7] transition-colors">{job.title}</p>
                       <p className="text-[#6B7A99] text-xs mt-0.5">{job.company} · {job.location}</p>
                     </div>
-                    {/* Salary + time */}
-                    <div className="text-right shrink-0">
-                      <p className="text-[#C9A84C] text-xs font-semibold">{job.salary}</p>
-                      <p className="text-[#4B5563] text-[0.65rem] mt-0.5">{job.time}</p>
-                    </div>
+                    {/* Salary */}
+                    <p className="text-[#C9A84C] text-xs font-semibold shrink-0">{job.salary}</p>
                     {/* Arrow hint */}
                     <ArrowRight size={14} className="text-[#2A3A50] group-hover:text-[#6B7A99] transition-colors shrink-0" />
                   </button>
