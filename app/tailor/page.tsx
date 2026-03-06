@@ -476,7 +476,7 @@ function TailorInner() {
                 {[
                   "Paste a job URL or the full description",
                   "Upload your resume or paste the text",
-                  "Hit Tailor — Claude rewrites it for you",
+                  "Hit Tailor — ResumeIdol rewrites it for you",
                 ].map((step, i) => (
                   <div key={i} className="flex items-start gap-2 text-xs text-[#9CA3AF]">
                     <span
@@ -652,12 +652,12 @@ function TailorInner() {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-2">
-                    <Upload size={24} className="text-[#374151]" />
+                    <Upload size={24} className="text-[#C9A84C] opacity-60" />
                     <div>
                       <span className="text-[#6B7A99] text-sm font-medium">Drop your resume here</span>
-                      <span className="text-[#374151] text-sm"> or click to browse</span>
+                      <span className="text-[#6B7A99] text-sm"> or click to browse</span>
                     </div>
-                    <span className="text-[#374151] text-xs">PDF, DOCX, or TXT</span>
+                    <span className="text-[#4B5563] text-xs">PDF, DOCX, or TXT</span>
                   </div>
                 )}
               </div>
@@ -665,7 +665,7 @@ function TailorInner() {
               {/* Text fallback */}
               <div>
                 <label className="text-xs text-[#6B7A99] mb-1.5 block">
-                  Resume Text <span className="text-[#374151]">(or paste directly)</span>
+                  Resume Text <span className="text-[#4B5563]">(or paste directly)</span>
                   <span className="text-[#ef4444] ml-0.5">*</span>
                 </label>
                 <textarea
@@ -701,12 +701,12 @@ function TailorInner() {
             <button
               onClick={handleTailor}
               disabled={!canTailor || tailoring}
-              className="btn-gold w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 text-base disabled:opacity-40 disabled:cursor-not-allowed"
+              className={`btn-gold w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 text-base disabled:opacity-40 disabled:cursor-not-allowed${canTailor && !tailoring ? " btn-gold-hero" : ""}`}
             >
               {tailoring ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Claude is tailoring your resume...
+                  ResumeIdol is tailoring your resume...
                 </>
               ) : (
                 <>
@@ -765,13 +765,13 @@ function TailorInner() {
                   Your tailored resume will appear here
                 </h3>
                 <p className="text-[#6B7A99] text-sm max-w-[260px] leading-relaxed">
-                  Add your resume and the job description, then hit the button. Claude optimises every line for ATS and human impact.
+                  Add your resume and the job description, then hit the button. ResumeIdol optimises every line for ATS and human impact.
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-6">
                   {[["ATS Score", "+25%", "#C9A84C"], ["Keywords", "Added", "#6366f1"], ["Interview Rate", "↑", "#22c55e"]].map(([label, val, color]) => (
                     <div key={label} className="text-center">
                       <div className="font-bold text-xl mb-1" style={{ color, fontFamily: "Playfair Display, serif" }}>{val}</div>
-                      <div className="text-[#374151] text-xs">{label}</div>
+                      <div className="text-[#6B7A99] text-xs">{label}</div>
                     </div>
                   ))}
                 </div>
@@ -790,7 +790,7 @@ function TailorInner() {
                 </div>
 
                 <h3 className="text-[#F0F2F7] font-semibold text-lg mb-2" style={{ fontFamily: "Playfair Display, serif" }}>
-                  Claude is working its magic...
+                  ResumeIdol is working its magic...
                 </h3>
                 <p className="text-[#6B7A99] text-sm mb-10 text-center max-w-xs">
                   Rewriting every line to maximise your ATS score and human appeal.

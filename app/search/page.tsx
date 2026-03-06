@@ -14,7 +14,6 @@ const JOB_TYPES = ["Any Type", "Full-time", "Part-time", "Contract", "Remote", "
 const DATE_POSTED = ["Any time", "Past 24 hours", "Past week", "Past month"];
 const SOURCES = ["All", "LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Dice", "Remotive", "BeBee", "Jooble", "Snagajob"];
 
-// Default popular locations shown before the user types
 const DEFAULT_LOCATIONS = [
   "Remote",
   "New York, NY",
@@ -30,7 +29,6 @@ const DEFAULT_LOCATIONS = [
   "Sydney, Australia",
 ];
 
-// Shorten Nominatim's verbose display_name to "City, Country/State"
 function formatPlace(displayName: string): string {
   const parts = displayName.split(", ").map((p) => p.trim());
   if (parts.length >= 2) return `${parts[0]}, ${parts[parts.length - 1]}`;
@@ -58,7 +56,7 @@ function FilterSelect({
       >
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
-      <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#374151]" />
+      <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#6B7A99]" />
     </div>
   );
 }
@@ -139,7 +137,6 @@ export default function SearchPage() {
     inputRef.current?.focus();
   };
 
-  // Click-outside to close location suggestions
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (locRef.current && !locRef.current.contains(e.target as Node)) {
@@ -150,7 +147,6 @@ export default function SearchPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Nominatim city autocomplete — debounced 350ms
   const [nominatimResults, setNominatimResults] = useState<string[]>([]);
   const nominatimTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -181,16 +177,13 @@ export default function SearchPage() {
     return () => { if (nominatimTimer.current) clearTimeout(nominatimTimer.current); };
   }, [locationInput]);
 
-  // What to show in the dropdown
   const locSuggestions = useMemo(() => {
     const q = locationInput.trim().toLowerCase();
     if (!q) return DEFAULT_LOCATIONS;
     if (q === "remote") return ["Remote"];
-    // Combine Nominatim results + always include typed value as first option
     const combined = nominatimResults.length > 0
       ? nominatimResults
       : DEFAULT_LOCATIONS.filter((l) => l.toLowerCase().includes(q));
-    // Always prepend the exact typed input so user can search any location
     if (!combined.some((c) => c.toLowerCase() === locationInput.trim().toLowerCase())) {
       return [locationInput.trim(), ...combined].slice(0, 9);
     }
@@ -205,13 +198,20 @@ export default function SearchPage() {
   ].filter(Boolean).length;
 
   return (
-    <div className="min-h-screen" style={{ background: "#07090F" }}>
+    <div className="min-h-screen relative" style={{ background: "#07090F" }}>
+      {/* Ambient orbs */}
+      <div className="absolute top-20 left-1/4 w-[700px] h-[700px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.045) 0%, transparent 65%)", zIndex: 0 }} />
+      <div className="absolute top-2/3 right-0 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 65%)", zIndex: 0 }} />
       <Navbar />
 
-      <div className="pt-20 pb-12">
+      <div className="relative z-10 pt-20 pb-12">
         {/* ── Search Hero ── */}
         <div className="max-w-4xl mx-auto px-6 pt-10 pb-6">
           <div className="text-center mb-8">
+            <div className="badge-gold mb-4 inline-flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+              Live · 500+ job boards · Real-time
+            </div>
             <h1
               style={{
                 fontFamily: "Playfair Display, serif",
@@ -225,38 +225,50 @@ export default function SearchPage() {
               <span className="text-gold-gradient italic">breakthrough role</span>
             </h1>
             <p className="text-[#6B7A99] mt-3 text-base">
-              Searching across 500+ job boards in real-time
+              Search once. ResumeIdol scans 500+ boards and surfaces the best fits.
             </p>
           </div>
 
           {/* Search form */}
           <form onSubmit={handleSearch}>
-            <div className="flex flex-col sm:flex-row gap-3 mb-3">
+            {/* Unified premium search pill */}
+            <div
+              className="search-pill-container flex flex-col sm:flex-row rounded-2xl mb-3"
+              style={{
+                background: "rgba(255,255,255,0.025)",
+                border: "1px solid rgba(255,255,255,0.09)",
+                boxShadow: "0 8px 40px rgba(0,0,0,0.3)",
+              }}
+            >
               {/* Query input */}
               <div className="flex-1 relative">
-                <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#374151] pointer-events-none" />
+                <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7A99] pointer-events-none" />
                 <input
                   ref={inputRef}
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder='Try "Senior Designer", "React Engineer", "Product Manager"'
-                  className="input-luxury w-full pl-11 pr-10 py-3.5 text-sm"
+                  placeholder='Job title, skill, or company...'
+                  className="search-pill-input w-full pl-11 pr-10 py-4 text-sm"
                 />
                 {query && (
                   <button
                     type="button"
                     onClick={clearSearch}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#374151] hover:text-[#6B7A99]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7A99] hover:text-[#9CA3AF] transition-colors"
                   >
                     <X size={15} />
                   </button>
                 )}
               </div>
 
+              {/* Vertical divider (desktop) / horizontal (mobile) */}
+              <div className="hidden sm:block w-px self-stretch my-3" style={{ background: "rgba(255,255,255,0.07)" }} />
+              <div className="sm:hidden h-px mx-4" style={{ background: "rgba(255,255,255,0.07)" }} />
+
               {/* Location autocomplete */}
               <div className="relative sm:w-52" ref={locRef}>
-                <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#374151] pointer-events-none z-10" />
+                <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6B7A99] pointer-events-none z-10" />
                 <input
                   type="text"
                   value={locationInput}
@@ -267,23 +279,23 @@ export default function SearchPage() {
                   }}
                   onFocus={() => setShowLocSuggestions(true)}
                   placeholder="Location or Remote"
-                  className="input-luxury w-full pl-9 pr-8 py-3.5 text-sm"
+                  className="search-pill-input w-full pl-9 pr-8 py-4 text-sm"
                   style={{ color: locationInput ? "#DEC27A" : undefined }}
                 />
                 {locationInput ? (
                   <button
                     type="button"
                     onClick={() => { setLocationInput(""); setRemote(false); setShowLocSuggestions(false); }}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#374151] hover:text-[#6B7A99]"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6B7A99] hover:text-[#9CA3AF] transition-colors"
                   >
                     <X size={13} />
                   </button>
                 ) : (
-                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#374151]" />
+                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#6B7A99]" />
                 )}
                 {showLocSuggestions && (
                   <div
-                    className="absolute top-full left-0 right-0 mt-1 rounded-xl overflow-hidden z-50 shadow-xl"
+                    className="absolute top-full left-0 right-0 mt-2 rounded-xl overflow-hidden z-50 shadow-xl"
                     style={{ background: "#0D1117", border: "1px solid rgba(255,255,255,0.08)", maxHeight: "220px", overflowY: "auto" }}
                   >
                     {locSuggestions.slice(0, 10).map((loc) => (
@@ -302,21 +314,25 @@ export default function SearchPage() {
                         onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
                         onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                       >
-                        <MapPin size={12} className="text-[#374151] shrink-0" />
+                        <MapPin size={12} className="text-[#6B7A99] shrink-0" />
                         {loc}
                       </button>
                     ))}
                     {locSuggestions.length === 0 && (
-                      <div className="px-4 py-3 text-xs text-[#374151]">No matching locations — press Search to use your input</div>
+                      <div className="px-4 py-3 text-xs text-[#6B7A99]">No matching locations — press Search to use your input</div>
                     )}
                   </div>
                 )}
               </div>
 
+              {/* Mobile divider before button */}
+              <div className="sm:hidden h-px mx-4" style={{ background: "rgba(255,255,255,0.07)" }} />
+
+              {/* Search button */}
               <button
                 type="submit"
                 disabled={loading || !query.trim()}
-                className="btn-gold px-8 py-3.5 rounded-xl text-sm font-semibold flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-gold search-btn px-8 py-4 font-semibold flex items-center justify-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -340,7 +356,7 @@ export default function SearchPage() {
                   color: remote ? "#4ade80" : "#6B7A99",
                 }}
               >
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: remote ? "#22c55e" : "#374151" }} />
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: remote ? "#22c55e" : "#4B5563" }} />
                 Remote only
               </button>
 
@@ -407,14 +423,14 @@ export default function SearchPage() {
                 <button
                   onClick={() => setViewMode("list")}
                   className="p-2 rounded-lg transition-all"
-                  style={{ color: viewMode === "list" ? "#C9A84C" : "#374151", background: viewMode === "list" ? "rgba(201,168,76,0.08)" : "transparent" }}
+                  style={{ color: viewMode === "list" ? "#C9A84C" : "#4B5563", background: viewMode === "list" ? "rgba(201,168,76,0.08)" : "transparent" }}
                 >
                   <List size={16} />
                 </button>
                 <button
                   onClick={() => setViewMode("grid")}
                   className="p-2 rounded-lg transition-all"
-                  style={{ color: viewMode === "grid" ? "#C9A84C" : "#374151", background: viewMode === "grid" ? "rgba(201,168,76,0.08)" : "transparent" }}
+                  style={{ color: viewMode === "grid" ? "#C9A84C" : "#4B5563", background: viewMode === "grid" ? "rgba(201,168,76,0.08)" : "transparent" }}
                 >
                   <LayoutGrid size={16} />
                 </button>
@@ -435,23 +451,31 @@ export default function SearchPage() {
 
           {/* Loading skeletons */}
           {loading && (
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="card p-5">
-                  <div className="flex gap-4">
-                    <div className="skeleton w-12 h-12 rounded-xl" />
-                    <div className="flex-1 space-y-2.5">
-                      <div className="skeleton h-5 w-1/2 rounded" />
-                      <div className="skeleton h-4 w-1/3 rounded" />
-                      <div className="skeleton h-3 w-3/4 rounded" />
-                      <div className="flex gap-2">
-                        <div className="skeleton h-6 w-20 rounded-full" />
-                        <div className="skeleton h-6 w-16 rounded-full" />
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <Loader2 size={15} className="text-[#C9A84C] animate-spin shrink-0" />
+                <span className="text-[#6B7A99] text-sm">
+                  Scanning 500+ job boards for <span className="text-[#DEC27A] font-medium">&ldquo;{query}&rdquo;</span>...
+                </span>
+              </div>
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="card p-5">
+                    <div className="flex gap-4">
+                      <div className="skeleton w-12 h-12 rounded-xl" />
+                      <div className="flex-1 space-y-2.5">
+                        <div className="skeleton h-5 w-1/2 rounded" />
+                        <div className="skeleton h-4 w-1/3 rounded" />
+                        <div className="skeleton h-3 w-3/4 rounded" />
+                        <div className="flex gap-2">
+                          <div className="skeleton h-6 w-20 rounded-full" />
+                          <div className="skeleton h-6 w-16 rounded-full" />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
@@ -488,7 +512,7 @@ export default function SearchPage() {
             </div>
           )}
 
-          {/* Empty state */}
+          {/* Empty state (after failed search) */}
           {!loading && searched && jobs.length === 0 && (
             <div className="text-center py-20">
               <div className="text-5xl mb-4">🎯</div>
@@ -501,19 +525,41 @@ export default function SearchPage() {
 
           {/* Initial state */}
           {!searched && !loading && (
-            <div className="text-center py-24">
-              <div
-                className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6"
-                style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.12)" }}
-              >
-                <Search size={28} className="text-[#C9A84C] opacity-60" />
+            <div className="text-center py-16">
+              {/* Animated icon with pulsing rings */}
+              <div className="relative w-24 h-24 mx-auto mb-8">
+                <div className="absolute inset-0 rounded-3xl animate-ping opacity-20" style={{ background: "rgba(201,168,76,0.15)", animationDuration: "2.5s" }} />
+                <div className="absolute -inset-3 rounded-[28px] animate-ping opacity-10" style={{ background: "rgba(201,168,76,0.08)", animationDuration: "2.5s", animationDelay: "0.6s" }} />
+                <div
+                  className="relative w-24 h-24 rounded-3xl flex items-center justify-center"
+                  style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.18)", boxShadow: "0 0 50px rgba(201,168,76,0.1)" }}
+                >
+                  <Search size={30} className="text-[#C9A84C]" />
+                </div>
               </div>
-              <h3 className="text-[#F0F2F7] font-semibold text-xl mb-3" style={{ fontFamily: "Playfair Display, serif" }}>
+
+              <h3 className="text-[#F0F2F7] font-semibold text-2xl mb-3" style={{ fontFamily: "Playfair Display, serif" }}>
                 What&apos;s your dream role?
               </h3>
-              <p className="text-[#6B7A99] text-sm max-w-xs mx-auto mb-8">
-                Search once. We check 500+ boards and score every result against your profile.
+              <p className="text-[#6B7A99] text-sm max-w-sm mx-auto mb-10">
+                Search once. ResumeIdol scans 500+ boards and scores every result against your profile.
               </p>
+
+              {/* Stats row */}
+              <div className="flex items-center justify-center gap-8 sm:gap-14 mb-10">
+                {[
+                  ["500+", "Job Boards"],
+                  ["Real-time", "Live Results"],
+                  ["1-click", "Auto Tailor"],
+                ].map(([val, label]) => (
+                  <div key={label} className="text-center">
+                    <div className="font-bold text-xl mb-1" style={{ color: "#C9A84C", fontFamily: "Playfair Display, serif" }}>{val}</div>
+                    <div className="text-[#6B7A99] text-xs">{label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-[#445568] text-xs mb-3 uppercase tracking-widest font-medium">Popular searches</p>
               <div className="flex items-center justify-center flex-wrap gap-2">
                 {["Senior Designer", "React Engineer", "Product Manager", "Data Scientist", "DevRel"].map((q) => (
                   <button

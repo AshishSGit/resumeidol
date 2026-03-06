@@ -635,3 +635,27 @@ button:disabled { cursor: not-allowed; }
   box-shadow: 0 8px 32px rgba(99,102,241,0.2);
 }
 .btn-indigo:active { transform: translateY(0); transition-duration: 0.1s; }
+
+/* ── Unified search pill ─────────────────────────────────────────────── */
+.search-pill-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  caret-color: #C9A84C;
+  color: #F0F2F7;
+}
+.search-pill-input::placeholder { color: #445568; }
+.search-pill-input:focus { box-shadow: none; border: none; }
+
+.search-pill-container {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.search-pill-container:focus-within {
+  border-color: rgba(201,168,76,0.32) !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(201,168,76,0.1) !important;
+}
+
+/* Search button — responsive corners */
+.search-btn { border-radius: 0 0 1rem 1rem; }
+@media (min-width: 640px) { .search-btn { border-radius: 0 1rem 1rem 0; } }

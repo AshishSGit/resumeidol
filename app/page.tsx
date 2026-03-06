@@ -194,8 +194,31 @@ function OutputPreview() {
     <section className="pb-28 max-w-3xl mx-auto px-6 fade-section">
       <div className="text-center mb-12">
         <div className="badge-gold mb-4 mx-auto w-fit"><Zap size={10} /><span>Live output preview</span></div>
-        <h2 className="heading-lg text-[#F0F2F7] mb-3">See exactly what you get</h2>
-        <p className="text-[#8A9AB8] text-base max-w-lg mx-auto">Every tailor produces four powerful outputs — not just a rewritten resume.</p>
+        <h2 className="heading-lg text-[#F0F2F7] mb-4">
+          Your resume,{" "}
+          <span className="shimmer-text">transformed in seconds</span>
+        </h2>
+        <p className="text-[#8A9AB8] text-base max-w-lg mx-auto mb-8">
+          Most tools hand you a rewrite and call it done.<br className="hidden sm:block" />
+          ResumeIdol gives you <strong className="text-[#C4CEDF] font-semibold">four outputs</strong> that put you in control of every application.
+        </p>
+        {/* 4 output highlights */}
+        <div className="flex items-start justify-center flex-wrap gap-3">
+          {[
+            { emoji: "📄", label: "Tailored Resume", sub: "Fully rewritten, not tweaked" },
+            { emoji: "⚡", label: "Word-level Diff", sub: "See every change made" },
+            { emoji: "✅", label: "Keywords Added", sub: "Avg. 14 keywords per tailor" },
+            { emoji: "🎯", label: "Honest Gaps", sub: "Know before you apply" },
+          ].map((item) => (
+            <div key={item.label} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <span className="text-base leading-none">{item.emoji}</span>
+              <div>
+                <div className="text-[#C4CEDF] text-xs font-semibold">{item.label}</div>
+                <div className="text-[#6B7A99] text-[0.7rem]">{item.sub}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="rounded-3xl overflow-hidden" style={{ background: "linear-gradient(145deg, #111827 0%, #0C101A 100%)", border: "1px solid rgba(201,168,76,0.15)", boxShadow: "0 40px 100px rgba(0,0,0,0.5), 0 0 80px rgba(201,168,76,0.06)" }}>
@@ -319,6 +342,16 @@ function OutputPreview() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Bottom CTA nudge */}
+      <div className="text-center mt-10">
+        <p className="text-[#6B7A99] text-sm mb-4">Try it free — no credit card required</p>
+        <Link href="/tailor" className="btn-gold btn-gold-hero inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm">
+          <Zap size={15} />
+          Tailor my resume now
+          <ArrowRight size={15} />
+        </Link>
       </div>
     </section>
   );
