@@ -455,6 +455,25 @@ export default function SearchPage() {
             </div>
           )}
 
+          {/* Low-results hint when source-filtered */}
+          {!loading && searched && jobs.length > 0 && jobs.length < 5 && source !== "All" && isLive && (
+            <div className="flex items-start gap-3 p-3.5 rounded-xl mb-4 text-xs"
+              style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.15)" }}>
+              <span className="text-[#C9A84C] shrink-0 mt-0.5">ℹ</span>
+              <span className="text-[#9CA3AF]">
+                Only {jobs.length} {source} listing{jobs.length !== 1 ? "s" : ""} found — {source} data is limited in our index.{" "}
+                <button
+                  type="button"
+                  onClick={() => { setSource("All"); setTimeout(() => handleSearch(), 50); }}
+                  className="text-[#C9A84C] hover:underline font-medium"
+                >
+                  Switch to All Sources
+                </button>{" "}
+                to see the full results.
+              </span>
+            </div>
+          )}
+
           {/* Results */}
           {!loading && jobs.length > 0 && (
             <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-4"}>
