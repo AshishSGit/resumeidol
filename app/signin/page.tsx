@@ -294,8 +294,11 @@ export default function SignInPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: "#07090F" }}>
-      <Link href="/" className="flex items-center gap-2.5 mb-10">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden" style={{ background: "#07090F" }}>
+      {/* Ambient orbs */}
+      <div className="orb-1 absolute top-1/4 left-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 65%)" }} />
+      <div className="orb-2 absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 65%)" }} />
+      <Link href="/" className="flex items-center gap-2.5 mb-10 relative z-10">
         <div
           className="w-8 h-8 rounded-xl flex items-center justify-center"
           style={{ background: "linear-gradient(135deg, #C9A84C, #B8952F)" }}
@@ -306,7 +309,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           ResumeIdol
         </span>
       </Link>
-      <div className="card p-8 w-full max-w-sm">{children}</div>
+      <div className="card p-8 w-full max-w-sm relative z-10">{children}</div>
     </div>
   );
 }

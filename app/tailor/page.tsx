@@ -18,29 +18,57 @@ interface TailorResult {
   gaps: string;
 }
 
-function ScoreBar({ label, before, after }: { label: string; before: number; after: number }) {
+function ScoreRing({ before, after }: { before: number; after: number }) {
+  const [displayed, setDisplayed] = useState(before);
+  const radius = 44;
+  const circumference = 2 * Math.PI * radius;
+  const color = displayed >= 80 ? "#22c55e" : displayed >= 60 ? "#C9A84C" : "#ef4444";
+  const offset = circumference - (displayed / 100) * circumference;
   const diff = after - before;
-  const color = after >= 80 ? "#22c55e" : after >= 60 ? "#C9A84C" : "#ef4444";
+
+  useEffect(() => {
+    const duration = 1600;
+    const start = Date.now();
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayed(Math.round(before + (after - before) * eased));
+      if (progress >= 1) clearInterval(timer);
+    }, 16);
+    return () => clearInterval(timer);
+  }, [before, after]);
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-[#6B7A99]">{label}</span>
-        <div className="flex items-center gap-2">
-          <span className="text-[#4B5563] line-through text-xs">{before}%</span>
-          <span className="font-bold" style={{ color }}>{after}%</span>
-          {diff > 0 && (
-            <span className="flex items-center gap-0.5 text-xs text-[#22c55e]">
-              <ArrowUp size={11} />+{diff}
-            </span>
-          )}
+    <div className="flex items-center gap-6">
+      <div className="relative w-28 h-28 shrink-0">
+        <svg viewBox="0 0 100 100" className="w-full h-full" style={{ transform: "rotate(-90deg)" }}>
+          <circle cx="50" cy="50" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="9" />
+          <circle
+            cx="50" cy="50" r={radius} fill="none"
+            stroke={color} strokeWidth="9"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            style={{ transition: "stroke-dashoffset 0.05s linear, stroke 0.4s ease" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="font-bold text-2xl leading-none" style={{ color, fontFamily: "Playfair Display, serif" }}>{displayed}</span>
+          <span className="text-[10px] text-[#6B7A99] mt-0.5">/ 100</span>
         </div>
       </div>
-      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <div
-          className="h-full rounded-full transition-all duration-1000 ease-out"
-          style={{ width: `${after}%`, background: `linear-gradient(90deg, ${color}80, ${color})` }}
-        />
+      <div className="flex-1">
+        <p className="text-xs text-[#6B7A99] mb-1">ATS Match Score</p>
+        <div className="flex items-baseline gap-2 mb-1">
+          <span className="text-[#4B5563] text-sm line-through">{before}%</span>
+          <span className="text-2xl font-bold" style={{ color, fontFamily: "Playfair Display, serif" }}>{after}%</span>
+        </div>
+        {diff > 0 && (
+          <span className="inline-flex items-center gap-1 text-sm font-medium text-[#22c55e]">
+            <ArrowUp size={13} />+{diff}% improvement
+          </span>
+        )}
       </div>
     </div>
   );
@@ -142,6 +170,13 @@ function TailorInner() {
   const [dragOver, setDragOver] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [tailoring, setTailoring] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
+  const LOADING_STEPS = [
+    { label: "Parsing your resume", duration: 3500 },
+    { label: "Analysing job requirements", duration: 4000 },
+    { label: "Optimising keywords & phrasing", duration: 5000 },
+    { label: "Finalising your resume", duration: 99999 },
+  ];
   const [result, setResult] = useState<TailorResult | null>(null);
   const [originalResumeText, setOriginalResumeText] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -302,9 +337,20 @@ function TailorInner() {
     }
 
     setTailoring(true);
+    setLoadingStep(0);
     setError(null);
     setResult(null);
     setOriginalResumeText(resumeText);
+
+    // Advance loading steps on a timer
+    const stepTimers: ReturnType<typeof setTimeout>[] = [];
+    let elapsed = 0;
+    for (let s = 0; s < LOADING_STEPS.length - 1; s++) {
+      elapsed += LOADING_STEPS[s].duration;
+      const nextStep = s + 1;
+      const t = setTimeout(() => { setLoadingStep(nextStep); }, elapsed);
+      stepTimers.push(t);
+    }
 
     try {
       const res = await fetch("/api/tailor", {
@@ -333,6 +379,7 @@ function TailorInner() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
+      stepTimers.forEach(clearTimeout);
       setTailoring(false);
     }
   };
@@ -672,19 +719,57 @@ function TailorInner() {
               </div>
             )}
 
-            {/* Loading state */}
+            {/* Loading state — multi-step progress */}
             {tailoring && (
-              <div className="card flex flex-col items-center justify-center text-center py-20 px-8" style={{ minHeight: "500px" }}>
-                <div className="relative mb-6">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)" }}>
-                    <Zap size={24} className="text-[#C9A84C]" />
+              <div className="card flex flex-col items-center justify-center py-20 px-10" style={{ minHeight: "500px" }}>
+                {/* Pulsing icon */}
+                <div className="relative mb-8">
+                  <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                    <Zap size={30} className="text-[#C9A84C]" />
                   </div>
-                  <div className="absolute inset-0 rounded-2xl animate-ping" style={{ background: "rgba(201,168,76,0.1)" }} />
+                  <div className="absolute inset-0 rounded-2xl animate-ping" style={{ background: "rgba(201,168,76,0.08)" }} />
                 </div>
-                <h3 className="text-[#F0F2F7] font-semibold text-lg mb-2">Tailoring your resume...</h3>
-                <p className="text-[#6B7A99] text-sm">
-                  Claude is analysing the job description and optimising every line of your resume. This takes about 15–20 seconds.
+
+                <h3 className="text-[#F0F2F7] font-semibold text-lg mb-2" style={{ fontFamily: "Playfair Display, serif" }}>
+                  Claude is working its magic...
+                </h3>
+                <p className="text-[#6B7A99] text-sm mb-10 text-center max-w-xs">
+                  Rewriting every line to maximise your ATS score and human appeal.
                 </p>
+
+                {/* Step list */}
+                <div className="w-full max-w-xs space-y-4">
+                  {LOADING_STEPS.map((s, i) => {
+                    const done = i < loadingStep;
+                    const active = i === loadingStep;
+                    return (
+                      <div key={i} className="flex items-center gap-3">
+                        <div
+                          className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-300"
+                          style={{
+                            background: done ? "rgba(34,197,94,0.15)" : active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
+                            border: `1px solid ${done ? "rgba(34,197,94,0.4)" : active ? "rgba(201,168,76,0.4)" : "rgba(255,255,255,0.08)"}`,
+                          }}
+                        >
+                          {done ? (
+                            <CheckCircle size={13} className="text-[#22c55e] step-tick" />
+                          ) : active ? (
+                            <Loader2 size={12} className="text-[#C9A84C] animate-spin" />
+                          ) : (
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.15)" }} />
+                          )}
+                        </div>
+                        <span
+                          className="text-sm transition-colors duration-300"
+                          style={{ color: done ? "#22c55e" : active ? "#DEC27A" : "#4B5563" }}
+                        >
+                          {s.label}
+                          {done && " ✓"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -692,16 +777,16 @@ function TailorInner() {
             {result && (
               <div className="space-y-4">
                 {/* Score cards */}
-                <div className="card p-5">
-                  <h3 className="text-[#F0F2F7] font-semibold mb-4 flex items-center gap-2">
+                <div className="card p-6 stagger-reveal" style={{ animationDelay: "0ms" }}>
+                  <h3 className="text-[#F0F2F7] font-semibold mb-5 flex items-center gap-2">
                     <CheckCircle size={16} className="text-[#22c55e]" />
                     ATS Optimisation Results
                   </h3>
-                  <ScoreBar label="ATS Match Score" before={result.atsScoreBefore} after={result.atsScoreAfter} />
-                  <div className="flex items-center gap-3 mt-4 p-3 rounded-xl" style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.12)" }}>
+                  <ScoreRing before={result.atsScoreBefore} after={result.atsScoreAfter} />
+                  <div className="flex items-center gap-3 mt-5 p-3 rounded-xl" style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.12)" }}>
                     <ArrowUp size={16} className="text-[#22c55e] shrink-0" />
                     <span className="text-[#22c55e] text-sm font-medium">
-                      +{result.atsScoreAfter - result.atsScoreBefore}% improvement — you&apos;re now in the top candidate tier
+                      You&apos;re now in the top candidate tier for this role
                     </span>
                   </div>
                   {applyUrl && (
@@ -718,7 +803,7 @@ function TailorInner() {
                 </div>
 
                 {/* Tabs */}
-                <div className="card overflow-hidden">
+                <div className="card overflow-hidden stagger-reveal" style={{ animationDelay: "180ms" }}>
                   <div className="flex border-b border-[rgba(255,255,255,0.06)] overflow-x-auto">
                     {([
                       { id: "resume", label: "Tailored Resume" },
@@ -852,7 +937,8 @@ function TailorInner() {
                 {/* Re-tailor */}
                 <button
                   onClick={() => { setResult(null); setError(null); }}
-                  className="btn-ghost w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2"
+                  className="btn-ghost w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 stagger-reveal"
+                  style={{ animationDelay: "320ms" }}
                 >
                   <RotateCcw size={15} />
                   Start over with a different job

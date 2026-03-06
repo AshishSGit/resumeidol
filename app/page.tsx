@@ -234,13 +234,9 @@ export default function LandingPage() {
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        router.replace("/tailor");
-      } else {
-        setIsLoggedIn(false);
-      }
+      setIsLoggedIn(!!user);
     });
-  }, [router]);
+  }, []);
 
   const handleCheckout = async (plan: string) => {
     if (plan === "free") { window.location.href = "/tailor"; return; }
@@ -383,9 +379,10 @@ export default function LandingPage() {
 
       {/* ── HERO ── */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden hero-glow dot-grid">
-        {/* Glow orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%)" }} />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)" }} />
+        {/* Animated ambient orbs */}
+        <div className="orb-1 absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 65%)" }} />
+        <div className="orb-2 absolute bottom-1/3 right-1/4 w-[420px] h-[420px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)" }} />
+        <div className="orb-3 absolute top-2/3 left-1/3 w-[300px] h-[300px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 65%)" }} />
 
         <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-20 text-center">
           {/* Eyebrow */}
