@@ -182,6 +182,11 @@ export async function GET(request: NextRequest) {
         }
       );
 
+      if (!response.ok) {
+        const errText = await response.text().catch(() => "");
+        console.error(`JSearch API error: HTTP ${response.status} — ${errText}`);
+      }
+
       if (response.ok) {
         const data = await response.json();
         let jobs = (data.data || []).map((job: Record<string, unknown>, i: number) => {
@@ -223,6 +228,16 @@ export async function GET(request: NextRequest) {
             j.source.toLowerCase().includes(source.toLowerCase())
           );
         }
+
+        // Prioritize LinkedIn jobs (higher user trust) while keeping relative order
+        const PRIORITY_SOURCES = ["linkedin", "indeed", "glassdoor"];
+        jobs.sort((a: { source: string }, b: { source: string }) => {
+          const aRank = PRIORITY_SOURCES.findIndex(s => a.source.toLowerCase().includes(s));
+          const bRank = PRIORITY_SOURCES.findIndex(s => b.source.toLowerCase().includes(s));
+          const aScore = aRank === -1 ? PRIORITY_SOURCES.length : aRank;
+          const bScore = bRank === -1 ? PRIORITY_SOURCES.length : bRank;
+          return aScore - bScore;
+        });
 
         return NextResponse.json({ jobs, total: jobs.length, source: "live" });
       }
