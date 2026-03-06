@@ -184,10 +184,22 @@ body {
   transform: translateY(-2px);
 }
 .card-feature {
+  position: relative;
   background: linear-gradient(135deg, rgba(201,168,76,0.04) 0%, rgba(255,255,255,0.02) 100%);
   border: 1px solid rgba(201,168,76,0.1);
   border-radius: 16px;
   transition: all 0.25s ease;
+  overflow: hidden;
+}
+.card-feature::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: var(--card-glow, linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent));
+  pointer-events: none;
 }
 .card-feature:hover {
   border-color: rgba(201,168,76,0.25);
@@ -451,4 +463,42 @@ body {
 .card-enter {
   opacity: 0;
   animation: cardEnter 0.5s ease-out forwards;
+}
+
+/* === Result showcase ATS progress bar === */
+@keyframes fillBar {
+  from { width: 0%; }
+  to   { width: 88%; }
+}
+.fill-bar {
+  width: 0%;
+  animation: fillBar 1.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
+  animation-play-state: paused;
+}
+.fade-section.visible .fill-bar {
+  animation-play-state: running;
+}
+
+/* === Keyword marquee === */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-rev {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+.marquee-track-rev {
+  display: flex;
+  width: max-content;
+  animation: marquee-rev 36s linear infinite;
+}
+.marquee-fade {
+  mask-image: linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%);
 }

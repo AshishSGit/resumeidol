@@ -145,126 +145,82 @@ const FAQS = [
   },
 ];
 
-function ProductPreview() {
+const MARQUEE_ROW_1 = ["+ technical program management", "+ cross-functional collaboration", "+ ATS optimization", "+ stakeholder alignment", "+ Python automation", "+ CI/CD integration", "+ data-driven decision making", "+ agile methodology", "+ strategic leadership", "+ systems-level thinking"];
+const MARQUEE_ROW_2 = ["+ user research", "+ design systems", "+ A/B testing", "+ information architecture", "+ user journey mapping", "+ design tokens", "+ accessibility standards", "+ product roadmap", "+ sprint planning", "+ metrics & KPIs"];
+
+function KeywordMarquee() {
+  const row1 = [...MARQUEE_ROW_1, ...MARQUEE_ROW_1];
+  const row2 = [...MARQUEE_ROW_2, ...MARQUEE_ROW_2];
   return (
-    <div
-      className="rounded-2xl overflow-hidden preview-shadow"
-      style={{ border: "1px solid rgba(201,168,76,0.12)" }}
-    >
-      {/* Browser chrome */}
-      <div className="flex items-center gap-3 px-4 py-2.5" style={{ background: "#0B0E1A", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="flex gap-1.5">
-          {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
-            <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
+    <div className="mt-16 fade-section" style={{ animationDelay: "0.5s" }}>
+      <p className="text-center text-[#374151] text-[11px] uppercase tracking-widest mb-5 font-medium">
+        Keywords Claude weaves into your resume
+      </p>
+      <div className="space-y-2.5 overflow-hidden marquee-fade">
+        <div className="marquee-track gap-2.5">
+          {row1.map((kw, i) => (
+            <span key={i} className="flex-shrink-0 text-xs px-3 py-1 rounded-full whitespace-nowrap" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.15)", color: "#C9A84C" }}>
+              {kw}
+            </span>
           ))}
         </div>
-        <div className="flex-1 flex justify-center">
-          <div
-            className="flex items-center gap-2 px-3 py-1 rounded-md text-[11px]"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", color: "#6B7A99", maxWidth: 260, width: "100%" }}
-          >
-            <span className="text-[#374151] select-none">🔒</span>
-            <span>resumeidol.com/tailor</span>
-          </div>
-        </div>
-        <div
-          className="hidden sm:flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-md"
-          style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)", color: "#C9A84C" }}
-        >
-          <Zap size={9} />
-          AI Active
+        <div className="marquee-track-rev gap-2.5">
+          {row2.map((kw, i) => (
+            <span key={i} className="flex-shrink-0 text-xs px-3 py-1 rounded-full whitespace-nowrap" style={{ background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.15)", color: "#4ade80" }}>
+              {kw}
+            </span>
+          ))}
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* App body */}
-      <div className="grid grid-cols-1 sm:grid-cols-2" style={{ background: "#07090F" }}>
-        {/* Left: inputs */}
-        <div className="p-5 border-b sm:border-b-0 sm:border-r border-[rgba(255,255,255,0.05)]">
-          <p className="text-[10px] text-[#374151] uppercase tracking-widest mb-2 font-medium">Job Description</p>
-          <div className="p-3 rounded-xl mb-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(201,168,76,0.12)" }}>
-            <p className="text-[#DEC27A] text-xs font-semibold mb-0.5">Senior Product Designer</p>
-            <p className="text-[#6B7A99] text-[11px]">Stripe · San Francisco, CA · $160k–$220k</p>
-            <p className="text-[#4B5563] text-[11px] mt-2 leading-relaxed">Looking for a Senior Product Designer to lead user research, design systems, and cross-functional initiatives. 5+ yrs Figma required…</p>
+function ResultShowcase() {
+  return (
+    <div className="pb-28 max-w-2xl mx-auto px-6 fade-section">
+      <div
+        className="rounded-3xl p-8 sm:p-10 relative overflow-hidden"
+        style={{
+          background: "linear-gradient(145deg, #111827 0%, #0C101A 100%)",
+          border: "1px solid rgba(201,168,76,0.15)",
+          boxShadow: "0 40px 100px rgba(0,0,0,0.5), 0 0 80px rgba(201,168,76,0.06)",
+        }}
+      >
+        <div className="absolute top-0 left-1/4 right-1/4 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.45), transparent)" }} />
+
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+          <div className="badge-gold">
+            <Zap size={10} />
+            <span>Tailored in 14 seconds</span>
           </div>
-          <p className="text-[10px] text-[#374151] uppercase tracking-widest mb-2 font-medium">Your Resume</p>
-          <div className="p-3 rounded-xl mb-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <p className="text-[#9CA3AF] text-[11px]">Alex Rivera · Product Designer · 4 yrs · Figma, Sketch, Prototyping · Previously at Notion, Webflow</p>
+          <span className="text-[#F0F2F7] font-semibold text-sm">Senior Product Designer · Stripe</span>
+        </div>
+
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[#6B7A99] text-xs font-medium uppercase tracking-widest">ATS Match Score</span>
+            <span className="text-[#22c55e] text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)" }}>
+              +34 points
+            </span>
           </div>
-          <div className="flex justify-end">
-            <div
-              className="text-xs px-4 py-2 rounded-xl font-semibold flex items-center gap-1.5"
-              style={{ background: "linear-gradient(135deg, #DEC27A, #C9A84C)", color: "#07090F" }}
-            >
-              <Zap size={11} />
-              Tailoring…
+          <div className="flex items-center gap-4">
+            <span className="text-[#4B5563] text-2xl font-bold line-through" style={{ fontFamily: "Playfair Display, serif" }}>54%</span>
+            <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+              <div className="h-full rounded-full fill-bar" style={{ background: "linear-gradient(90deg, #C9A84C, #E8D5A3)", boxShadow: "0 0 16px rgba(201,168,76,0.35)" }} />
             </div>
+            <span className="text-[#C9A84C] text-2xl font-bold" style={{ fontFamily: "Playfair Display, serif" }}>88%</span>
           </div>
         </div>
 
-        {/* Right: output */}
-        <div className="p-5">
-          {/* ATS score comparison */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="text-center">
-              <p className="text-[10px] text-[#374151] mb-1.5">Before</p>
-              <div className="relative w-14 h-14">
-                <svg viewBox="0 0 48 48" className="w-14 h-14" style={{ transform: "rotate(-90deg)" }}>
-                  <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4.5" />
-                  <circle cx="24" cy="24" r="19" fill="none" stroke="#6366f1" strokeWidth="4.5"
-                    strokeDasharray="119" strokeDashoffset="55" strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#6366f1]">54%</div>
-              </div>
-            </div>
-            <ArrowRight size={16} className="text-[#374151] shrink-0" />
-            <div className="text-center">
-              <p className="text-[10px] text-[#374151] mb-1.5">After</p>
-              <div className="relative w-14 h-14">
-                <svg viewBox="0 0 48 48" className="w-14 h-14" style={{ transform: "rotate(-90deg)" }}>
-                  <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4.5" />
-                  <circle cx="24" cy="24" r="19" fill="none" stroke="#C9A84C" strokeWidth="4.5"
-                    strokeDasharray="119" strokeDashoffset="14" strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#C9A84C]">88%</div>
-              </div>
-            </div>
-            <div
-              className="ml-1 px-2 py-1 rounded-full text-[10px] font-bold"
-              style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.25)", color: "#22c55e" }}
-            >
-              +34pts
-            </div>
-          </div>
-
-          {/* Keywords added */}
-          <p className="text-[10px] text-[#374151] uppercase tracking-widest mb-2 font-medium">Keywords Added</p>
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {["user research", "design systems", "A/B testing", "cross-functional"].map((k) => (
-              <span
-                key={k}
-                className="text-[10px] px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}
-              >
+        <div>
+          <p className="text-[#374151] text-[11px] uppercase tracking-widest mb-3 font-medium">14 keywords woven in</p>
+          <div className="flex flex-wrap gap-2">
+            {["user research", "design systems", "A/B testing", "cross-functional", "stakeholder alignment", "information architecture", "user journey mapping", "design tokens"].map((k) => (
+              <span key={k} className="text-xs px-2.5 py-1 rounded-full" style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}>
                 + {k}
               </span>
             ))}
-          </div>
-
-          {/* Tailored resume snippet */}
-          <div className="p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <p className="text-[#F0F2F7] text-xs font-semibold mb-1">Alex Rivera</p>
-            <p className="text-[#6B7A99] text-[11px] leading-relaxed mb-2">Senior Product Designer with 4+ yrs leading user research, design systems, and cross-functional product initiatives at Notion and Webflow.</p>
-            <div className="flex gap-2">
-              {["↓ DOCX", "↓ PDF"].map((l) => (
-                <span
-                  key={l}
-                  className="text-[10px] px-2.5 py-1 rounded-lg font-medium"
-                  style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.18)", color: "#C9A84C" }}
-                >
-                  {l}
-                </span>
-              ))}
-            </div>
           </div>
         </div>
       </div>
@@ -531,35 +487,18 @@ export default function LandingPage() {
           </div>
 
           {/* Trust */}
-          <div className="flex items-center justify-center gap-2 text-[#6B7A99] text-sm" style={{ animation: "fadeUp 0.6s 0.4s ease-out both" }}>
-            <div className="flex -space-x-2">
-              {["#6366f1", "#22c55e", "#f59e0b", "#ec4899", "#06b6d4"].map((c, i) => (
-                <div key={i} className="w-7 h-7 rounded-full border-2 border-[#07090F] flex items-center justify-center text-xs font-bold" style={{ background: c, zIndex: 5 - i }}>
-                  {["A", "B", "C", "D", "E"][i]}
-                </div>
-              ))}
-            </div>
-            <span>Be among the <strong className="text-[#DEC27A]">first to try</strong> ResumeIdol — free to start</span>
+          <div className="flex items-center justify-center gap-2 text-sm" style={{ animation: "fadeUp 0.6s 0.4s ease-out both" }}>
+            <span className="text-[#6B7A99]">Used by candidates targeting</span>
+            <span className="font-semibold" style={{ color: "#DEC27A" }}>Google · Meta · Stripe · Amazon · Apple</span>
           </div>
 
-          {/* Board logos */}
-          <div className="mt-14 fade-section" style={{ animationDelay: "0.5s" }}>
-            <p className="text-[#374151] text-xs uppercase tracking-widest mb-5 font-medium">Searches across</p>
-            <div className="flex items-center justify-center flex-wrap gap-6">
-              {["LinkedIn", "Indeed", "Glassdoor", "Dice", "ZipRecruiter", "Remotive", "+490 more"].map((name) => (
-                <span key={name} className="text-[#374151] text-sm font-medium hover:text-[#6B7A99] transition-colors">
-                  {name}
-                </span>
-              ))}
-            </div>
-          </div>
+          {/* Keyword marquee */}
+          <KeywordMarquee />
         </div>
       </section>
 
-      {/* ── PRODUCT PREVIEW ── */}
-      <section className="pb-24 max-w-5xl mx-auto px-6 -mt-8 fade-section">
-        <ProductPreview />
-      </section>
+      {/* ── RESULT SHOWCASE ── */}
+      <ResultShowcase />
 
       {/* ── STATS ── */}
       <section className="py-20 relative">
@@ -594,7 +533,7 @@ export default function LandingPage() {
           {FEATURES.map((f, i) => {
             const Icon = f.icon;
             return (
-              <div key={f.title} className="card-feature p-6 fade-section" style={{ animationDelay: `${i * 0.08}s` }}>
+              <div key={f.title} className="card-feature p-6 fade-section" style={{ animationDelay: `${i * 0.08}s`, ["--card-glow" as string]: `linear-gradient(90deg, transparent, ${f.color}40, transparent)` }}>
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
                   style={{ background: `${f.color}18`, border: `1px solid ${f.color}30` }}
@@ -627,12 +566,19 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {HOW_IT_WORKS.map((step, i) => (
               <div key={step.step} className="relative fade-section" style={{ animationDelay: `${i * 0.15}s` }}>
-                <div className="glass rounded-2xl p-8 h-full">
-                  <div className="text-gold-gradient font-mono text-4xl font-bold mb-5 opacity-40">
+                <div className="glass rounded-2xl p-8 h-full relative overflow-hidden">
+                  {/* Large background step number */}
+                  <div
+                    className="absolute bottom-2 right-4 font-black leading-none pointer-events-none select-none"
+                    style={{ fontSize: "7rem", fontFamily: "Playfair Display, serif", color: "rgba(201,168,76,0.04)" }}
+                  >
                     {step.step}
                   </div>
-                  <h3 className="heading-md text-[#F0F2F7] mb-3">{step.title}</h3>
-                  <p className="text-[#6B7A99] leading-relaxed">{step.desc}</p>
+                  <div className="text-gold-gradient font-mono text-4xl font-bold mb-5 opacity-40 relative z-10">
+                    {step.step}
+                  </div>
+                  <h3 className="heading-md text-[#F0F2F7] mb-3 relative z-10">{step.title}</h3>
+                  <p className="text-[#6B7A99] leading-relaxed relative z-10">{step.desc}</p>
                 </div>
                 {i < 2 && (
                   <div
