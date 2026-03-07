@@ -20,6 +20,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isPro, setIsPro] = useState(false);
+  const [planLabel, setPlanLabel] = useState("Free — 1 tailor");
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
 
@@ -54,8 +55,14 @@ export default function Navbar() {
       setUser(user);
       if (user) {
         const res = await fetch("/api/pro-status");
-        const { isPro } = await res.json();
+        const { isPro, plan } = await res.json();
         setIsPro(isPro);
+        setPlanLabel(
+          plan === "lifetime" ? "✦ Lifetime — unlimited" :
+          plan === "pro"      ? "✦ Pro — unlimited" :
+          plan === "starter"  ? "Starter — 8/month" :
+                                "Free — 1 tailor"
+        );
       }
     });
 
@@ -64,10 +71,17 @@ export default function Navbar() {
       setUser(u);
       if (u) {
         const res = await fetch("/api/pro-status");
-        const { isPro } = await res.json();
+        const { isPro, plan } = await res.json();
         setIsPro(isPro);
+        setPlanLabel(
+          plan === "lifetime" ? "✦ Lifetime — unlimited" :
+          plan === "pro"      ? "✦ Pro — unlimited" :
+          plan === "starter"  ? "Starter — 8/month" :
+                                "Free — 1 tailor"
+        );
       } else {
         setIsPro(false);
+        setPlanLabel("Free — 1 tailor");
       }
     });
 
@@ -158,11 +172,13 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
-              {isPro && (
+              {(isPro || planLabel.startsWith("Starter")) && (
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
-                  style={{ background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.25)", color: "#DEC27A" }}>
+                  style={isPro
+                    ? { background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.25)", color: "#DEC27A" }
+                    : { background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", color: "#fbbf24" }}>
                   <Crown size={11} />
-                  Pro
+                  {isPro ? "Pro" : "Starter"}
                 </div>
               )}
               {/* Account dropdown */}
@@ -185,7 +201,7 @@ export default function Navbar() {
                       <p className="text-xs text-[#6B7A99] mb-0.5">Signed in as</p>
                       <p className="text-sm text-[#F0F2F7] truncate font-medium">{user.email}</p>
                       <p className="text-xs mt-1.5" style={{ color: isPro ? "#DEC27A" : "#6B7A99" }}>
-                        {isPro ? "✦ Pro plan — 30 tailors/month" : "Free plan — 3 tailors/month"}
+                        {planLabel}
                       </p>
                     </div>
                     {!isPro && (

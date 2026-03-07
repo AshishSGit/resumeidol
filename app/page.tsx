@@ -745,7 +745,7 @@ export default function LandingPage() {
           {/* Trust */}
           <div className="flex items-center justify-center gap-3 text-sm" style={{ animation: "fadeUp 0.6s 0.4s ease-out both" }}>
             {[
-              { icon: "✦", label: "3 free tailors" },
+              { icon: "✦", label: "Try free — no card" },
               { icon: "✦", label: "DOCX + PDF export" },
               { icon: "✦", label: "No credit card" },
             ].map(({ icon, label }, i) => (
@@ -1140,7 +1140,7 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <p className="text-[#6B7A99] text-xs mt-6">3 free tailors per month. No card required.</p>
+            <p className="text-[#6B7A99] text-xs mt-6">1 free tailor. No card required.</p>
           </div>
         </div>
       </section>
