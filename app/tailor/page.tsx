@@ -7,7 +7,8 @@ import Navbar from "@/components/Navbar";
 import { createClient } from "@/utils/supabase/client";
 import {
   Upload, FileText, Zap, Download, CheckCircle, AlertCircle,
-  RotateCcw, ArrowUp, ChevronRight, Loader2, X, Pencil, Check, ExternalLink, Link2
+  RotateCcw, ArrowUp, ChevronRight, Loader2, X, Pencil, Check, ExternalLink, Link2,
+  Tag, TrendingUp, ArrowLeftRight, Copy
 } from "lucide-react";
 
 interface TailorResult {
@@ -1036,13 +1037,24 @@ function TailorInner() {
                 transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
                 {/* Score card */}
-                <div className="card-input p-8 stagger-reveal" style={{ animationDelay: "0ms" }}>
-                  <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.1rem", fontWeight: 600, color: "#F0F2F7", marginBottom: "1.75rem" }} className="flex items-center gap-2.5">
-                    <CheckCircle size={17} className="text-[#22c55e]" />
-                    ATS Optimisation Results
-                  </h3>
+                <div className="card-input overflow-hidden stagger-reveal" style={{ animationDelay: "0ms" }}>
+                  {/* Gold accent line at top */}
+                  <div style={{ height: "2px", background: "linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.7) 30%, rgba(201,168,76,0.9) 55%, transparent 100%)" }} />
+                  <div className="p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <p className="text-[0.68rem] uppercase tracking-widest text-[#4B5563] font-semibold mb-1">ATS Analysis Complete</p>
+                      <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.2rem", fontWeight: 700, color: "#F0F2F7" }}>
+                        Your Resume Score
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}>
+                      <CheckCircle size={12} />
+                      Optimised
+                    </div>
+                  </div>
                   <ScoreRing before={result.atsScoreBefore} after={result.atsScoreAfter} />
-                  {result.atsScoreAfter >= 65 && result.atsScoreAfter > result.atsScoreBefore ? (
+                  {result.atsScoreAfter >= 80 && result.atsScoreAfter - result.atsScoreBefore >= 10 ? (
                   <div className="flex items-center gap-3 mt-7 p-4 rounded-xl" style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.12)" }}>
                     <ArrowUp size={16} className="text-[#22c55e] shrink-0" />
                     <span className="text-[#22c55e] text-sm font-medium">
@@ -1068,33 +1080,51 @@ function TailorInner() {
                       <ExternalLink size={15} />
                     </a>
                   )}
+                  </div>{/* /p-8 */}
                 </div>
 
                 {/* Tabs */}
                 <div className="card-input overflow-hidden stagger-reveal" style={{ animationDelay: "180ms" }}>
-                  {/* Pill-style tab bar */}
-                  <div className="p-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.15)" }}>
-                    <div className="flex gap-1 overflow-x-auto">
+                  {/* Gold accent line at top */}
+                  <div style={{ height: "2px", background: "linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.5) 40%, rgba(201,168,76,0.7) 60%, transparent 100%)" }} />
+                  {/* Tab bar with animated sliding indicator */}
+                  <div className="px-3 pt-3 pb-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.2)" }}>
+                    <div className="flex gap-0.5 overflow-x-auto">
                       {([
-                        { id: "resume", label: "Tailored Resume" },
-                        { id: "compare", label: "Compare" },
-                        { id: "keywords", label: "Keywords" },
-                        { id: "changes", label: "Changes" },
-                        { id: "gaps", label: "Gaps" },
-                      ] as const).map((tab) => (
-                        <button
-                          key={tab.id}
-                          onClick={() => setActiveTab(tab.id)}
-                          className="flex-1 py-2.5 px-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap"
-                          style={{
-                            color: activeTab === tab.id ? "#07090F" : "#6B7A99",
-                            background: activeTab === tab.id ? "linear-gradient(135deg, #DEC27A 0%, #C9A84C 100%)" : "transparent",
-                            fontWeight: activeTab === tab.id ? 600 : 500,
-                          }}
-                        >
-                          {tab.label}
-                        </button>
-                      ))}
+                        { id: "resume",   label: "Tailored Resume", icon: FileText },
+                        { id: "compare",  label: "Compare",         icon: ArrowLeftRight },
+                        { id: "keywords", label: "Keywords",        icon: Tag },
+                        { id: "changes",  label: "Changes",         icon: TrendingUp },
+                        { id: "gaps",     label: "Gaps",            icon: AlertCircle },
+                      ] as const).map((tab) => {
+                        const active = activeTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className="relative flex items-center gap-1.5 py-2.5 px-3 text-xs font-medium rounded-t-lg transition-colors duration-150 whitespace-nowrap"
+                            style={{ color: active ? "#DEC27A" : "#4B5563" }}
+                          >
+                            {active && (
+                              <motion.div
+                                layoutId="tab-pill"
+                                className="absolute inset-0 rounded-t-lg"
+                                style={{
+                                  background: "rgba(201,168,76,0.08)",
+                                  borderTop: "1px solid rgba(201,168,76,0.2)",
+                                  borderLeft: "1px solid rgba(201,168,76,0.1)",
+                                  borderRight: "1px solid rgba(201,168,76,0.1)",
+                                  borderBottom: "1px solid #07090F",
+                                  bottom: "-1px",
+                                }}
+                                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                              />
+                            )}
+                            <tab.icon size={12} className="relative z-10 shrink-0" />
+                            <span className="relative z-10">{tab.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -1109,56 +1139,19 @@ function TailorInner() {
                   >
                     {activeTab === "resume" && (
                       <div>
-                        <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
-                          <span className="text-sm text-[#6B7A99]">
-                            {editMode ? "Editing — changes save to your downloads" : "Copy, edit, or download your tailored resume"}
-                          </span>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <button
-                              onClick={() => setEditMode(!editMode)}
-                              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
-                              style={editMode
-                                ? { background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.3)", color: "#DEC27A" }
-                                : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#6B7A99" }
-                              }
-                            >
-                              {editMode ? <><Check size={11} />Done</> : <><Pencil size={11} />Edit</>}
-                            </button>
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(editedResume);
-                                setCopied(true);
-                                setTimeout(() => setCopied(false), 1500);
-                              }}
-                              className="text-xs px-3 py-1.5 rounded-lg transition-all"
-                              style={copied
-                                ? { background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", color: "#22c55e" }
-                                : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#6B7A99" }
-                              }
-                            >
-                              {copied ? "✓ Copied!" : "Copy"}
-                            </button>
-                            <button onClick={handleDownloadDocx} className="btn-ghost text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                              <Download size={11} />
-                              .docx
-                            </button>
-                            <button onClick={handleDownloadPdf} className="btn-gold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                              <Download size={11} />
-                              PDF
-                            </button>
-                          </div>
-                        </div>
+                        {/* Resume display */}
+                        {/* Resume content */}
                         {editMode ? (
                           <textarea
                             value={editedResume}
                             onChange={(e) => setEditedResume(e.target.value)}
-                            className="input-luxury w-full px-4 py-4 leading-relaxed font-mono resize-none"
+                            className="input-luxury w-full px-4 py-4 leading-relaxed font-mono resize-none mb-5"
                             style={{ minHeight: "460px", fontSize: "0.8rem", color: "#D4DBE8", lineHeight: 1.75 }}
                             spellCheck={false}
                           />
                         ) : (
                           <div
-                            className="p-5 rounded-xl leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono"
+                            className="p-5 rounded-xl leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono mb-5"
                             style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.06)", maxHeight: "460px", fontSize: "0.8rem", color: "#C4CEDF", lineHeight: 1.75 }}
                           >
                             {streamComplete ? editedResume : streamedResume}
@@ -1170,6 +1163,81 @@ function TailorInner() {
                             )}
                           </div>
                         )}
+
+                        {/* Action row */}
+                        <div className="pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                          <p className="text-[0.7rem] uppercase tracking-widest text-[#3A4558] font-semibold mb-3">
+                            {editMode ? "Editing — changes apply to downloads" : "Export your tailored resume"}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 mb-2">
+                            {/* Edit toggle */}
+                            <button
+                              onClick={() => setEditMode(!editMode)}
+                              className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all"
+                              style={editMode
+                                ? { background: "rgba(201,168,76,0.14)", border: "1px solid rgba(201,168,76,0.35)", color: "#DEC27A" }
+                                : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "#9CA3AF" }
+                              }
+                            >
+                              {editMode ? <Check size={14} /> : <Pencil size={14} />}
+                              {editMode ? "Done editing" : "Edit resume"}
+                            </button>
+                            {/* Copy */}
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(editedResume);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 1500);
+                              }}
+                              className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all"
+                              style={copied
+                                ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80" }
+                                : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "#9CA3AF" }
+                              }
+                            >
+                              <Copy size={14} />
+                              {copied ? "Copied!" : "Copy text"}
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            {/* DOCX */}
+                            <button
+                              onClick={handleDownloadDocx}
+                              className="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-all"
+                              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#D4DBE8" }}
+                              onMouseEnter={e => {
+                                (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.09)";
+                                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.2)";
+                              }}
+                              onMouseLeave={e => {
+                                (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.05)";
+                                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.12)";
+                              }}
+                            >
+                              <Download size={14} />
+                              Download .docx
+                            </button>
+                            {/* PDF — primary gold */}
+                            <button
+                              onClick={handleDownloadPdf}
+                              className="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-all"
+                              style={{
+                                background: "linear-gradient(135deg, #C9A84C 0%, #B8952F 100%)",
+                                color: "#07090F",
+                                boxShadow: "0 4px 20px rgba(201,168,76,0.25)",
+                              }}
+                              onMouseEnter={e => {
+                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 28px rgba(201,168,76,0.4)";
+                              }}
+                              onMouseLeave={e => {
+                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 20px rgba(201,168,76,0.25)";
+                              }}
+                            >
+                              <Download size={14} />
+                              Download PDF
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     )}
                     {activeTab === "compare" && (
