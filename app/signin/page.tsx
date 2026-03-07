@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Crown, Mail, Lock, Eye, EyeOff, Loader2,
-  CheckCircle, AlertCircle,
+  CheckCircle, AlertCircle, Wand2, Star,
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
@@ -22,11 +22,36 @@ function GoogleIcon() {
   );
 }
 
-// ── Mini SVG score ring ──────────────────────────────────────────────────────
-function MiniScoreRing({ score, size = 96, gold = false }: { score: number; size?: number; gold?: boolean }) {
+// ── Animated SVG score ring ───────────────────────────────────────────────────
+function MiniScoreRing({ score, size = 96, gold = false, animateRing = false }: {
+  score: number; size?: number; gold?: boolean; animateRing?: boolean;
+}) {
   const r = 38;
   const circ = 2 * Math.PI * r;
-  const filled = (score / 100) * circ;
+  const target = (score / 100) * circ;
+
+  // CSS-transition approach: start at 0, flip to target after mount
+  const [offset, setOffset] = useState(animateRing ? circ : circ - target);
+  const [display, setDisplay] = useState(animateRing ? Math.round(score * 0.55) : score);
+
+  useEffect(() => {
+    if (!animateRing) return;
+    const t1 = setTimeout(() => {
+      setOffset(circ - target);
+      // count-up
+      const start = Math.round(score * 0.55);
+      const steps = 50;
+      const dur = 1500;
+      let n = 0;
+      const iv = setInterval(() => {
+        n++;
+        if (n >= steps) { setDisplay(score); clearInterval(iv); }
+        else setDisplay(Math.round(start + (score - start) * (n / steps)));
+      }, dur / steps);
+    }, 700);
+    return () => clearTimeout(t1);
+  }, [animateRing, circ, target, score]);
+
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox="0 0 100 100" style={{ display: "block", transform: "rotate(-90deg)" }}>
@@ -35,22 +60,40 @@ function MiniScoreRing({ score, size = 96, gold = false }: { score: number; size
           cx="50" cy="50" r={r} fill="none"
           stroke={gold ? "#C9A84C" : "#2A3040"}
           strokeWidth="8"
-          strokeDasharray={`${filled} ${circ}`}
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
           strokeLinecap="round"
-          style={gold ? { filter: "drop-shadow(0 0 8px rgba(201,168,76,0.65))" } : {}}
+          style={{
+            transition: animateRing ? "stroke-dashoffset 1.7s cubic-bezier(0.34,0.05,0.1,1) 0s" : "none",
+            ...(gold ? { filter: "drop-shadow(0 0 8px rgba(201,168,76,0.65))" } : {}),
+          }}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <span style={{ fontSize: size * 0.24, fontWeight: 700, color: gold ? "#DEC27A" : "#4B5563" }}>
-          {score}
+          {display}
         </span>
       </div>
     </div>
   );
 }
 
+// ── Testimonial data ──────────────────────────────────────────────────────────
+const TESTIMONIALS = [
+  { initials: "M", name: "Marcus L.",  company: "Netflix",    quote: "Got 3 interviews in a week. My score went from 58 to 96 on the first try." },
+  { initials: "S", name: "Sarah K.",   company: "Stripe",     quote: "Tailored in 30 seconds. Heard back from the recruiter that same day." },
+  { initials: "J", name: "Jordan R.",  company: "Figma",      quote: "Was getting zero responses. After ResumeIdol, 2 interviews in 4 days." },
+];
+
 // ── Left showcase panel ───────────────────────────────────────────────────────
 function ShowcasePanel() {
+  const [tIdx, setTIdx] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTIdx(i => (i + 1) % TESTIMONIALS.length), 4500);
+    return () => clearInterval(id);
+  }, []);
+  const t = TESTIMONIALS[tIdx];
+
   const stats = [
     { icon: "✦", label: "Keywords injected", value: "+28" },
     { icon: "🛡", label: "ATS compatibility",  value: "94%"   },
@@ -76,7 +119,7 @@ function ShowcasePanel() {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[580px] h-[580px] rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, rgba(201,168,76,0.11) 0%, transparent 65%)" }}
       />
-      {/* Purple accent bottom-right */}
+      {/* Purple accent */}
       <div
         className="absolute bottom-0 right-0 w-72 h-72 rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%)" }}
@@ -95,16 +138,13 @@ function ShowcasePanel() {
         </span>
       </div>
 
-      {/* Score visualization + stats */}
+      {/* Score viz + company strip + stats */}
       <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-        {/* Before → After */}
+        {/* Before → After rings */}
         <div className="flex items-center gap-7 mb-2">
           <div className="text-center">
-            <MiniScoreRing score={52} size={88} gold={false} />
-            <p
-              className="mt-2.5 font-semibold tracking-widest uppercase"
-              style={{ fontSize: "0.58rem", color: "#3A4558", letterSpacing: "0.1em" }}
-            >
+            <MiniScoreRing score={52} size={88} />
+            <p className="mt-2.5 font-semibold tracking-widest uppercase" style={{ fontSize: "0.58rem", color: "#3A4558", letterSpacing: "0.1em" }}>
               Before
             </p>
           </div>
@@ -115,22 +155,40 @@ function ShowcasePanel() {
                 className="absolute inset-[-10px] rounded-full pointer-events-none"
                 style={{ background: "radial-gradient(circle, rgba(201,168,76,0.18) 0%, transparent 70%)" }}
               />
-              <MiniScoreRing score={94} size={112} gold={true} />
+              <MiniScoreRing score={94} size={112} gold animateRing />
+              {/* Breathing glow — fires after ring fills */}
+              <motion.div
+                className="absolute inset-[-6px] rounded-full pointer-events-none"
+                animate={{ boxShadow: ["0 0 0px rgba(201,168,76,0)", "0 0 28px rgba(201,168,76,0.28)", "0 0 0px rgba(201,168,76,0)"] }}
+                transition={{ delay: 2.5, duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              />
             </div>
-            <p
-              className="mt-2.5 font-semibold tracking-widest uppercase"
-              style={{ fontSize: "0.58rem", color: "#C9A84C", letterSpacing: "0.1em" }}
-            >
+            <p className="mt-2.5 font-semibold tracking-widest uppercase" style={{ fontSize: "0.58rem", color: "#C9A84C", letterSpacing: "0.1em" }}>
               After
             </p>
           </div>
         </div>
-        <p
-          className="mb-9 tracking-widest uppercase"
-          style={{ fontSize: "0.58rem", color: "#2A3040", letterSpacing: "0.14em" }}
-        >
+        <p className="mb-5 tracking-widest uppercase" style={{ fontSize: "0.58rem", color: "#2A3040", letterSpacing: "0.14em" }}>
           ATS Match Score
         </p>
+
+        {/* Company name-drop */}
+        <div className="w-full max-w-[268px] mb-7 text-center">
+          <p className="mb-2" style={{ fontSize: "0.58rem", color: "#2A3040", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            Candidates from
+          </p>
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {["Google", "Stripe", "Netflix", "OpenAI", "Figma", "Apple"].map(co => (
+              <span
+                key={co}
+                className="text-[10px] px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", color: "#4B5563" }}
+              >
+                {co}
+              </span>
+            ))}
+          </div>
+        </div>
 
         {/* Stat cards */}
         {stats.map(({ icon, label, value }, i) => (
@@ -140,10 +198,7 @@ function ShowcasePanel() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.45 + i * 0.15, duration: 0.5, ease: "easeOut" }}
             className="w-full max-w-[268px] flex items-center justify-between px-4 py-2.5 rounded-xl mb-2.5"
-            style={{
-              background: "rgba(201,168,76,0.04)",
-              border: "1px solid rgba(201,168,76,0.1)",
-            }}
+            style={{ background: "rgba(201,168,76,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}
           >
             <div className="flex items-center gap-2.5">
               <span className="text-xs">{icon}</span>
@@ -154,38 +209,69 @@ function ShowcasePanel() {
         ))}
       </div>
 
-      {/* Testimonial */}
-      <div className="relative z-10 pt-6 border-t border-[rgba(255,255,255,0.05)]">
-        <p className="text-sm leading-relaxed" style={{ color: "#4B5563", fontStyle: "italic" }}>
-          &ldquo;Got 3 interviews in a week. Score went from 58 to 96 on the first try.&rdquo;
-        </p>
-        <div className="flex items-center gap-2.5 mt-3">
-          <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-            style={{ background: "rgba(201,168,76,0.12)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.22)" }}
+      {/* Cycling testimonial */}
+      <div className="relative z-10 pt-6 border-t border-[rgba(255,255,255,0.05)]" style={{ minHeight: "120px" }}>
+        <div className="flex gap-0.5 mb-3">
+          {[...Array(5)].map((_, i) => <Star key={i} size={11} fill="#C9A84C" stroke="none" />)}
+        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tIdx}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.35 }}
           >
-            M
-          </div>
-          <span className="text-xs" style={{ color: "#374151" }}>Marcus L. — hired at Netflix</span>
+            <p className="text-sm leading-relaxed mb-3" style={{ color: "#8A97B0", fontStyle: "italic" }}>
+              &ldquo;{t.quote}&rdquo;
+            </p>
+            <div className="flex items-center gap-2.5">
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                style={{ background: "rgba(201,168,76,0.12)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.22)" }}
+              >
+                {t.initials}
+              </div>
+              <div>
+                <span className="text-xs font-medium" style={{ color: "#9CA3AF" }}>{t.name}</span>
+                <span className="text-xs" style={{ color: "#4B5563" }}> — hired at {t.company}</span>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+        {/* Dot indicators */}
+        <div className="flex gap-1.5 mt-4">
+          {TESTIMONIALS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setTIdx(i)}
+              className="transition-all duration-300"
+              style={{
+                width: i === tIdx ? "16px" : "5px",
+                height: "5px",
+                borderRadius: "999px",
+                background: i === tIdx ? "#C9A84C" : "rgba(201,168,76,0.2)",
+              }}
+            />
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-// ── Shell (right side) ───────────────────────────────────────────────────────
+// ── Shell (right side) ────────────────────────────────────────────────────────
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen grid lg:grid-cols-2" style={{ background: "#07090F" }}>
       <ShowcasePanel />
       <div className="flex flex-col items-center justify-center px-8 py-16 relative overflow-hidden">
-        {/* Subtle right-side bloom */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] rounded-full pointer-events-none"
           style={{ background: "radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 60%)" }}
         />
 
-        {/* Logo with pulsing ring */}
+        {/* Logo + pulsing ring */}
         <Link href="/" className="flex items-center gap-3 mb-10 relative z-10">
           <div className="relative">
             <motion.div
@@ -201,23 +287,12 @@ function Shell({ children }: { children: React.ReactNode }) {
             />
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{
-                background: "linear-gradient(135deg, #C9A84C, #B8952F)",
-                boxShadow: "0 0 24px rgba(201,168,76,0.5)",
-              }}
+              style={{ background: "linear-gradient(135deg, #C9A84C, #B8952F)", boxShadow: "0 0 24px rgba(201,168,76,0.5)" }}
             >
               <Crown size={18} className="text-[#07090F]" strokeWidth={2.5} />
             </div>
           </div>
-          <span
-            style={{
-              fontFamily: "Playfair Display, serif",
-              fontWeight: 700,
-              fontSize: "1.35rem",
-              color: "#F0F2F7",
-              letterSpacing: "-0.01em",
-            }}
-          >
+          <span style={{ fontFamily: "Playfair Display, serif", fontWeight: 700, fontSize: "1.35rem", color: "#F0F2F7", letterSpacing: "-0.01em" }}>
             ResumeIdol
           </span>
         </Link>
@@ -231,16 +306,15 @@ function Shell({ children }: { children: React.ReactNode }) {
           {children}
         </motion.div>
 
-        {/* Social proof */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.0 }}
           className="mt-8 text-xs relative z-10"
-          style={{ color: "#2A3040" }}
+          style={{ color: "#3A4558" }}
         >
           ✦ Trusted by{" "}
-          <span style={{ color: "#4B5563" }}>2,847</span>{" "}
+          <span style={{ color: "#6B7A99" }}>2,847</span>{" "}
           job seekers this week
         </motion.p>
       </div>
@@ -248,32 +322,26 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ── Page ─────────────────────────────────────────────────────────────────────
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default function SignInPage() {
-  const [mode, setMode]               = useState<Mode>("signin");
-  const [email, setEmail]             = useState("");
-  const [password, setPassword]       = useState("");
+  const [mode, setMode]             = useState<Mode>("signin");
+  const [email, setEmail]           = useState("");
+  const [password, setPassword]     = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading]         = useState(false);
+  const [loading, setLoading]       = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [error, setError]             = useState<string | null>(null);
+  const [error, setError]           = useState<string | null>(null);
 
   const supabase = createClient();
 
-  const reset = (nextMode: Mode) => {
-    setError(null);
-    setMode(nextMode);
-  };
+  const reset = (nextMode: Mode) => { setError(null); setMode(nextMode); };
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
     setError(null);
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: "https://resumeidol.com/auth/callback",
-        queryParams: { prompt: "select_account" },
-      },
+      options: { redirectTo: "https://resumeidol.com/auth/callback", queryParams: { prompt: "select_account" } },
     });
   };
 
@@ -281,62 +349,39 @@ export default function SignInPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
     if (mode === "signup") {
       const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) {
-        setError(error.message);
-      } else if (data.user && data.user.identities && data.user.identities.length === 0) {
-        setError("An account with this email already exists. Sign in instead.");
-        setLoading(false);
-        return;
-      } else if (data.session) {
-        window.location.href = "/tailor";
-      } else {
-        setMode("sent_signup");
-      }
+      if (error) { setError(error.message); }
+      else if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setError("An account with this email already exists. Sign in instead."); setLoading(false); return;
+      } else if (data.session) { window.location.href = "/tailor"; }
+      else { setMode("sent_signup"); }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         const msg = error.message.toLowerCase();
-        if (msg.includes("invalid login credentials") || msg.includes("invalid email or password")) {
-          setError("Incorrect email or password. Try again or use magic link.");
-        } else {
-          setError(error.message);
-        }
-      } else {
-        window.location.href = "/tailor";
-      }
+        setError(msg.includes("invalid login credentials") || msg.includes("invalid email or password")
+          ? "Incorrect email or password. Try again or use magic link."
+          : error.message);
+      } else { window.location.href = "/tailor"; }
     }
     setLoading(false);
   };
 
   const handleMagicLink = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: "https://resumeidol.com/auth/callback" },
-    });
-    if (error) setError(error.message);
-    else setMode("sent_magic");
+    e.preventDefault(); setLoading(true); setError(null);
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: "https://resumeidol.com/auth/callback" } });
+    if (error) setError(error.message); else setMode("sent_magic");
     setLoading(false);
   };
 
   const handleForgot = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://resumeidol.com/auth/callback?next=/update-password",
-    });
-    if (error) setError(error.message);
-    else setMode("sent_reset");
+    e.preventDefault(); setLoading(true); setError(null);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: "https://resumeidol.com/auth/callback?next=/update-password" });
+    if (error) setError(error.message); else setMode("sent_reset");
     setLoading(false);
   };
 
-  // ── Stagger helper ──────────────────────────────────────────────────────────
   const fadeUp = (delay: number) => ({
     initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
@@ -345,21 +390,12 @@ export default function SignInPage() {
 
   // ── Sent states ─────────────────────────────────────────────────────────────
   if (mode === "sent_magic" || mode === "sent_signup" || mode === "sent_reset") {
-    const headlines: Record<string, string> = {
-      sent_magic:  "Check your inbox",
-      sent_signup: "Confirm your email",
-      sent_reset:  "Check your inbox",
+    const copy: Record<string, { head: string; prefix: string; body: string }> = {
+      sent_magic:  { head: "Check your inbox",  prefix: "We sent a magic link to ",         body: " Click it to sign in — no password needed." },
+      sent_signup: { head: "Confirm your email", prefix: "We sent a confirmation email to ", body: " Click the link to activate your account." },
+      sent_reset:  { head: "Check your inbox",  prefix: "We sent a reset link to ",          body: " Click it to choose a new password." },
     };
-    const messages: Record<string, string> = {
-      sent_magic:  " Click it to sign in — no password needed.",
-      sent_signup: " Click the confirmation link to activate your account.",
-      sent_reset:  " Click it to choose a new password.",
-    };
-    const prefix: Record<string, string> = {
-      sent_magic:  "We sent a magic link to ",
-      sent_signup: "We sent a confirmation email to ",
-      sent_reset:  "We sent a password reset link to ",
-    };
+    const { head, prefix, body } = copy[mode];
     return (
       <Shell>
         <div className="text-center">
@@ -372,25 +408,12 @@ export default function SignInPage() {
           >
             <CheckCircle size={28} className="text-[#22c55e]" />
           </motion.div>
-          <h2
-            className="text-[#F0F2F7] font-semibold text-xl mb-3"
-            style={{ fontFamily: "Playfair Display, serif" }}
-          >
-            {headlines[mode]}
-          </h2>
+          <h2 className="text-[#F0F2F7] font-semibold text-xl mb-3" style={{ fontFamily: "Playfair Display, serif" }}>{head}</h2>
           <p className="text-sm leading-relaxed" style={{ color: "#6B7A99" }}>
-            {prefix[mode]}
-            <span style={{ color: "#DEC27A", fontWeight: 500 }}>{email}</span>.
-            {messages[mode]}
+            {prefix}<span style={{ color: "#DEC27A", fontWeight: 500 }}>{email}</span>.{body}
           </p>
-          <p className="text-xs mt-3" style={{ color: "#374151" }}>
-            Don&apos;t see it? Check your spam folder.
-          </p>
-          <button
-            onClick={() => reset("signin")}
-            className="mt-7 text-xs hover:text-[#9CA3AF] transition-colors underline underline-offset-2"
-            style={{ color: "#6B7A99" }}
-          >
+          <p className="text-xs mt-3" style={{ color: "#374151" }}>Don&apos;t see it? Check your spam folder.</p>
+          <button onClick={() => reset("signin")} className="mt-7 text-xs hover:text-[#9CA3AF] transition-colors underline underline-offset-2" style={{ color: "#6B7A99" }}>
             Back to sign in
           </button>
         </div>
@@ -403,14 +426,8 @@ export default function SignInPage() {
     return (
       <Shell>
         <motion.div {...fadeUp(0)} className="mb-7">
-          <h1
-            style={{ fontFamily: "Playfair Display, serif", fontSize: "1.75rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.4rem" }}
-          >
-            Reset password
-          </h1>
-          <p className="text-sm" style={{ color: "#6B7A99" }}>
-            Enter your email and we&apos;ll send a reset link.
-          </p>
+          <h1 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.75rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.4rem" }}>Reset password</h1>
+          <p className="text-sm" style={{ color: "#6B7A99" }}>Enter your email and we&apos;ll send a reset link.</p>
         </motion.div>
         <motion.form {...fadeUp(0.08)} onSubmit={handleForgot} className="space-y-4">
           <EmailField email={email} setEmail={setEmail} />
@@ -418,11 +435,7 @@ export default function SignInPage() {
           <SubmitBtn loading={loading} label="Send reset link" />
         </motion.form>
         <motion.div {...fadeUp(0.16)}>
-          <button
-            onClick={() => reset("signin")}
-            className="mt-5 w-full text-xs text-center hover:text-[#6B7A99] transition-colors"
-            style={{ color: "#3A4558" }}
-          >
+          <button onClick={() => reset("signin")} className="mt-5 w-full text-xs text-center hover:text-[#6B7A99] transition-colors" style={{ color: "#3A4558" }}>
             ← Back to sign in
           </button>
         </motion.div>
@@ -435,14 +448,8 @@ export default function SignInPage() {
     return (
       <Shell>
         <motion.div {...fadeUp(0)} className="mb-7">
-          <h1
-            style={{ fontFamily: "Playfair Display, serif", fontSize: "1.75rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.4rem" }}
-          >
-            Magic link
-          </h1>
-          <p className="text-sm" style={{ color: "#6B7A99" }}>
-            We&apos;ll email you a one-click sign-in — no password needed.
-          </p>
+          <h1 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.75rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.4rem" }}>Magic link</h1>
+          <p className="text-sm" style={{ color: "#6B7A99" }}>We&apos;ll email you a one-click sign-in — no password needed.</p>
         </motion.div>
         <motion.form {...fadeUp(0.08)} onSubmit={handleMagicLink} className="space-y-4">
           <EmailField email={email} setEmail={setEmail} />
@@ -450,17 +457,11 @@ export default function SignInPage() {
           <SubmitBtn loading={loading} label="Send magic link" />
         </motion.form>
         <motion.div {...fadeUp(0.16)}>
-          <button
-            onClick={() => reset("signin")}
-            className="mt-5 w-full text-xs text-center hover:text-[#6B7A99] transition-colors"
-            style={{ color: "#3A4558" }}
-          >
+          <button onClick={() => reset("signin")} className="mt-5 w-full text-xs text-center hover:text-[#6B7A99] transition-colors" style={{ color: "#3A4558" }}>
             ← Use email &amp; password instead
           </button>
         </motion.div>
-        <motion.div {...fadeUp(0.2)}>
-          <TosLine />
-        </motion.div>
+        <motion.div {...fadeUp(0.2)}><TosLine /></motion.div>
       </Shell>
     );
   }
@@ -470,11 +471,8 @@ export default function SignInPage() {
 
   return (
     <Shell>
-      {/* Heading */}
       <motion.div {...fadeUp(0)} className="mb-7">
-        <h1
-          style={{ fontFamily: "Playfair Display, serif", fontSize: "1.9rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.4rem", letterSpacing: "-0.02em" }}
-        >
+        <h1 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.9rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.4rem", letterSpacing: "-0.02em" }}>
           {isSignup ? "Create account" : "Welcome back."}
         </h1>
         <p className="text-sm" style={{ color: "#6B7A99" }}>
@@ -488,19 +486,11 @@ export default function SignInPage() {
           onClick={handleGoogle}
           disabled={googleLoading}
           className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl text-sm font-medium transition-all disabled:opacity-60 mb-5"
-          style={{
-            background: "rgba(255,255,255,0.96)",
-            color: "#111827",
-            boxShadow: "0 2px 16px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.1) inset",
-          }}
+          style={{ background: "rgba(255,255,255,0.96)", color: "#111827", boxShadow: "0 2px 16px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.1) inset" }}
           onMouseEnter={e => (e.currentTarget.style.background = "#fff")}
           onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.96)")}
         >
-          {googleLoading ? (
-            <Loader2 size={16} className="animate-spin" style={{ color: "#111" }} />
-          ) : (
-            <GoogleIcon />
-          )}
+          {googleLoading ? <Loader2 size={16} className="animate-spin" style={{ color: "#111" }} /> : <GoogleIcon />}
           Continue with Google
         </button>
       </motion.div>
@@ -512,10 +502,9 @@ export default function SignInPage() {
         <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.07)" }} />
       </motion.div>
 
-      {/* Email + password form */}
+      {/* Email + password */}
       <motion.form {...fadeUp(0.16)} onSubmit={handlePasswordAuth} className="space-y-3.5">
         <EmailField email={email} setEmail={setEmail} />
-
         <div>
           <label className="text-xs mb-1.5 block" style={{ color: "#6B7A99" }}>Password</label>
           <div className="relative">
@@ -529,17 +518,11 @@ export default function SignInPage() {
               minLength={isSignup ? 8 : 1}
               className="input-luxury w-full pl-10 pr-10 py-3 text-sm"
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 hover:text-[#6B7A99] transition-colors"
-              style={{ color: "#374151" }}
-            >
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 hover:text-[#6B7A99] transition-colors" style={{ color: "#374151" }}>
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
         </div>
-
         <ErrorMsg error={error} />
         <SubmitBtn loading={loading} label={isSignup ? "Create account →" : "Sign in →"} />
       </motion.form>
@@ -547,30 +530,34 @@ export default function SignInPage() {
       {/* Footer links */}
       <motion.div {...fadeUp(0.22)} className="mt-4 flex items-center justify-between text-xs" style={{ color: "#3A4558" }}>
         {!isSignup && (
-          <button onClick={() => reset("forgot")} className="hover:text-[#6B7A99] transition-colors">
-            Forgot password?
-          </button>
+          <button onClick={() => reset("forgot")} className="hover:text-[#6B7A99] transition-colors">Forgot password?</button>
         )}
-        <button
-          onClick={() => reset(isSignup ? "signin" : "signup")}
-          className="hover:text-[#6B7A99] transition-colors ml-auto"
-        >
+        <button onClick={() => reset(isSignup ? "signin" : "signup")} className="hover:text-[#6B7A99] transition-colors ml-auto">
           {isSignup ? "Have an account? Sign in" : "New here? Create account"}
         </button>
       </motion.div>
 
-      <motion.div {...fadeUp(0.26)} className="mt-3 text-center">
+      {/* Magic link — gold, prominent */}
+      <motion.div {...fadeUp(0.26)} className="mt-3">
         <button
           onClick={() => reset("magic")}
-          className="text-xs hover:text-[#6B7A99] transition-colors"
-          style={{ color: "#3A4558" }}
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-medium transition-all"
+          style={{ color: "#C9A84C", background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.18)" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(201,168,76,0.12)"; e.currentTarget.style.borderColor = "rgba(201,168,76,0.32)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "rgba(201,168,76,0.06)"; e.currentTarget.style.borderColor = "rgba(201,168,76,0.18)"; }}
         >
-          Use magic link instead →
+          <Wand2 size={13} />
+          Sign in with magic link — no password needed
         </button>
       </motion.div>
 
-      <motion.div {...fadeUp(0.3)}>
-        <TosLine />
+      <motion.div {...fadeUp(0.3)}><TosLine /></motion.div>
+
+      {/* Escape hatch for skeptics */}
+      <motion.div {...fadeUp(0.34)} className="mt-4 text-center">
+        <Link href="/tailor" className="text-xs transition-colors hover:text-[#9CA3AF]" style={{ color: "#2A3040" }}>
+          Just want to try? Tailor without signing in →
+        </Link>
       </motion.div>
     </Shell>
   );
@@ -584,15 +571,7 @@ function EmailField({ email, setEmail }: { email: string; setEmail: (v: string) 
       <label className="text-xs mb-1.5 block" style={{ color: "#6B7A99" }}>Email address</label>
       <div className="relative">
         <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "#374151" }} />
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          required
-          autoFocus
-          className="input-luxury w-full pl-10 pr-4 py-3 text-sm"
-        />
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required autoFocus className="input-luxury w-full pl-10 pr-4 py-3 text-sm" />
       </div>
     </div>
   );
@@ -602,19 +581,14 @@ function ErrorMsg({ error }: { error: string | null }) {
   if (!error) return null;
   return (
     <div className="flex items-center gap-2 text-xs" style={{ color: "#f87171" }}>
-      <AlertCircle size={13} />
-      {error}
+      <AlertCircle size={13} />{error}
     </div>
   );
 }
 
 function SubmitBtn({ loading, label }: { loading: boolean; label: string }) {
   return (
-    <button
-      type="submit"
-      disabled={loading}
-      className="btn-gold w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
+    <button type="submit" disabled={loading} className="btn-gold w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
       {loading && <Loader2 size={15} className="animate-spin" />}
       {label}
     </button>
