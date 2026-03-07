@@ -968,7 +968,7 @@ function TailorInner() {
                         boxShadow: active ? "0 0 20px rgba(201,168,76,0.25)" : "none",
                       }}
                     >
-                      {done ? <CheckCircle size={16} style={{ color: "#C9A84C" }} /> : n}
+                      {done ? <CheckCircle size={16} style={{ color: "#C9A84C" }} /> : (active && n === 3) ? <Zap size={15} style={{ color: "#DEC27A" }} /> : n}
                     </div>
                     <span className="text-[0.68rem] font-medium transition-colors duration-300" style={{ color: active ? "#DEC27A" : done ? "#C9A84C" : "#4B5563" }}>
                       {label}
@@ -1511,34 +1511,48 @@ function TailorInner() {
                         )}
 
                         {/* Action row */}
-                        <div className="pt-5 mt-1" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                        <div className="pt-6 mt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                           {editMode ? (
-                            <p className="text-[0.7rem] uppercase tracking-widest text-[#3A4558] font-semibold mb-3">Editing — changes apply to downloads</p>
+                            <p className="text-xs uppercase tracking-widest text-[#3A4558] font-semibold mb-4">Editing — changes apply to downloads</p>
                           ) : (
-                            <div className="flex items-center gap-2.5 mb-4">
-                              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)" }}>
-                                <Crown size={13} style={{ color: "#C9A84C" }} />
+                            <div className="flex items-center gap-3 mb-5">
+                              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.22)" }}>
+                                <Crown size={16} style={{ color: "#C9A84C" }} />
                               </div>
                               <div>
-                                <p className="text-sm font-semibold" style={{ color: "#DEC27A" }}>Your resume is interview-ready</p>
-                                <p className="text-xs" style={{ color: "#4B5563" }}>Download or copy below — it&apos;s tailored specifically for this role</p>
+                                <p className="text-base font-bold" style={{ color: "#DEC27A" }}>Your resume is interview-ready</p>
+                                <p className="text-sm" style={{ color: "#4B5563" }}>Tailored specifically for this role — download to apply</p>
                               </div>
                             </div>
                           )}
+
+                          {/* Primary CTA — PDF full width */}
+                          <button
+                            onClick={handleDownloadPdf}
+                            className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-bold text-base transition-all mb-3"
+                            style={downloadedPdf
+                              ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80", boxShadow: "0 4px 16px rgba(34,197,94,0.15)" }
+                              : { background: "linear-gradient(135deg, #C9A84C 0%, #B8952F 100%)", color: "#07090F", boxShadow: "0 6px 28px rgba(201,168,76,0.35)" }
+                            }
+                          >
+                            {downloadedPdf ? <CheckCircle size={17} /> : <Download size={17} />}
+                            {downloadedPdf ? "Downloaded! Good luck." : "Download PDF"}
+                            {!downloadedPdf && <span className="text-xs font-normal opacity-60 ml-1">Best for applications</span>}
+                          </button>
+
+                          {/* Secondary row — DOCX + Copy */}
                           <div className="grid grid-cols-2 gap-2 mb-2">
-                            {/* Edit toggle */}
                             <button
-                              onClick={() => setEditMode(!editMode)}
-                              className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all"
-                              style={editMode
-                                ? { background: "rgba(201,168,76,0.14)", border: "1px solid rgba(201,168,76,0.35)", color: "#DEC27A" }
-                                : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "#9CA3AF" }
+                              onClick={handleDownloadDocx}
+                              className="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-all"
+                              style={downloadedDocx
+                                ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80" }
+                                : { background: "linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(29,78,216,0.08) 100%)", border: "1px solid rgba(96,165,250,0.25)", color: "#93c5fd", boxShadow: "0 4px 14px rgba(37,99,235,0.1)" }
                               }
                             >
-                              {editMode ? <Check size={14} /> : <Pencil size={14} />}
-                              {editMode ? "Done editing" : "Edit resume"}
+                              {downloadedDocx ? <CheckCircle size={14} /> : <Download size={14} />}
+                              {downloadedDocx ? "Saved!" : "Word .docx"}
                             </button>
-                            {/* Copy */}
                             <button
                               onClick={() => {
                                 if (requireAuth("copy")) return;
@@ -1546,7 +1560,7 @@ function TailorInner() {
                                 setCopied(true);
                                 setTimeout(() => setCopied(false), 1500);
                               }}
-                              className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all"
+                              className="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-all"
                               style={copied
                                 ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80" }
                                 : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "#9CA3AF" }
@@ -1556,38 +1570,19 @@ function TailorInner() {
                               {copied ? "Copied!" : "Copy text"}
                             </button>
                           </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            {/* DOCX — Word blue */}
-                            <button
-                              onClick={handleDownloadDocx}
-                              className="flex flex-col items-center justify-center gap-1 py-3.5 rounded-xl text-sm font-semibold transition-all"
-                              style={downloadedDocx
-                                ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80", boxShadow: "0 4px 16px rgba(34,197,94,0.15)" }
-                                : { background: "linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(29,78,216,0.08) 100%)", border: "1px solid rgba(96,165,250,0.25)", color: "#93c5fd", boxShadow: "0 4px 16px rgba(37,99,235,0.12)" }
-                              }
-                            >
-                              <div className="flex items-center gap-1.5">
-                                {downloadedDocx ? <CheckCircle size={13} /> : <Download size={13} />}
-                                {downloadedDocx ? "Downloaded!" : "Word .docx"}
-                              </div>
-                              <span className="text-[0.6rem] opacity-60 font-normal tracking-wider">{downloadedDocx ? "Opening in Word" : "ATS-friendly format"}</span>
-                            </button>
-                            {/* PDF — primary gold */}
-                            <button
-                              onClick={handleDownloadPdf}
-                              className="flex flex-col items-center justify-center gap-1 py-3.5 rounded-xl text-sm font-semibold transition-all"
-                              style={downloadedPdf
-                                ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80", boxShadow: "0 4px 16px rgba(34,197,94,0.15)" }
-                                : { background: "linear-gradient(135deg, #C9A84C 0%, #B8952F 100%)", color: "#07090F", boxShadow: "0 4px 20px rgba(201,168,76,0.28)" }
-                              }
-                            >
-                              <div className="flex items-center gap-1.5">
-                                {downloadedPdf ? <CheckCircle size={13} /> : <Download size={13} />}
-                                {downloadedPdf ? "Downloaded!" : "Download PDF"}
-                              </div>
-                              <span className="text-[0.6rem] opacity-60 font-normal tracking-wider">{downloadedPdf ? "Good luck!" : "Best for applications"}</span>
-                            </button>
-                          </div>
+
+                          {/* Tertiary — edit toggle */}
+                          <button
+                            onClick={() => setEditMode(!editMode)}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all"
+                            style={editMode
+                              ? { background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.28)", color: "#DEC27A" }
+                              : { background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: "#4B5563" }
+                            }
+                          >
+                            {editMode ? <Check size={13} /> : <Pencil size={13} />}
+                            {editMode ? "Done editing" : "Edit before downloading"}
+                          </button>
                         </div>
                       </div>
                     )}

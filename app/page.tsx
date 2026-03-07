@@ -749,9 +749,9 @@ export default function LandingPage() {
           {/* Trust */}
           <div className="flex items-center justify-center gap-3 text-sm" style={{ animation: "fadeUp 0.6s 0.4s ease-out both" }}>
             {[
-              { icon: "✦", label: "Try free — no card" },
-              { icon: "✦", label: "DOCX + PDF export" },
-              { icon: "✦", label: "No credit card" },
+              { icon: "✦", label: "3 free tailors, no card" },
+              { icon: "✦", label: "Beat ATS filters instantly" },
+              { icon: "✦", label: "DOCX + PDF in seconds" },
             ].map(({ icon, label }, i) => (
               <span key={i} className="flex items-center gap-1.5">
                 {i > 0 && <span className="text-[#2A3040]">·</span>}
