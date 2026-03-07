@@ -625,6 +625,7 @@ function TailorInner() {
             if (pending.jobTitle) setJobTitle(pending.jobTitle);
             if (pending.company) setCompany(pending.company);
             if (pending.resumeText) setResumeText(pending.resumeText);
+            window.scrollTo(0, 0);
           }
         } catch { /* sessionStorage not available */ }
       }
@@ -802,6 +803,8 @@ function TailorInner() {
       setResult(data);
       setEditedResume(data.tailoredResume);
       setEditMode(false);
+      // Snap to top while loading overlay is still visible — score hero is first thing user sees
+      window.scrollTo(0, 0);
       // Show blur gate for unauthenticated users — fires at moment of maximum desire
       if (!user) {
         setShowResultsGate(true);
