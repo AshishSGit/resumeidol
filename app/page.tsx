@@ -122,7 +122,7 @@ const PRICING = [
       "No renewals, no expiry",
       "Priority support",
     ],
-    cta: "Claim Founder Price →",
+    cta: "Get Lifetime Access →",
     plan: "lifetime",
     featured: false,
     badge: "Best Value",
@@ -937,7 +937,7 @@ export default function LandingPage() {
                 {plan.badge && (
                   <div className={`absolute -top-4 left-1/2 -translate-x-1/2 z-10 ${isPro ? "badge-shimmer" : ""}`}
                   style={isLifetime ? {
-                    background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.35)", color: "#a5b4fc",
+                    background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.35)", color: "#34d399",
                     fontSize: "0.72rem", fontWeight: 600, padding: "0.22rem 0.75rem", borderRadius: "9999px", whiteSpace: "nowrap"
                   } : {}}>
                     {plan.badge}
@@ -953,11 +953,11 @@ export default function LandingPage() {
                     ["--pricing-hover-shadow" as string]: "0 32px 90px rgba(201,168,76,0.18), 0 0 0 1px rgba(201,168,76,0.25)",
                     ["--pricing-hover-border" as string]: "rgba(201,168,76,0.6)",
                   } : isLifetime ? {
-                    background: "linear-gradient(160deg, #10131F 0%, #0B0E1A 100%)",
-                    border: "1px solid rgba(99,102,241,0.25)",
-                    boxShadow: "0 0 60px rgba(99,102,241,0.06)",
-                    ["--pricing-hover-shadow" as string]: "0 32px 80px rgba(99,102,241,0.15), 0 0 0 1px rgba(99,102,241,0.3)",
-                    ["--pricing-hover-border" as string]: "rgba(99,102,241,0.5)",
+                    background: "linear-gradient(160deg, #0C1A15 0%, #0A150F 100%)",
+                    border: "1px solid rgba(16,185,129,0.2)",
+                    boxShadow: "0 0 60px rgba(16,185,129,0.07)",
+                    ["--pricing-hover-shadow" as string]: "0 32px 80px rgba(16,185,129,0.15), 0 0 0 1px rgba(16,185,129,0.3)",
+                    ["--pricing-hover-border" as string]: "rgba(16,185,129,0.45)",
                   } : {
                     background: "#0F1420",
                     border: "1px solid rgba(255,255,255,0.07)",
@@ -970,14 +970,14 @@ export default function LandingPage() {
                     background: isPro
                       ? "linear-gradient(90deg, transparent, rgba(201,168,76,0.6), transparent)"
                       : isLifetime
-                      ? "linear-gradient(90deg, transparent, rgba(99,102,241,0.4), transparent)"
+                      ? "linear-gradient(90deg, transparent, rgba(16,185,129,0.4), transparent)"
                       : "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
                   }} />
 
                   {/* Plan name + desc */}
                   <h3
                     className="text-xl font-bold mb-1 mt-1"
-                    style={{ color: isPro ? "#DEC27A" : isLifetime ? "#a5b4fc" : "#F0F2F7", fontFamily: "Playfair Display, serif" }}
+                    style={{ color: isPro ? "#DEC27A" : isLifetime ? "#34d399" : "#F0F2F7", fontFamily: "Playfair Display, serif" }}
                   >
                     {plan.name}
                   </h3>
@@ -994,7 +994,7 @@ export default function LandingPage() {
                         style={{
                           fontFamily: "Playfair Display, serif",
                           fontSize: plan.plan === "free" ? "3.5rem" : "4.5rem",
-                          color: isLifetime ? "#a5b4fc" : undefined,
+                          color: isLifetime ? "#34d399" : undefined,
                         }}
                       >
                         {displayPrice === "0" ? "Free" : displayPrice}
@@ -1016,9 +1016,9 @@ export default function LandingPage() {
 
                   {/* Lifetime value callout */}
                   {isLifetime && (
-                    <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl mb-4" style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}>
-                      <TrendingUp size={13} className="shrink-0 mt-0.5" style={{ color: "#818cf8" }} />
-                      <p className="text-[0.78rem] leading-snug" style={{ color: "#a5b4fc" }}>
+                    <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl mb-4" style={{ background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.18)" }}>
+                      <TrendingUp size={13} className="shrink-0 mt-0.5" style={{ color: "#10b981" }} />
+                      <p className="text-[0.78rem] leading-snug" style={{ color: "#6ee7b7" }}>
                         Pay once. Use it every job search, for every role, for the rest of your career — no renewals, no surprises.
                       </p>
                     </div>
@@ -1028,7 +1028,7 @@ export default function LandingPage() {
                   <ul className="space-y-3 mb-8 flex-1">
                     {plan.features.map((f) => (
                       <li key={f} className="flex items-center gap-3 text-[0.88rem] text-[#9CA3AF]">
-                        <CheckCircle size={15} className="shrink-0" style={{ color: isPro ? "#C9A84C" : isLifetime ? "#818cf8" : "#6B7A99" }} />
+                        <CheckCircle size={15} className="shrink-0" style={{ color: isPro ? "#C9A84C" : isLifetime ? "#10b981" : "#6B7A99" }} />
                         {f}
                       </li>
                     ))}
@@ -1039,13 +1039,8 @@ export default function LandingPage() {
                     onClick={() => handleCheckout(checkoutPlan)}
                     disabled={checkoutLoading !== null}
                     className={`w-full text-center py-3.5 rounded-xl font-semibold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isPro ? "btn-gold" : isLifetime ? "btn-indigo" : "btn-ghost"
+                      isPro ? "btn-gold" : isLifetime ? "btn-emerald" : "btn-ghost"
                     }`}
-                    style={isLifetime ? {
-                      background: "rgba(99,102,241,0.15)",
-                      border: "1px solid rgba(99,102,241,0.35)",
-                      color: "#a5b4fc",
-                    } : {}}
                   >
                     {checkoutLoading === plan.plan ? "Redirecting…" : plan.cta}
                   </button>

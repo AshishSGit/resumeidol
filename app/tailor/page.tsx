@@ -582,8 +582,8 @@ function TailorInner() {
           </div>
         )}
 
-        {/* ── Step Indicator ── */}
-        <div className="mb-10 card-enter" style={{ animationDelay: "60ms" }}>
+        {/* ── Step Indicator (hidden during tailoring for clean loading experience) ── */}
+        {!tailoring && <div className="mb-10 card-enter" style={{ animationDelay: "60ms" }}>
           <div className="flex items-center justify-center gap-0">
             {([
               { n: 1, label: "Job Details" },
@@ -617,11 +617,19 @@ function TailorInner() {
               );
             })}
           </div>
-        </div>
+        </div>}
 
-        <div className={`grid gap-7 ${tailoring || result ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 max-w-2xl mx-auto w-full"}`}>
-          {/* ── LEFT PANEL: Inputs ── */}
-          <div className="space-y-6">
+        <div className={`grid gap-7 ${result ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 max-w-2xl mx-auto w-full"}`}>
+          {/* ── LEFT PANEL: Inputs (hidden during tailoring for immersive loading) ── */}
+          <AnimatePresence>
+          {!tailoring && (
+          <motion.div
+            className="space-y-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.98 }}
+            transition={{ duration: 0.28, ease: "easeInOut" }}
+          >
             {/* Job info */}
             <div className="card-input p-8 card-enter" style={{ animationDelay: "80ms" }}>
               <div className="flex items-center gap-3 mb-6">
@@ -901,49 +909,60 @@ function TailorInner() {
                 )}
               </div>
             )}
-          </div>
+          </motion.div>
+          )}
+          </AnimatePresence>
 
-          {/* ── RIGHT PANEL: Results (only shown when tailoring or result available) ── */}
+          {/* ── RIGHT PANEL: Loading (full-width immersive) or Results ── */}
           {(tailoring || result) && (
           <motion.div
-            className="card-enter"
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
+            className={tailoring ? "col-span-full" : "card-enter"}
+            initial={{ opacity: 0, scale: tailoring ? 0.97 : 1, x: tailoring ? 0 : 40 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
-            style={{ animationDelay: "120ms" }}
           >
-            {/* Loading state — multi-step progress */}
+            {/* Loading state — full-width immersive */}
             {tailoring && (
-              <div className="card-input flex flex-col items-center justify-center py-16 px-10" style={{ minHeight: "580px" }}>
-                {/* Orbital animation */}
-                <div className="relative w-32 h-32 mb-10">
+              <div className="relative flex flex-col items-center justify-center py-24 px-10 overflow-hidden" style={{ minHeight: "560px" }}>
+                {/* Ambient radial glow behind rings */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="loading-ambient" style={{ width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.09) 0%, rgba(201,168,76,0.03) 45%, transparent 70%)" }} />
+                </div>
+
+                {/* Orbital animation — larger for full-width drama */}
+                <div className="relative w-44 h-44 mb-12 z-10">
                   {/* Outer ring — slow spin */}
-                  <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "3s", animationTimingFunction: "linear" }} viewBox="0 0 128 128">
-                    <circle cx="64" cy="64" r="58" fill="none" stroke="rgba(201,168,76,0.08)" strokeWidth="2" />
-                    <circle cx="64" cy="64" r="58" fill="none" stroke="rgba(201,168,76,0.6)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="60 305" />
+                  <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "4s", animationTimingFunction: "linear" }} viewBox="0 0 176 176">
+                    <circle cx="88" cy="88" r="80" fill="none" stroke="rgba(201,168,76,0.07)" strokeWidth="1.5" />
+                    <circle cx="88" cy="88" r="80" fill="none" stroke="rgba(201,168,76,0.65)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="70 432" />
                   </svg>
-                  {/* Inner ring — reverse spin */}
-                  <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "2s", animationTimingFunction: "linear", animationDirection: "reverse" }} viewBox="0 0 128 128">
-                    <circle cx="64" cy="64" r="44" fill="none" stroke="rgba(201,168,76,0.05)" strokeWidth="1.5" />
-                    <circle cx="64" cy="64" r="44" fill="none" stroke="rgba(201,168,76,0.35)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="35 240" />
+                  {/* Middle ring — medium reverse spin */}
+                  <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "2.5s", animationTimingFunction: "linear", animationDirection: "reverse" }} viewBox="0 0 176 176">
+                    <circle cx="88" cy="88" r="62" fill="none" stroke="rgba(201,168,76,0.04)" strokeWidth="1" />
+                    <circle cx="88" cy="88" r="62" fill="none" stroke="rgba(201,168,76,0.4)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="45 340" />
+                  </svg>
+                  {/* Inner ring — fast spin */}
+                  <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "1.6s", animationTimingFunction: "linear" }} viewBox="0 0 176 176">
+                    <circle cx="88" cy="88" r="42" fill="none" stroke="rgba(201,168,76,0.03)" strokeWidth="1" />
+                    <circle cx="88" cy="88" r="42" fill="none" stroke="rgba(201,168,76,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="25 230" />
                   </svg>
                   {/* Center */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.25)", boxShadow: "0 0 30px rgba(201,168,76,0.15)" }}>
-                      <Zap size={24} className="text-[#C9A84C]" />
+                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)", boxShadow: "0 0 50px rgba(201,168,76,0.2), 0 0 100px rgba(201,168,76,0.08)" }}>
+                      <Zap size={30} className="text-[#C9A84C]" />
                     </div>
                   </div>
                 </div>
 
-                <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.5rem", fontWeight: 600, color: "#F0F2F7", marginBottom: "0.625rem", textAlign: "center" }}>
+                <h3 className="z-10" style={{ fontFamily: "Playfair Display, serif", fontSize: "1.9rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.75rem", textAlign: "center" }}>
                   ResumeIdol is working its magic...
                 </h3>
-                <p className="text-[#6B7A99] text-base mb-12 text-center max-w-xs leading-relaxed">
-                  Rewriting every line to maximise your ATS score and human appeal.
+                <p className="text-[#6B7A99] text-base mb-14 text-center z-10" style={{ maxWidth: 360, lineHeight: 1.7 }}>
+                  Analyzing the job description, mapping your skills, and rewriting every line to maximise your ATS score.
                 </p>
 
                 {/* Step list */}
-                <div className="w-full max-w-[290px] space-y-5">
+                <div className="w-full max-w-[320px] space-y-5 z-10">
                   {LOADING_STEPS.map((s, i) => {
                     const done = i < loadingStep;
                     const active = i === loadingStep;
