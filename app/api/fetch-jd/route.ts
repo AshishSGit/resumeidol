@@ -101,6 +101,23 @@ export async function POST(request: Request) {
       );
     }
 
+    // Detect gated/paywalled pages that show Lorem ipsum placeholder content
+    if (/lorem ipsum/i.test(jd)) {
+      return NextResponse.json(
+        { error: "This job posting requires login to view the full description. Please paste the job description manually." },
+        { status: 422 }
+      );
+    }
+
+    // Detect pages with too little real job content (nav/footer junk only)
+    const wordCount = jd.split(/\s+/).filter(Boolean).length;
+    if (wordCount < 40) {
+      return NextResponse.json(
+        { error: "Couldn't find enough job details on that page. Please paste the description manually." },
+        { status: 422 }
+      );
+    }
+
     // Try to extract job title and company from <title> tag
     const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
     const pageTitle = titleMatch ? titleMatch[1].replace(/\s+/g, " ").trim() : "";

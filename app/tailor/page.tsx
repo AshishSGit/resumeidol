@@ -1042,12 +1042,21 @@ function TailorInner() {
                     ATS Optimisation Results
                   </h3>
                   <ScoreRing before={result.atsScoreBefore} after={result.atsScoreAfter} />
+                  {result.atsScoreAfter >= 65 && result.atsScoreAfter > result.atsScoreBefore ? (
                   <div className="flex items-center gap-3 mt-7 p-4 rounded-xl" style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.12)" }}>
                     <ArrowUp size={16} className="text-[#22c55e] shrink-0" />
                     <span className="text-[#22c55e] text-sm font-medium">
                       You&apos;re now in the top candidate tier for this role
                     </span>
                   </div>
+                  ) : result.atsScoreAfter < 20 ? (
+                  <div className="flex items-center gap-3 mt-7 p-4 rounded-xl" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
+                    <AlertCircle size={16} className="text-[#f87171] shrink-0" />
+                    <span className="text-[#f87171] text-sm">
+                      Low score — the job description may have been incomplete. Try pasting the full description directly for better results.
+                    </span>
+                  </div>
+                  ) : null}
                   {applyUrl && (
                     <a
                       href={applyUrl}
