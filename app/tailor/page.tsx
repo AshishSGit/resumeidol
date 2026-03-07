@@ -601,6 +601,9 @@ function TailorInner() {
       return;
     }
 
+    // Scroll to top so the loading animation is always fully visible below the navbar
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     setTailoring(true);
     setLoadingStep(0);
     setError(null);
@@ -1166,7 +1169,7 @@ function TailorInner() {
           >
             {/* Loading state — full-width immersive */}
             {tailoring && (
-              <div className="relative flex flex-col items-center pt-24 pb-16 px-10" style={{ minHeight: "580px" }}>
+              <div className="relative flex flex-col items-center pt-14 pb-16 px-10" style={{ minHeight: "520px" }}>
                 {/* Ambient radial glow — absolute, behind everything */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 0 }}>
                   <div className="loading-ambient" style={{ width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.10) 0%, rgba(201,168,76,0.04) 40%, transparent 68%)" }} />
