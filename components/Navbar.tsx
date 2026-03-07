@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Search, FileText, LayoutDashboard, Menu, X, LogOut, Crown, ChevronDown, User as UserIcon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, FileText, Menu, X, LogOut, Crown, ChevronDown } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -172,58 +172,109 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
-              {(isPro || planLabel.startsWith("Starter")) && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
-                  style={isPro
-                    ? { background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.25)", color: "#DEC27A" }
-                    : { background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", color: "#fbbf24" }}>
-                  <Crown size={11} />
-                  {isPro ? "Pro" : "Starter"}
-                </div>
-              )}
               {/* Account dropdown */}
               <div className="relative" ref={accountRef}>
+                {/* Avatar trigger */}
                 <button
                   onClick={() => setAccountOpen(!accountOpen)}
-                  className="flex items-center gap-1.5 text-xs text-[#9CA3AF] hover:text-[#DEC27A] px-3 py-2 rounded-lg transition-colors"
-                  style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+                  className="flex items-center gap-1.5 transition-all"
+                  style={{ outline: "none" }}
                 >
-                  <UserIcon size={13} />
-                  <span className="max-w-[130px] truncate">{user.email}</span>
-                  <ChevronDown size={11} className={`transition-transform ${accountOpen ? "rotate-180" : ""}`} />
-                </button>
-                {accountOpen && (
                   <div
-                    className="absolute right-0 top-full mt-2 w-64 rounded-xl p-1 z-50"
-                    style={{ background: "#0D1018", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 16px 40px rgba(0,0,0,0.6)" }}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all duration-200"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08))",
+                      border: `1.5px solid ${accountOpen ? "rgba(201,168,76,0.55)" : "rgba(201,168,76,0.28)"}`,
+                      color: "#DEC27A",
+                      boxShadow: accountOpen ? "0 0 14px rgba(201,168,76,0.28)" : "none",
+                    }}
                   >
-                    <div className="px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
-                      <p className="text-xs text-[#6B7A99] mb-0.5">Signed in as</p>
-                      <p className="text-sm text-[#F0F2F7] truncate font-medium">{user.email}</p>
-                      <p className="text-xs mt-1.5" style={{ color: isPro ? "#DEC27A" : "#6B7A99" }}>
-                        {planLabel}
-                      </p>
-                    </div>
-                    {!isPro && (
-                      <Link
-                        href="/#pricing"
-                        onClick={() => setAccountOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-xs rounded-lg transition-colors hover:bg-[rgba(201,168,76,0.08)]"
-                        style={{ color: "#C9A84C" }}
-                      >
-                        <Crown size={12} />
-                        Upgrade to Pro
-                      </Link>
-                    )}
-                    <button
-                      onClick={() => { setAccountOpen(false); handleSignOut(); }}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-xs text-[#6B7A99] hover:text-[#9CA3AF] rounded-lg transition-colors hover:bg-[rgba(255,255,255,0.04)]"
-                    >
-                      <LogOut size={12} />
-                      Sign out
-                    </button>
+                    {user.email?.charAt(0).toUpperCase() ?? "U"}
                   </div>
-                )}
+                  <ChevronDown
+                    size={12}
+                    style={{ color: "#6B7A99" }}
+                    className={`transition-transform duration-200 ${accountOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {/* Dropdown */}
+                <AnimatePresence>
+                  {accountOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
+                      className="absolute right-0 top-full mt-2.5 w-[280px] rounded-2xl overflow-hidden z-50"
+                      style={{
+                        background: "rgba(7,9,15,0.98)",
+                        backdropFilter: "blur(28px)",
+                        WebkitBackdropFilter: "blur(28px)",
+                        border: "1px solid rgba(201,168,76,0.13)",
+                        boxShadow: "0 24px 64px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.03)",
+                      }}
+                    >
+                      {/* Header */}
+                      <div className="px-4 py-4 border-b border-[rgba(255,255,255,0.06)]">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+                            style={{
+                              background: "linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08))",
+                              border: "1px solid rgba(201,168,76,0.3)",
+                              color: "#DEC27A",
+                              boxShadow: "0 0 20px rgba(201,168,76,0.12)",
+                            }}
+                          >
+                            {user.email?.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-[#F0F2F7] truncate">{user.email}</p>
+                            {isPro ? (
+                              <span
+                                className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold mt-1"
+                                style={{
+                                  background: "linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08))",
+                                  border: "1px solid rgba(201,168,76,0.3)",
+                                  color: "#DEC27A",
+                                }}
+                              >
+                                <Crown size={8} />
+                                {planLabel.replace("✦ ", "")}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] block mt-0.5" style={{ color: "#4B5563" }}>{planLabel}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Menu items */}
+                      <div className="p-1.5">
+                        {!isPro && (
+                          <Link
+                            href="/#pricing"
+                            onClick={() => setAccountOpen(false)}
+                            className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs rounded-xl transition-all hover:bg-[rgba(201,168,76,0.08)]"
+                            style={{ color: "#C9A84C" }}
+                          >
+                            <Crown size={13} />
+                            <span>Upgrade to Pro</span>
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => { setAccountOpen(false); handleSignOut(); }}
+                          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs rounded-xl transition-all hover:bg-[rgba(255,255,255,0.04)]"
+                          style={{ color: "#6B7A99" }}
+                        >
+                          <LogOut size={13} />
+                          <span>Sign out</span>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           ) : (
