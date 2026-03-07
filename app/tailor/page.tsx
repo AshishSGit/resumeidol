@@ -742,7 +742,8 @@ function TailorInner() {
   const canTailor = resumeText.trim().length > 50 && jobDescription.trim().length > 50 && withinLimit;
   const step1Done = jobDescription.trim().length > 30;
   const step2Done = resumeText.trim().length > 50;
-  const currentStep = !step1Done ? 1 : !step2Done ? 2 : 3;
+  // When results are in, step 3 is also done (show all checkmarks)
+  const currentStep = result ? 4 : !step1Done ? 1 : !step2Done ? 2 : 3;
 
   return (
     <div className="min-h-screen relative" style={{ background: "#07090F" }}>
@@ -756,8 +757,8 @@ function TailorInner() {
         {/* Header */}
         <div className="mb-14 card-enter" style={{ animationDelay: "0ms" }}>
           <div className="badge-gold mb-6">
-            <Zap size={11} />
-            <span>AI Resume Tailor</span>
+            <Crown size={11} />
+            <span>Resume Tailor</span>
           </div>
           <h1
             style={{ fontFamily: "Playfair Display, serif", fontSize: "clamp(2.25rem, 4vw, 3.5rem)", fontWeight: 700, color: "#F0F2F7", lineHeight: 1.1 }}
@@ -1183,9 +1184,9 @@ function TailorInner() {
                     {/* Header */}
                     <div className="flex items-center justify-between mb-8">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.16em] font-semibold mb-1.5" style={{ color: "#3A4558" }}>AI Analysis Complete</p>
+                        <p className="text-xs uppercase tracking-[0.16em] font-semibold mb-1.5" style={{ color: "#3A4558" }}>Analysis Complete</p>
                         <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.7rem", fontWeight: 700, color: "#F0F2F7", lineHeight: 1.05 }}>
-                          ATS Match Score
+                          Your Match Report
                         </h3>
                       </div>
                       <div className="flex items-center gap-4">
@@ -1320,8 +1321,9 @@ function TailorInner() {
                             spellCheck={false}
                           />
                         ) : (
+                          <div className="relative mb-5">
                           <div
-                            className="p-5 rounded-xl leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono mb-5"
+                            className="p-5 rounded-xl leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono"
                             style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.06)", maxHeight: "460px", fontSize: "0.83rem", color: "#C4CEDF", lineHeight: 1.82 }}
                           >
                             {streamComplete ? editedResume : streamedResume}
@@ -1332,13 +1334,26 @@ function TailorInner() {
                               />
                             )}
                           </div>
+                          {/* Bottom fade — hints there's more to scroll */}
+                          <div className="absolute bottom-0 left-0 right-0 h-12 rounded-b-xl pointer-events-none" style={{ background: "linear-gradient(to top, rgba(7,9,15,0.7) 0%, transparent 100%)" }} />
+                          </div>
                         )}
 
                         {/* Action row */}
-                        <div className="pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                          <p className="text-[0.7rem] uppercase tracking-widest text-[#3A4558] font-semibold mb-3">
-                            {editMode ? "Editing — changes apply to downloads" : "Export your tailored resume"}
-                          </p>
+                        <div className="pt-5 mt-1" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                          {editMode ? (
+                            <p className="text-[0.7rem] uppercase tracking-widest text-[#3A4558] font-semibold mb-3">Editing — changes apply to downloads</p>
+                          ) : (
+                            <div className="flex items-center gap-2.5 mb-4">
+                              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                                <Crown size={13} style={{ color: "#C9A84C" }} />
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold" style={{ color: "#DEC27A" }}>Your resume is interview-ready</p>
+                                <p className="text-xs" style={{ color: "#4B5563" }}>Download or copy below — it&apos;s tailored specifically for this role</p>
+                              </div>
+                            </div>
+                          )}
                           <div className="grid grid-cols-2 gap-2 mb-2">
                             {/* Edit toggle */}
                             <button
