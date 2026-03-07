@@ -527,7 +527,7 @@ function TailorInner() {
 
   const withinLimit = isPro || (isStarter ? tailorCount < STARTER_LIMIT : tailorCount < FREE_LIMIT);
   const canTailor = resumeText.trim().length > 50 && jobDescription.trim().length > 50 && withinLimit;
-  const step1Done = jobTitle.trim().length > 1 && jobDescription.trim().length > 30;
+  const step1Done = jobDescription.trim().length > 30;
   const step2Done = resumeText.trim().length > 50;
   const currentStep = !step1Done ? 1 : !step2Done ? 2 : 3;
 
