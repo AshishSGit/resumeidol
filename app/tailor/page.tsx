@@ -521,11 +521,20 @@ function TailorInner() {
   const [parsing, setParsing] = useState(false);
   const [tailoring, setTailoring] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
+  const [loadingTip, setLoadingTip] = useState(0);
+  const [loadingElapsed, setLoadingElapsed] = useState(0);
   const LOADING_STEPS = [
     { label: "Parsing your resume", duration: 3500 },
     { label: "Analysing job requirements", duration: 4000 },
     { label: "Optimising keywords & phrasing", duration: 5000 },
     { label: "Finalising your resume", duration: 99999 },
+  ];
+  const LOADING_TIPS = [
+    "The average job gets 250+ applications. Yours is about to look like it was made for this role.",
+    "Recruiters spend just 6 seconds scanning a resume. We're making every second count.",
+    "ATS filters reject 75% of resumes before a human ever sees them. You're about to beat that.",
+    "Your resume is being rewritten to mirror the exact language this hiring team uses.",
+    "Top candidates tailor every application. That used to take hours. Now it takes seconds.",
   ];
   const [result, setResult] = useState<TailorResult | null>(null);
   const [originalResumeText, setOriginalResumeText] = useState("");
@@ -545,6 +554,8 @@ function TailorInner() {
   const [streamedResume, setStreamedResume] = useState("");
   const [streamComplete, setStreamComplete] = useState(true);
   const streamTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const loadingTipTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const loadingElapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const pendingActionRef = useRef<"pdf" | "docx" | "copy" | null>(null);
   const [showSignInModal, setShowSignInModal] = useState(false);
@@ -599,7 +610,25 @@ function TailorInner() {
 
     // Track auth state — get current user + fire pending action on sign-in
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user: u } }) => setUser(u ?? null));
+    supabase.auth.getUser().then(({ data: { user: u } }) => {
+      setUser(u ?? null);
+      // Restore result saved before magic-link redirect (user just signed in via link)
+      if (u) {
+        try {
+          const pendingStr = sessionStorage.getItem("resumeidol_pending_result");
+          if (pendingStr) {
+            const pending = JSON.parse(pendingStr);
+            sessionStorage.removeItem("resumeidol_pending_result");
+            setResult(pending.result);
+            setEditedResume(pending.result.tailoredResume);
+            setOriginalResumeText(pending.resumeText ?? "");
+            if (pending.jobTitle) setJobTitle(pending.jobTitle);
+            if (pending.company) setCompany(pending.company);
+            if (pending.resumeText) setResumeText(pending.resumeText);
+          }
+        } catch { /* sessionStorage not available */ }
+      }
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const u = session?.user ?? null;
@@ -736,7 +765,14 @@ function TailorInner() {
 
     setTailoring(true);
     setLoadingStep(0);
+    setLoadingElapsed(0);
+    setLoadingTip(0);
     setError(null);
+    // Tip rotation + elapsed counter
+    if (loadingTipTimerRef.current) clearInterval(loadingTipTimerRef.current);
+    if (loadingElapsedTimerRef.current) clearInterval(loadingElapsedTimerRef.current);
+    loadingTipTimerRef.current = setInterval(() => setLoadingTip(t => (t + 1) % 5), 5000);
+    loadingElapsedTimerRef.current = setInterval(() => setLoadingElapsed(e => e + 1), 1000);
     setResult(null);
     setOriginalResumeText(resumeText);
 
@@ -772,6 +808,15 @@ function TailorInner() {
         setGateSent(false);
         setGateEmail("");
         setGateError(null);
+        // Persist result so magic-link page reload can restore it
+        try {
+          sessionStorage.setItem("resumeidol_pending_result", JSON.stringify({
+            result: data,
+            jobTitle,
+            company,
+            resumeText,
+          }));
+        } catch { /* sessionStorage not available */ }
       }
       // Stream the tailored resume line by line
       if (streamTimerRef.current) clearInterval(streamTimerRef.current);
@@ -806,6 +851,8 @@ function TailorInner() {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       stepTimers.forEach(clearTimeout);
+      if (loadingTipTimerRef.current) { clearInterval(loadingTipTimerRef.current); loadingTipTimerRef.current = null; }
+      if (loadingElapsedTimerRef.current) { clearInterval(loadingElapsedTimerRef.current); loadingElapsedTimerRef.current = null; }
       setTailoring(false);
     }
   };
@@ -1917,12 +1964,41 @@ function TailorInner() {
               </div>
             </div>
 
-            <h3 className="shimmer-text" style={{ fontFamily: "Playfair Display, serif", fontSize: "1.85rem", fontWeight: 700, marginBottom: "0.6rem", textAlign: "center", position: "relative", zIndex: 1 }}>
+            <h3 className="shimmer-text" style={{ fontFamily: "Playfair Display, serif", fontSize: "1.85rem", fontWeight: 700, marginBottom: "1rem", textAlign: "center", position: "relative", zIndex: 1 }}>
               Working its magic...
             </h3>
-            <p className="text-[#4B5563] text-sm mb-10 text-center" style={{ maxWidth: 320, lineHeight: 1.7, position: "relative", zIndex: 1 }}>
-              Rewriting every line of your resume to maximise ATS match for this specific role.
-            </p>
+
+            {/* Progress bar + elapsed */}
+            <div className="flex items-center gap-3 mb-5" style={{ position: "relative", zIndex: 1 }}>
+              <span className="text-xs font-mono tabular-nums" style={{ color: "#3A4558", minWidth: "2.5rem", textAlign: "right" }}>{loadingElapsed}s</span>
+              <div className="w-40 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+                <motion.div
+                  className="h-full rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: `${Math.min((loadingElapsed / 28) * 90, 90)}%` }}
+                  transition={{ duration: 0.9, ease: "easeOut" }}
+                  style={{ background: "linear-gradient(90deg, rgba(201,168,76,0.45) 0%, rgba(222,194,122,0.95) 100%)", boxShadow: "0 0 8px rgba(201,168,76,0.4)" }}
+                />
+              </div>
+              <span className="text-xs" style={{ color: "#2A3040" }}>~28s</span>
+            </div>
+
+            {/* Rotating tip */}
+            <div className="mb-8 text-center overflow-hidden" style={{ maxWidth: 340, height: "2.8rem", position: "relative", zIndex: 1 }}>
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={loadingTip}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.32 }}
+                  className="text-sm text-center absolute inset-0 flex items-center justify-center px-2"
+                  style={{ color: "#4B5563", lineHeight: 1.55 }}
+                >
+                  {LOADING_TIPS[loadingTip]}
+                </motion.p>
+              </AnimatePresence>
+            </div>
 
             {/* Step list */}
             <div className="w-full max-w-[340px] space-y-3" style={{ position: "relative", zIndex: 1 }}>
