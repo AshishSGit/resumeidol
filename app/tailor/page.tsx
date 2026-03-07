@@ -601,9 +601,6 @@ function TailorInner() {
       return;
     }
 
-    // Scroll to top so the loading animation is always fully visible below the navbar
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
     setTailoring(true);
     setLoadingStep(0);
     setError(null);
@@ -1159,124 +1156,8 @@ function TailorInner() {
           )}
           </AnimatePresence>
 
-          {/* ── RIGHT PANEL: Loading (full-width immersive) or Results ── */}
-          {(tailoring || result) && (
-          <motion.div
-            className="card-enter"
-            initial={{ opacity: 0, scale: tailoring ? 0.97 : 1, x: tailoring ? 0 : 0 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
-          >
-            {/* Loading state — full-width immersive */}
-            {tailoring && (
-              <div className="relative flex flex-col items-center pt-14 pb-16 px-10" style={{ minHeight: "520px" }}>
-                {/* Ambient radial glow — absolute, behind everything */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 0 }}>
-                  <div className="loading-ambient" style={{ width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.10) 0%, rgba(201,168,76,0.04) 40%, transparent 68%)" }} />
-                </div>
-
-                {/* Orbital rings — overflow:visible on SVGs prevents arc clipping */}
-                <div className="relative mb-10" style={{ width: 200, height: 200, zIndex: 1, overflow: "visible" }}>
-                  {/* Outer ring — slow spin */}
-                  <svg
-                    className="absolute animate-spin"
-                    style={{ inset: "-12px", width: "calc(100% + 24px)", height: "calc(100% + 24px)", animationDuration: "5s", animationTimingFunction: "linear", overflow: "visible" }}
-                    viewBox="0 0 224 224"
-                  >
-                    <circle cx="112" cy="112" r="104" fill="none" stroke="rgba(201,168,76,0.06)" strokeWidth="1.5" />
-                    <circle cx="112" cy="112" r="104" fill="none" stroke="rgba(201,168,76,0.7)" strokeWidth="2" strokeLinecap="round" strokeDasharray="80 573" />
-                    {/* Glow dot at arc head */}
-                    <circle cx="112" cy="8" r="3.5" fill="rgba(201,168,76,0.9)" style={{ filter: "blur(1px)" }} />
-                  </svg>
-                  {/* Middle ring — reverse spin */}
-                  <svg
-                    className="absolute animate-spin"
-                    style={{ inset: "10px", width: "calc(100% - 20px)", height: "calc(100% - 20px)", animationDuration: "3s", animationTimingFunction: "linear", animationDirection: "reverse", overflow: "visible" }}
-                    viewBox="0 0 180 180"
-                  >
-                    <circle cx="90" cy="90" r="84" fill="none" stroke="rgba(201,168,76,0.04)" strokeWidth="1" />
-                    <circle cx="90" cy="90" r="84" fill="none" stroke="rgba(201,168,76,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="55 473" />
-                  </svg>
-                  {/* Inner ring — fast spin */}
-                  <svg
-                    className="absolute animate-spin"
-                    style={{ inset: "34px", width: "calc(100% - 68px)", height: "calc(100% - 68px)", animationDuration: "2s", animationTimingFunction: "linear", overflow: "visible" }}
-                    viewBox="0 0 132 132"
-                  >
-                    <circle cx="66" cy="66" r="60" fill="none" stroke="rgba(201,168,76,0.03)" strokeWidth="1" />
-                    <circle cx="66" cy="66" r="60" fill="none" stroke="rgba(201,168,76,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="35 342" />
-                  </svg>
-                  {/* Center icon — Crown (brand logo) */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div
-                      className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center"
-                      style={{
-                        background: "linear-gradient(135deg, rgba(201,168,76,0.18) 0%, rgba(201,168,76,0.06) 100%)",
-                        border: "1px solid rgba(201,168,76,0.4)",
-                        boxShadow: "0 0 40px rgba(201,168,76,0.25), 0 0 80px rgba(201,168,76,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
-                      }}
-                    >
-                      <Crown size={28} style={{ color: "#C9A84C" }} strokeWidth={2} />
-                    </div>
-                  </div>
-                </div>
-
-                <h3 className="shimmer-text" style={{ fontFamily: "Playfair Display, serif", fontSize: "1.85rem", fontWeight: 700, marginBottom: "0.6rem", textAlign: "center", zIndex: 1, position: "relative" }}>
-                  Working its magic...
-                </h3>
-                <p className="text-[#4B5563] text-sm mb-12 text-center" style={{ maxWidth: 320, lineHeight: 1.7, zIndex: 1, position: "relative" }}>
-                  Rewriting every line of your resume to maximise ATS match for this specific role.
-                </p>
-
-                {/* Step list — card-style rows */}
-                <div className="w-full max-w-[340px] space-y-3" style={{ zIndex: 1, position: "relative" }}>
-                  {LOADING_STEPS.map((s, i) => {
-                    const done = i < loadingStep;
-                    const active = i === loadingStep;
-                    return (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-400"
-                        style={{
-                          background: done
-                            ? "rgba(34,197,94,0.05)"
-                            : active
-                            ? "rgba(201,168,76,0.07)"
-                            : "rgba(255,255,255,0.02)",
-                          border: `1px solid ${done ? "rgba(34,197,94,0.15)" : active ? "rgba(201,168,76,0.2)" : "rgba(255,255,255,0.04)"}`,
-                        }}
-                      >
-                        <div
-                          className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-300"
-                          style={{
-                            background: done ? "rgba(34,197,94,0.15)" : active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
-                            border: `1px solid ${done ? "rgba(34,197,94,0.35)" : active ? "rgba(201,168,76,0.35)" : "rgba(255,255,255,0.08)"}`,
-                          }}
-                        >
-                          {done ? (
-                            <CheckCircle size={13} className="text-[#22c55e]" />
-                          ) : active ? (
-                            <Loader2 size={12} className="text-[#C9A84C] animate-spin" />
-                          ) : (
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.1)" }} />
-                          )}
-                        </div>
-                        <span
-                          className="text-sm transition-colors duration-300 flex-1"
-                          style={{ color: done ? "#4ade80" : active ? "#DEC27A" : "#3A4558", fontWeight: active ? 500 : 400 }}
-                        >
-                          {s.label}
-                        </span>
-                        {done && <CheckCircle size={13} className="text-[#22c55e] shrink-0" />}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Results */}
-            {result && (
+          {/* Results */}
+          {result && (
               <motion.div
                 className="space-y-4"
                 initial={{ opacity: 0, x: 40, scale: 0.98 }}
@@ -1620,10 +1501,115 @@ function TailorInner() {
                 </div>
               </motion.div>
             )}
-          </motion.div>
-          )}
         </div>
       </div>
+
+      {/* ── Loading overlay — fixed, centered below navbar ── */}
+      <AnimatePresence>
+        {tailoring && (
+          <motion.div
+            key="loading-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed left-0 right-0 bottom-0 z-40 flex flex-col items-center justify-center px-6"
+            style={{ top: "60px", background: "#07090F" }}
+          >
+            {/* Ambient radial glow */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div style={{ width: 560, height: 560, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.10) 0%, rgba(201,168,76,0.04) 40%, transparent 68%)" }} />
+            </div>
+
+            {/* Orbital rings */}
+            <div className="relative mb-10" style={{ width: 200, height: 200, zIndex: 1, overflow: "visible" }}>
+              {/* Outer ring — slow spin */}
+              <svg
+                className="absolute animate-spin"
+                style={{ inset: "-12px", width: "calc(100% + 24px)", height: "calc(100% + 24px)", animationDuration: "5s", animationTimingFunction: "linear", overflow: "visible" }}
+                viewBox="0 0 224 224"
+              >
+                <circle cx="112" cy="112" r="104" fill="none" stroke="rgba(201,168,76,0.06)" strokeWidth="1.5" />
+                <circle cx="112" cy="112" r="104" fill="none" stroke="rgba(201,168,76,0.7)" strokeWidth="2" strokeLinecap="round" strokeDasharray="80 573" />
+                <circle cx="112" cy="8" r="3.5" fill="rgba(201,168,76,0.9)" style={{ filter: "blur(1px)" }} />
+              </svg>
+              {/* Middle ring — reverse spin */}
+              <svg
+                className="absolute animate-spin"
+                style={{ inset: "10px", width: "calc(100% - 20px)", height: "calc(100% - 20px)", animationDuration: "3s", animationTimingFunction: "linear", animationDirection: "reverse", overflow: "visible" }}
+                viewBox="0 0 180 180"
+              >
+                <circle cx="90" cy="90" r="84" fill="none" stroke="rgba(201,168,76,0.04)" strokeWidth="1" />
+                <circle cx="90" cy="90" r="84" fill="none" stroke="rgba(201,168,76,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="55 473" />
+              </svg>
+              {/* Inner ring — fast spin */}
+              <svg
+                className="absolute animate-spin"
+                style={{ inset: "34px", width: "calc(100% - 68px)", height: "calc(100% - 68px)", animationDuration: "2s", animationTimingFunction: "linear", overflow: "visible" }}
+                viewBox="0 0 132 132"
+              >
+                <circle cx="66" cy="66" r="60" fill="none" stroke="rgba(201,168,76,0.03)" strokeWidth="1" />
+                <circle cx="66" cy="66" r="60" fill="none" stroke="rgba(201,168,76,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="35 342" />
+              </svg>
+              {/* Center Crown */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div
+                  className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(201,168,76,0.18) 0%, rgba(201,168,76,0.06) 100%)",
+                    border: "1px solid rgba(201,168,76,0.4)",
+                    boxShadow: "0 0 40px rgba(201,168,76,0.25), 0 0 80px rgba(201,168,76,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
+                  }}
+                >
+                  <Crown size={28} style={{ color: "#C9A84C" }} strokeWidth={2} />
+                </div>
+              </div>
+            </div>
+
+            <h3 className="shimmer-text" style={{ fontFamily: "Playfair Display, serif", fontSize: "1.85rem", fontWeight: 700, marginBottom: "0.6rem", textAlign: "center", position: "relative", zIndex: 1 }}>
+              Working its magic...
+            </h3>
+            <p className="text-[#4B5563] text-sm mb-10 text-center" style={{ maxWidth: 320, lineHeight: 1.7, position: "relative", zIndex: 1 }}>
+              Rewriting every line of your resume to maximise ATS match for this specific role.
+            </p>
+
+            {/* Step list */}
+            <div className="w-full max-w-[340px] space-y-3" style={{ position: "relative", zIndex: 1 }}>
+              {LOADING_STEPS.map((s, i) => {
+                const done = i < loadingStep;
+                const active = i === loadingStep;
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-400"
+                    style={{
+                      background: done ? "rgba(34,197,94,0.05)" : active ? "rgba(201,168,76,0.07)" : "rgba(255,255,255,0.02)",
+                      border: `1px solid ${done ? "rgba(34,197,94,0.15)" : active ? "rgba(201,168,76,0.2)" : "rgba(255,255,255,0.04)"}`,
+                    }}
+                  >
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-300"
+                      style={{
+                        background: done ? "rgba(34,197,94,0.15)" : active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
+                        border: `1px solid ${done ? "rgba(34,197,94,0.35)" : active ? "rgba(201,168,76,0.35)" : "rgba(255,255,255,0.08)"}`,
+                      }}
+                    >
+                      {done ? <CheckCircle size={13} className="text-[#22c55e]" /> : active ? <Loader2 size={12} className="text-[#C9A84C] animate-spin" /> : <span className="w-1.5 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.1)" }} />}
+                    </div>
+                    <span
+                      className="text-sm transition-colors duration-300 flex-1"
+                      style={{ color: done ? "#4ade80" : active ? "#DEC27A" : "#3A4558", fontWeight: active ? 500 : 400 }}
+                    >
+                      {s.label}
+                    </span>
+                    {done && <CheckCircle size={13} className="text-[#22c55e] shrink-0" />}
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Sign-in gate modal ────────────────────────────────────────── */}
       <AnimatePresence>
