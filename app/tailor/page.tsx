@@ -1440,41 +1440,52 @@ function TailorInner() {
                             </button>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
-                            {/* DOCX */}
+                            {/* DOCX — Word blue */}
                             <button
                               onClick={handleDownloadDocx}
-                              className="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-all"
-                              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#D4DBE8" }}
+                              className="flex flex-col items-center justify-center gap-1 py-3.5 rounded-xl text-sm font-semibold transition-all"
+                              style={{
+                                background: "linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(29,78,216,0.08) 100%)",
+                                border: "1px solid rgba(96,165,250,0.25)",
+                                color: "#93c5fd",
+                                boxShadow: "0 4px 16px rgba(37,99,235,0.12)",
+                              }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.09)";
-                                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.2)";
+                                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(96,165,250,0.45)";
+                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 24px rgba(37,99,235,0.22)";
                               }}
                               onMouseLeave={e => {
-                                (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.05)";
-                                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.12)";
+                                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(96,165,250,0.25)";
+                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 16px rgba(37,99,235,0.12)";
                               }}
                             >
-                              <Download size={14} />
-                              Download .docx
+                              <div className="flex items-center gap-1.5">
+                                <Download size={13} />
+                                Word .docx
+                              </div>
+                              <span className="text-[0.6rem] opacity-60 font-normal tracking-wider">ATS-friendly format</span>
                             </button>
                             {/* PDF — primary gold */}
                             <button
                               onClick={handleDownloadPdf}
-                              className="flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold transition-all"
+                              className="flex flex-col items-center justify-center gap-1 py-3.5 rounded-xl text-sm font-semibold transition-all"
                               style={{
                                 background: "linear-gradient(135deg, #C9A84C 0%, #B8952F 100%)",
                                 color: "#07090F",
-                                boxShadow: "0 4px 20px rgba(201,168,76,0.25)",
+                                boxShadow: "0 4px 20px rgba(201,168,76,0.28)",
                               }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 28px rgba(201,168,76,0.4)";
+                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 28px rgba(201,168,76,0.45)";
                               }}
                               onMouseLeave={e => {
-                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 20px rgba(201,168,76,0.25)";
+                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 20px rgba(201,168,76,0.28)";
                               }}
                             >
-                              <Download size={14} />
-                              Download PDF
+                              <div className="flex items-center gap-1.5">
+                                <Download size={13} />
+                                Download PDF
+                              </div>
+                              <span className="text-[0.6rem] opacity-60 font-normal tracking-wider">Best for applications</span>
                             </button>
                           </div>
                         </div>
@@ -1537,14 +1548,26 @@ function TailorInner() {
                 </div>
 
                 {/* Re-tailor */}
-                <button
-                  onClick={() => { setResult(null); setError(null); }}
-                  className="btn-ghost w-full py-4 rounded-xl text-sm flex items-center justify-center gap-2 stagger-reveal"
-                  style={{ animationDelay: "320ms" }}
-                >
-                  <RotateCcw size={15} />
-                  Start over with a different job
-                </button>
+                <div className="flex items-center gap-3 stagger-reveal" style={{ animationDelay: "320ms" }}>
+                  <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                  <button
+                    onClick={() => { setResult(null); setError(null); }}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-medium transition-all"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", color: "#4B5563" }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLButtonElement).style.color = "#9CA3AF";
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.12)";
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLButtonElement).style.color = "#4B5563";
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.07)";
+                    }}
+                  >
+                    <RotateCcw size={12} />
+                    Tailor a different job
+                  </button>
+                  <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                </div>
               </motion.div>
             )}
           </motion.div>
