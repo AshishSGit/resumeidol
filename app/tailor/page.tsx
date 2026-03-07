@@ -198,11 +198,11 @@ function ScoreHero({ before, after, jobTitle }: { before: number; after: number;
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-8 items-center py-2">
         {/* ── BEFORE ── */}
         <div className="flex flex-col items-center gap-3">
-          <p className="text-[0.65rem] uppercase tracking-widest font-semibold" style={{ color: "#4B5563" }}>Before</p>
+          <p className="text-xs uppercase tracking-[0.15em] font-semibold" style={{ color: "#4B5563" }}>Before</p>
           <div className="relative" style={{ width: 144, height: 144, overflow: "visible" }}>
             <ScoreArc value={before} size={144} dim />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-bold text-3xl leading-none" style={{ color: "#4B5563", fontFamily: "Playfair Display, serif" }}>{before}</span>
+              <span className="font-bold text-4xl leading-none" style={{ color: "#4B5563", fontFamily: "Playfair Display, serif" }}>{before}</span>
               <span className="text-[0.6rem] text-[#3A4558] mt-0.5 tracking-wider uppercase">/ 100</span>
             </div>
           </div>
@@ -218,13 +218,13 @@ function ScoreHero({ before, after, jobTitle }: { before: number; after: number;
             className="flex flex-col items-center gap-1"
           >
             <div
-              className="px-5 py-2.5 rounded-2xl text-center"
+              className="px-6 py-3 rounded-2xl text-center"
               style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.25)" }}
             >
-              <p className="text-3xl font-black" style={{ color: "#4ade80", fontFamily: "Playfair Display, serif", lineHeight: 1 }}>
+              <p className="text-5xl font-black" style={{ color: "#4ade80", fontFamily: "Playfair Display, serif", lineHeight: 1 }}>
                 +{improvement}
               </p>
-              <p className="text-[0.6rem] uppercase tracking-widest text-[#22c55e] mt-0.5 font-semibold">pts gained</p>
+              <p className="text-[0.65rem] uppercase tracking-[0.15em] text-[#22c55e] mt-1 font-semibold">pts gained</p>
             </div>
             <div className="flex items-center gap-1 text-[#3A4558]">
               <div className="w-8 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
@@ -236,8 +236,8 @@ function ScoreHero({ before, after, jobTitle }: { before: number; after: number;
 
         {/* ── AFTER ── */}
         <div className="flex flex-col items-center gap-3">
-          <p className="text-[0.65rem] uppercase tracking-widest font-semibold" style={{ color: "#4ade80" }}>After Tailoring</p>
-          <div className="relative" style={{ width: 160, height: 160, overflow: "visible" }}>
+          <p className="text-xs uppercase tracking-[0.15em] font-semibold" style={{ color: "#4ade80" }}>After Tailoring</p>
+          <div className="relative" style={{ width: 170, height: 170, overflow: "visible" }}>
             {/* Particle burst */}
             <AnimatePresence>
               {showParticles && particles.map(p => {
@@ -254,15 +254,15 @@ function ScoreHero({ before, after, jobTitle }: { before: number; after: number;
             </AnimatePresence>
             {/* Glow halo */}
             <div className="absolute inset-0 rounded-full" style={{ background: `radial-gradient(circle, ${afterColor}28 0%, transparent 70%)`, filter: "blur(12px)" }} />
-            <ScoreArc value={displayed} size={160} />
+            <ScoreArc value={displayed} size={170} />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-black leading-none" style={{ color: afterColor, fontFamily: "Playfair Display, serif", fontSize: "2.6rem" }}>{displayed}</span>
+              <span className="font-black leading-none" style={{ color: afterColor, fontFamily: "Playfair Display, serif", fontSize: "3rem" }}>{displayed}</span>
               <span className="text-[0.6rem] tracking-wider uppercase mt-0.5" style={{ color: afterColor + "99" }}>/ 100</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full" style={{ background: afterColor, boxShadow: `0 0 8px ${afterColor}` }} />
-            <p className="text-sm font-semibold" style={{ color: afterColor }}>{afterLabel}</p>
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: afterColor, boxShadow: `0 0 10px ${afterColor}` }} />
+            <p className="text-sm font-bold" style={{ color: afterColor }}>{afterLabel}</p>
           </div>
         </div>
       </div>
@@ -270,7 +270,7 @@ function ScoreHero({ before, after, jobTitle }: { before: number; after: number;
       {/* Score bar */}
       <div className="mt-6 pt-5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[0.65rem] uppercase tracking-widest text-[#3A4558] font-semibold">ATS Score Range</span>
+          <span className="text-xs uppercase tracking-[0.14em] text-[#3A4558] font-semibold">ATS Score Range</span>
           <span className="text-xs font-medium" style={{ color: afterColor }}>{after}/100</span>
         </div>
         <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
@@ -310,7 +310,7 @@ function BulletList({ content, icon: Icon, iconColor }: { content: string; icon:
   return (
     <ul className="space-y-3">
       {lines.map((line, i) => (
-        <li key={i} className="flex items-start gap-3 text-[0.9rem] text-[#9CA3AF] leading-relaxed">
+        <li key={i} className="flex items-start gap-3 text-sm text-[#9CA3AF] leading-relaxed">
           <Icon size={16} className="shrink-0 mt-0.5" style={{ color: iconColor }} />
           {line}
         </li>
@@ -1166,14 +1166,14 @@ function TailorInner() {
           >
             {/* Loading state — full-width immersive */}
             {tailoring && (
-              <div className="relative flex flex-col items-center justify-center py-20 px-10" style={{ minHeight: "580px" }}>
+              <div className="relative flex flex-col items-center pt-24 pb-16 px-10" style={{ minHeight: "580px" }}>
                 {/* Ambient radial glow — absolute, behind everything */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 0 }}>
                   <div className="loading-ambient" style={{ width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.10) 0%, rgba(201,168,76,0.04) 40%, transparent 68%)" }} />
                 </div>
 
                 {/* Orbital rings — overflow:visible on SVGs prevents arc clipping */}
-                <div className="relative mb-10" style={{ width: 200, height: 200, zIndex: 1 }}>
+                <div className="relative mb-10" style={{ width: 200, height: 200, zIndex: 1, overflow: "visible" }}>
                   {/* Outer ring — slow spin */}
                   <svg
                     className="absolute animate-spin"
@@ -1299,8 +1299,8 @@ function TailorInner() {
                     {/* Header */}
                     <div className="flex items-center justify-between mb-8">
                       <div>
-                        <p className="text-[0.65rem] uppercase tracking-widest font-semibold mb-1" style={{ color: "#3A4558" }}>AI Analysis Complete</p>
-                        <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.45rem", fontWeight: 700, color: "#F0F2F7", lineHeight: 1.1 }}>
+                        <p className="text-xs uppercase tracking-[0.16em] font-semibold mb-1.5" style={{ color: "#3A4558" }}>AI Analysis Complete</p>
+                        <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.7rem", fontWeight: 700, color: "#F0F2F7", lineHeight: 1.05 }}>
                           ATS Match Score
                         </h3>
                       </div>
@@ -1388,7 +1388,7 @@ function TailorInner() {
                           <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className="relative flex items-center gap-1.5 py-2.5 px-3 text-xs font-medium rounded-t-lg transition-colors duration-150 whitespace-nowrap"
+                            className="relative flex items-center gap-1.5 py-3 px-3.5 text-[0.8rem] font-medium rounded-t-lg transition-colors duration-150 whitespace-nowrap"
                             style={{ color: active ? "#DEC27A" : "#4B5563" }}
                           >
                             {active && (
@@ -1406,7 +1406,7 @@ function TailorInner() {
                                 transition={{ type: "spring", stiffness: 500, damping: 40 }}
                               />
                             )}
-                            <tab.icon size={12} className="relative z-10 shrink-0" />
+                            <tab.icon size={13} className="relative z-10 shrink-0" />
                             <span className="relative z-10">{tab.label}</span>
                           </button>
                         );
@@ -1432,13 +1432,13 @@ function TailorInner() {
                             value={editedResume}
                             onChange={(e) => setEditedResume(e.target.value)}
                             className="input-luxury w-full px-4 py-4 leading-relaxed font-mono resize-none mb-5"
-                            style={{ minHeight: "460px", fontSize: "0.8rem", color: "#D4DBE8", lineHeight: 1.75 }}
+                            style={{ minHeight: "460px", fontSize: "0.83rem", color: "#D4DBE8", lineHeight: 1.82 }}
                             spellCheck={false}
                           />
                         ) : (
                           <div
                             className="p-5 rounded-xl leading-relaxed whitespace-pre-wrap overflow-y-auto font-mono mb-5"
-                            style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.06)", maxHeight: "460px", fontSize: "0.8rem", color: "#C4CEDF", lineHeight: 1.75 }}
+                            style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.06)", maxHeight: "460px", fontSize: "0.83rem", color: "#C4CEDF", lineHeight: 1.82 }}
                           >
                             {streamComplete ? editedResume : streamedResume}
                             {!streamComplete && (
