@@ -552,6 +552,12 @@ function TailorInner() {
   const [signInLoading, setSignInLoading] = useState(false);
   const [signInSent, setSignInSent] = useState(false);
   const [signInError, setSignInError] = useState<string | null>(null);
+  // ── Results blur gate (fires when tailoring completes for unauthenticated users) ──
+  const [showResultsGate, setShowResultsGate] = useState(false);
+  const [gateEmail, setGateEmail] = useState("");
+  const [gateLoading, setGateLoading] = useState(false);
+  const [gateSent, setGateSent] = useState(false);
+  const [gateError, setGateError] = useState<string | null>(null);
   // Refs so onAuthStateChange always calls the latest handler version (avoids stale closure)
   const handleDownloadDocxRef = useRef<(() => void) | null>(null);
   const handleDownloadPdfRef = useRef<(() => void) | null>(null);
@@ -599,6 +605,8 @@ function TailorInner() {
       const u = session?.user ?? null;
       setUser(u);
       if (u) {
+        // Dissolve results blur gate
+        setShowResultsGate(false);
         // Fire any action the user tried before signing in
         const pending = pendingActionRef.current;
         pendingActionRef.current = null;
@@ -758,6 +766,13 @@ function TailorInner() {
       setResult(data);
       setEditedResume(data.tailoredResume);
       setEditMode(false);
+      // Show blur gate for unauthenticated users — fires at moment of maximum desire
+      if (!user) {
+        setShowResultsGate(true);
+        setGateSent(false);
+        setGateEmail("");
+        setGateError(null);
+      }
       // Stream the tailored resume line by line
       if (streamTimerRef.current) clearInterval(streamTimerRef.current);
       setStreamedResume("");
@@ -1416,6 +1431,9 @@ function TailorInner() {
                   </div>
                 </motion.div>
 
+                {/* ── Blur gate wrapper: tabs + re-tailor blurred until sign-in ── */}
+                <div className="relative">
+                  <div style={showResultsGate ? { filter: "blur(6px)", pointerEvents: "none", userSelect: "none", transition: "filter 0.6s ease" } : { transition: "filter 0.6s ease" }}>
                 {/* Tabs */}
                 <div className="card-input overflow-hidden stagger-reveal" style={{ animationDelay: "180ms" }}>
                   {/* Gold accent line at top */}
@@ -1658,7 +1676,7 @@ function TailorInner() {
                 <div className="flex flex-col items-center gap-3 pt-2 stagger-reveal" style={{ animationDelay: "320ms" }}>
                   <p className="text-xs" style={{ color: "#3A4558" }}>Applying to another role?</p>
                   <button
-                    onClick={() => { setResult(null); setError(null); }}
+                    onClick={() => { setResult(null); setError(null); setShowResultsGate(false); }}
                     className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all"
                     style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "#6B7A99" }}
                     onMouseEnter={e => {
@@ -1674,6 +1692,164 @@ function TailorInner() {
                     Tailor for a different role
                   </button>
                 </div>
+                  </div>{/* /blur inner */}
+
+                  {/* ── Results Gate Overlay ── */}
+                  <AnimatePresence>
+                  {showResultsGate && (
+                    <motion.div
+                      key="results-gate"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="absolute inset-0 flex items-start justify-center pt-12 px-4"
+                      style={{ zIndex: 10 }}
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, y: 32, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 16, scale: 0.97 }}
+                        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                        className="w-full max-w-sm rounded-2xl overflow-hidden"
+                        style={{
+                          background: "linear-gradient(145deg, rgba(13,17,28,0.99) 0%, rgba(7,10,18,0.99) 100%)",
+                          border: "1px solid rgba(201,168,76,0.3)",
+                          boxShadow: "0 0 0 1px rgba(201,168,76,0.07), 0 48px 120px rgba(0,0,0,0.7), 0 0 100px rgba(201,168,76,0.12)",
+                        }}
+                      >
+                        {/* Gold shimmer top line */}
+                        <div style={{ height: "2px", background: "linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.4) 20%, rgba(222,194,122,1) 50%, rgba(201,168,76,0.4) 80%, transparent 100%)" }} />
+
+                        <div className="p-8">
+                          {/* Icon + headline */}
+                          <div className="flex flex-col items-center text-center mb-6">
+                            <motion.div
+                              initial={{ scale: 0.7, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ delay: 0.15, type: "spring", stiffness: 300, damping: 20 }}
+                              className="mb-4 rounded-2xl p-4 relative"
+                              style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.25)" }}
+                            >
+                              <div className="absolute inset-0 rounded-2xl" style={{ background: "radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)", filter: "blur(10px)" }} />
+                              <Crown size={30} style={{ color: "#C9A84C", position: "relative", zIndex: 1 }} />
+                            </motion.div>
+                            <h2 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.4rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.6rem", lineHeight: 1.15 }}>
+                              Your resume is ready
+                            </h2>
+                            <p className="text-sm leading-relaxed mb-5" style={{ color: "#6B7280", maxWidth: "20rem" }}>
+                              Sign in free to unlock your tailored resume, every keyword injected, and PDF + DOCX downloads.
+                            </p>
+                            {/* Feature unlock chips */}
+                            <div className="flex flex-wrap items-center justify-center gap-2">
+                              {[
+                                { label: `${tabCounts.keywords} keywords added`, color: "#C9A84C", bg: "rgba(201,168,76,0.08)", border: "rgba(201,168,76,0.2)" },
+                                { label: `${tabCounts.changes} improvements`, color: "#4ade80", bg: "rgba(34,197,94,0.06)", border: "rgba(34,197,94,0.18)" },
+                                { label: "PDF + DOCX download", color: "#93c5fd", bg: "rgba(96,165,250,0.06)", border: "rgba(96,165,250,0.18)" },
+                              ].map(({ label, color, bg, border }) => (
+                                <motion.span
+                                  key={label}
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ delay: 0.3 + Math.random() * 0.2, type: "spring", stiffness: 400, damping: 25 }}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                                  style={{ background: bg, border: `1px solid ${border}`, color }}
+                                >
+                                  <CheckCircle size={9} style={{ color }} />
+                                  {label}
+                                </motion.span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Form or success state */}
+                          {gateSent ? (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="text-center py-5"
+                            >
+                              <div className="mb-4 mx-auto w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)", boxShadow: "0 0 30px rgba(34,197,94,0.15)" }}>
+                                <CheckCircle size={26} style={{ color: "#4ade80" }} />
+                              </div>
+                              <p className="font-semibold text-base mb-2" style={{ color: "#F0F2F7" }}>Check your email</p>
+                              <p className="text-sm leading-relaxed" style={{ color: "#6B7280" }}>
+                                Magic link sent to{" "}
+                                <span style={{ color: "#C9A84C", fontWeight: 600 }}>{gateEmail}</span>.<br />
+                                Click it to unlock your results instantly.
+                              </p>
+                            </motion.div>
+                          ) : (
+                            <form onSubmit={async (e) => {
+                              e.preventDefault();
+                              if (!gateEmail.trim()) return;
+                              setGateLoading(true);
+                              setGateError(null);
+                              try {
+                                const supabase = createClient();
+                                const { error: err } = await supabase.auth.signInWithOtp({
+                                  email: gateEmail.trim(),
+                                  options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+                                });
+                                if (err) throw err;
+                                setGateSent(true);
+                              } catch (err: unknown) {
+                                setGateError(err instanceof Error ? err.message : "Something went wrong.");
+                              } finally {
+                                setGateLoading(false);
+                              }
+                            }}>
+                              <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "#4B5563" }}>
+                                Email address
+                              </label>
+                              <input
+                                type="email"
+                                required
+                                value={gateEmail}
+                                onChange={e => setGateEmail(e.target.value)}
+                                placeholder="you@example.com"
+                                className="input-luxury w-full px-4 py-3 mb-3 text-sm"
+                                autoFocus
+                              />
+                              {gateError && (
+                                <p className="text-xs mb-3" style={{ color: "#f87171" }}>{gateError}</p>
+                              )}
+                              <button
+                                type="submit"
+                                disabled={gateLoading || !gateEmail.trim()}
+                                className="btn-gold w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                style={{ fontSize: "0.95rem", letterSpacing: "0.01em" }}
+                              >
+                                {gateLoading ? (
+                                  <><Loader2 size={15} className="animate-spin" />Sending link...</>
+                                ) : (
+                                  <>Unlock My Results →</>
+                                )}
+                              </button>
+                            </form>
+                          )}
+
+                          <div className="mt-4 flex items-center justify-between">
+                            <p className="text-xs" style={{ color: "#374151" }}>Free · No card · 10 seconds</p>
+                            <button
+                              onClick={() => setShowResultsGate(false)}
+                              className="text-xs transition-colors"
+                              style={{ color: "#374151" }}
+                              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "#6B7280"; }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "#374151"; }}
+                            >
+                              Skip (view only)
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Bottom shimmer */}
+                        <div style={{ height: "1px", background: "linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.15) 50%, transparent 100%)" }} />
+                      </motion.div>
+                    </motion.div>
+                  )}
+                  </AnimatePresence>
+                </div>{/* /relative gate wrapper */}
               </motion.div>
             )}
         </div>
