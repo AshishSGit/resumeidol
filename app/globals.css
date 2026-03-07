@@ -512,7 +512,7 @@ a, button, [role="button"] { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
 
 /* Smooth will-change hint */
-.btn-gold, .btn-ghost, .btn-emerald, .card-feature, .card-pricing-interactive { will-change: transform; }
+.btn-gold, .btn-ghost, .btn-emerald, .btn-amber, .card-feature, .card-pricing-interactive { will-change: transform; }
 
 /* === Enhanced btn-gold hover/active === */
 .btn-gold { cursor: pointer; }
@@ -629,6 +629,22 @@ button:disabled { cursor: not-allowed; }
   50%       { transform: translateY(7px); opacity: 0.9; }
 }
 .scroll-hint { animation: bounce-hint 2.2s ease-in-out infinite; }
+
+/* === Starter card amber button === */
+.btn-amber {
+  background: rgba(245,158,11,0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(245,158,11,0.3);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.btn-amber:hover {
+  background: rgba(245,158,11,0.18);
+  border-color: rgba(245,158,11,0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(245,158,11,0.18);
+}
+.btn-amber:not(:disabled):active { transform: translateY(0); transition-duration: 0.1s; }
 
 /* === Lifetime card emerald button === */
 .btn-emerald {

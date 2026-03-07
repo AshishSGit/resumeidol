@@ -243,8 +243,10 @@ function TailorInner() {
   const [editMode, setEditMode] = useState(false);
   const [editedResume, setEditedResume] = useState("");
   const [isPro, setIsPro] = useState(false);
+  const [isStarter, setIsStarter] = useState(false);
   const [tailorCount, setTailorCount] = useState(0);
-  const FREE_LIMIT = 3;
+  const FREE_LIMIT = 1;
+  const STARTER_LIMIT = 8;
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [copied, setCopied] = useState(false);
   const [streamedResume, setStreamedResume] = useState("");
@@ -255,16 +257,18 @@ function TailorInner() {
     const init = async () => {
       // Server-side pro check (owner bypass via OWNER_EMAIL env var)
       const res = await fetch("/api/pro-status");
-      const { isPro: serverPro } = await res.json();
+      const { isPro: serverPro, plan: serverPlan } = await res.json();
       if (serverPro) {
         setIsPro(true);
+      } else if (serverPlan === "starter") {
+        setIsStarter(true);
+        const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
+        setTailorCount(parseInt(localStorage.getItem(monthKey) ?? "0"));
       } else {
-        // localStorage fallback (pro purchase)
-        const pro = localStorage.getItem("resumeidol_pro") === "true";
-        setIsPro(pro);
+        // Free: one-time limit (not monthly)
+        const freeUsed = localStorage.getItem("resumeidol_free_used") === "1";
+        setTailorCount(freeUsed ? 1 : 0);
       }
-      const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
-      setTailorCount(parseInt(localStorage.getItem(monthKey) ?? "0"));
       if (!localStorage.getItem("resumeidol_onboarded")) setShowOnboarding(true);
 
       // Auto-load saved resume from cloud
@@ -396,8 +400,12 @@ function TailorInner() {
       return;
     }
 
-    if (!isPro && tailorCount >= FREE_LIMIT) {
-      setError(`You've used all ${FREE_LIMIT} free tailors this month. Upgrade to Pro (30/mo) or get Lifetime for unlimited.`);
+    if (!isPro && !isStarter && tailorCount >= FREE_LIMIT) {
+      setError("You've used your 1 free tailor. Upgrade to Starter ($9/mo) or Pro for more.");
+      return;
+    }
+    if (isStarter && tailorCount >= STARTER_LIMIT) {
+      setError(`You've used all ${STARTER_LIMIT} Starter tailors this month. Upgrade to Pro for unlimited.`);
       return;
     }
 
@@ -451,10 +459,16 @@ function TailorInner() {
       setActiveTab("resume");
       // Increment usage counter
       if (!isPro) {
-        const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
-        const newCount = tailorCount + 1;
-        localStorage.setItem(monthKey, String(newCount));
-        setTailorCount(newCount);
+        if (isStarter) {
+          const monthKey = `resumeidol_tailor_${new Date().toISOString().slice(0, 7)}`;
+          const newCount = tailorCount + 1;
+          localStorage.setItem(monthKey, String(newCount));
+          setTailorCount(newCount);
+        } else {
+          // Free: one-time use flag
+          localStorage.setItem("resumeidol_free_used", "1");
+          setTailorCount(1);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -887,25 +901,40 @@ function TailorInner() {
             {/* Usage indicator */}
             {!isPro && (
               <div className="text-center">
-                {tailorCount >= FREE_LIMIT ? (
+                {isStarter ? (
+                  tailorCount >= STARTER_LIMIT ? (
+                    <div className="p-4 rounded-xl" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                      <p className="text-[#f87171] font-medium mb-1.5 text-sm">All 8 Starter tailors used this month</p>
+                      <p className="text-[#6B7A99] text-sm">
+                        <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Upgrade to Pro ($29/mo)</a>
+                        {" "}for unlimited tailoring or{" "}
+                        <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Lifetime ($349)</a>
+                        {" "}for forever access.
+                      </p>
+                    </div>
+                  ) : tailorCount >= STARTER_LIMIT - 2 ? (
+                    <div className="p-4 rounded-xl" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                      <p className="text-[#DEC27A] font-medium mb-1 text-sm">Only {STARTER_LIMIT - tailorCount} Starter tailor{STARTER_LIMIT - tailorCount !== 1 ? "s" : ""} left this month</p>
+                      <p className="text-[#6B7A99] text-sm">
+                        <a href="/#pricing" className="text-[#C9A84C] hover:underline">Upgrade to Pro</a> for unlimited.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-[#6B7A99] text-sm">{STARTER_LIMIT - tailorCount} of {STARTER_LIMIT} tailors remaining this month</p>
+                  )
+                ) : tailorCount >= FREE_LIMIT ? (
                   <div className="p-4 rounded-xl" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                    <p className="text-[#f87171] font-medium mb-1.5 text-sm">Free limit reached for this month</p>
+                    <p className="text-[#f87171] font-medium mb-1.5 text-sm">Free tailor used</p>
                     <p className="text-[#6B7A99] text-sm">
-                      <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Upgrade to Pro ($18/mo)</a>
-                      {" "}for 30 tailors, or{" "}
-                      <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Lifetime ($249)</a>
-                      {" "}for unlimited.
-                    </p>
-                  </div>
-                ) : tailorCount === FREE_LIMIT - 1 ? (
-                  <div className="p-4 rounded-xl" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)" }}>
-                    <p className="text-[#DEC27A] font-medium mb-1 text-sm">This is your last free tailor this month</p>
-                    <p className="text-[#6B7A99] text-sm">
-                      <a href="/#pricing" className="text-[#C9A84C] hover:underline">Upgrade to Pro</a> to keep going after this.
+                      <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Starter ($9/mo)</a>
+                      {" "}for 8/month,{" "}
+                      <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Pro ($29/mo)</a>
+                      {" "}for unlimited, or{" "}
+                      <a href="/#pricing" className="text-[#C9A84C] hover:underline font-medium">Lifetime ($349)</a>.
                     </p>
                   </div>
                 ) : (
-                  <p className="text-[#6B7A99] text-sm">{FREE_LIMIT - tailorCount} free tailor{FREE_LIMIT - tailorCount !== 1 ? "s" : ""} remaining this month</p>
+                  <p className="text-[#6B7A99] text-sm">1 free tailor available — no card needed</p>
                 )}
               </div>
             )}

@@ -20,12 +20,17 @@ export async function GET() {
     .eq("user_id", user.id)
     .single();
 
-  if (data && (data.plan === "pro" || data.plan === "lifetime")) {
+  if (data) {
     // For subscriptions, check if it hasn't expired
     if (data.plan_expires_at && new Date(data.plan_expires_at) < new Date()) {
       return NextResponse.json({ isPro: false, plan: "free" });
     }
-    return NextResponse.json({ isPro: true, plan: data.plan });
+    if (data.plan === "pro" || data.plan === "lifetime") {
+      return NextResponse.json({ isPro: true, plan: data.plan });
+    }
+    if (data.plan === "starter") {
+      return NextResponse.json({ isPro: false, plan: "starter" });
+    }
   }
 
   return NextResponse.json({ isPro: false, plan: "free" });

@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
         ? process.env.STRIPE_LIFETIME_PRICE_ID
         : plan === "pro_annual"
         ? process.env.STRIPE_PRO_ANNUAL_PRICE_ID
+        : plan === "starter"
+        ? process.env.STRIPE_STARTER_PRICE_ID
         : process.env.STRIPE_PRO_PRICE_ID;
 
     if (!priceId) {

@@ -15,7 +15,7 @@ function getAdminClient() {
 async function upsertPlan(
   supabase: ReturnType<typeof getAdminClient>,
   email: string,
-  plan: "pro" | "lifetime" | "free",
+  plan: "pro" | "lifetime" | "starter" | "free",
   stripeCustomerId?: string,
   stripeSubscriptionId?: string,
   expiresAt?: Date | null
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const email = session.customer_details?.email;
-        const plan = (session.metadata?.plan ?? "pro") as "pro" | "lifetime";
+        const plan = (session.metadata?.plan ?? "pro") as "pro" | "lifetime" | "starter";
         const customerId = session.customer as string | undefined;
         const subscriptionId = session.subscription as string | undefined;
 

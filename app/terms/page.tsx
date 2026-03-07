@@ -54,9 +54,10 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[#F0F2F7] text-lg font-semibold mb-3">4. Subscription and payments</h2>
             <ul className="list-disc list-inside space-y-2">
-              <li><strong className="text-[#DEC27A]">Free plan:</strong> Access to 3 AI resume tailors per month at no charge.</li>
-              <li><strong className="text-[#DEC27A]">Pro plan ($18/month):</strong> 30 AI resume tailors per month, billed monthly. Cancel anytime from your Stripe billing portal.</li>
-              <li><strong className="text-[#DEC27A]">Lifetime plan ($249 one-time):</strong> Unlimited resume tailoring, no recurring charges, valid for the lifetime of the product.</li>
+              <li><strong className="text-[#DEC27A]">Free plan:</strong> 1 AI resume tailor, one-time, at no charge. No monthly reset.</li>
+              <li><strong className="text-[#DEC27A]">Starter plan ($9/month):</strong> 8 AI resume tailors per month, billed monthly. Cancel anytime from your Stripe billing portal.</li>
+              <li><strong className="text-[#DEC27A]">Pro plan ($29/month or $228/year):</strong> Unlimited AI resume tailoring, billed monthly or annually. Cancel anytime from your Stripe billing portal.</li>
+              <li><strong className="text-[#DEC27A]">Lifetime plan ($349 one-time):</strong> Unlimited resume tailoring, no recurring charges, valid for the lifetime of the product.</li>
               <li>All payments are processed by Stripe. By purchasing, you agree to Stripe&apos;s terms of service.</li>
             </ul>
           </section>

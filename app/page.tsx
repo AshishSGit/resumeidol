@@ -78,27 +78,43 @@ const PRICING = [
     name: "Free",
     price: "0",
     period: "No credit card needed",
-    desc: "Try it before you commit",
+    desc: "See the magic — once",
     features: [
-      "3 AI resume tailors / month",
+      "1 AI resume tailor — free forever",
       "ATS score before & after",
       "Keyword gap analysis",
       "DOCX + PDF download",
     ],
-    cta: "Start Free",
+    cta: "Try for Free",
     plan: "free",
     featured: false,
     badge: null,
   },
   {
-    name: "Pro",
-    price: "18",
-    annualPrice: "12",
+    name: "Starter",
+    price: "9",
     period: "per month",
-    annualPeriod: "per month, billed $144/yr",
+    desc: "For the casual job seeker",
+    features: [
+      "8 AI resume tailors / month",
+      "ATS score before & after",
+      "Keyword gap analysis",
+      "DOCX + PDF download",
+    ],
+    cta: "Start for $9 →",
+    plan: "starter",
+    featured: false,
+    badge: null,
+  },
+  {
+    name: "Pro",
+    price: "29",
+    annualPrice: "19",
+    period: "per month",
+    annualPeriod: "per month, billed $228/yr",
     desc: "For the focused job seeker",
     features: [
-      "30 AI resume tailors / month",
+      "Unlimited AI tailoring",
       "ATS score before & after",
       "Keyword gap analysis",
       "Word-level diff comparison",
@@ -112,7 +128,7 @@ const PRICING = [
   },
   {
     name: "Lifetime",
-    price: "249",
+    price: "349",
     period: "one-time payment",
     desc: "The last resume tool you'll ever buy",
     features: [
@@ -914,14 +930,15 @@ export default function LandingPage() {
               className="text-xs px-2 py-0.5 rounded-full font-semibold"
               style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.25)", color: "#22c55e" }}
             >
-              Save $72 / year
+              Save $120 / year
             </span>
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 items-stretch">
           {PRICING.map((plan, i) => {
             const isLifetime = plan.plan === "lifetime";
+            const isStarter = plan.plan === "starter";
             const isPro = plan.featured;
             const displayPrice = isPro && annual ? plan.annualPrice! : plan.price;
             const displayPeriod = isPro && annual ? plan.annualPeriod! : plan.period;
@@ -938,6 +955,9 @@ export default function LandingPage() {
                   <div className={`absolute -top-4 left-1/2 -translate-x-1/2 z-10 ${isPro ? "badge-shimmer" : ""}`}
                   style={isLifetime ? {
                     background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.35)", color: "#34d399",
+                    fontSize: "0.72rem", fontWeight: 600, padding: "0.22rem 0.75rem", borderRadius: "9999px", whiteSpace: "nowrap"
+                  } : isStarter ? {
+                    background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)", color: "#fbbf24",
                     fontSize: "0.72rem", fontWeight: 600, padding: "0.22rem 0.75rem", borderRadius: "9999px", whiteSpace: "nowrap"
                   } : {}}>
                     {plan.badge}
@@ -958,6 +978,12 @@ export default function LandingPage() {
                     boxShadow: "0 0 60px rgba(16,185,129,0.07)",
                     ["--pricing-hover-shadow" as string]: "0 32px 80px rgba(16,185,129,0.15), 0 0 0 1px rgba(16,185,129,0.3)",
                     ["--pricing-hover-border" as string]: "rgba(16,185,129,0.45)",
+                  } : isStarter ? {
+                    background: "linear-gradient(160deg, #18150A 0%, #10100B 100%)",
+                    border: "1px solid rgba(245,158,11,0.15)",
+                    boxShadow: "0 0 40px rgba(245,158,11,0.04)",
+                    ["--pricing-hover-shadow" as string]: "0 24px 60px rgba(245,158,11,0.1), 0 0 0 1px rgba(245,158,11,0.25)",
+                    ["--pricing-hover-border" as string]: "rgba(245,158,11,0.4)",
                   } : {
                     background: "#0F1420",
                     border: "1px solid rgba(255,255,255,0.07)",
@@ -971,13 +997,15 @@ export default function LandingPage() {
                       ? "linear-gradient(90deg, transparent, rgba(201,168,76,0.6), transparent)"
                       : isLifetime
                       ? "linear-gradient(90deg, transparent, rgba(16,185,129,0.4), transparent)"
+                      : isStarter
+                      ? "linear-gradient(90deg, transparent, rgba(245,158,11,0.3), transparent)"
                       : "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
                   }} />
 
                   {/* Plan name + desc */}
                   <h3
                     className="text-xl font-bold mb-1 mt-1"
-                    style={{ color: isPro ? "#DEC27A" : isLifetime ? "#34d399" : "#F0F2F7", fontFamily: "Playfair Display, serif" }}
+                    style={{ color: isPro ? "#DEC27A" : isLifetime ? "#34d399" : isStarter ? "#fbbf24" : "#F0F2F7", fontFamily: "Playfair Display, serif" }}
                   >
                     {plan.name}
                   </h3>
@@ -994,7 +1022,7 @@ export default function LandingPage() {
                         style={{
                           fontFamily: "Playfair Display, serif",
                           fontSize: plan.plan === "free" ? "3.5rem" : "4.5rem",
-                          color: isLifetime ? "#34d399" : undefined,
+                          color: isLifetime ? "#34d399" : isStarter ? "#fbbf24" : undefined,
                         }}
                       >
                         {displayPrice === "0" ? "Free" : displayPrice}
@@ -1006,7 +1034,7 @@ export default function LandingPage() {
                       <div className="flex items-center gap-2 mt-2 mb-1">
                         <span className="text-[#4B5563] text-sm line-through">${plan.price}/mo</span>
                         <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#22c55e" }}>
-                          You save $72/yr
+                          You save $120/yr
                         </span>
                       </div>
                     )}
@@ -1028,7 +1056,7 @@ export default function LandingPage() {
                   <ul className="space-y-3 mb-8 flex-1">
                     {plan.features.map((f) => (
                       <li key={f} className="flex items-center gap-3 text-[0.88rem] text-[#9CA3AF]">
-                        <CheckCircle size={15} className="shrink-0" style={{ color: isPro ? "#C9A84C" : isLifetime ? "#10b981" : "#6B7A99" }} />
+                        <CheckCircle size={15} className="shrink-0" style={{ color: isPro ? "#C9A84C" : isLifetime ? "#10b981" : isStarter ? "#f59e0b" : "#6B7A99" }} />
                         {f}
                       </li>
                     ))}
@@ -1039,14 +1067,14 @@ export default function LandingPage() {
                     onClick={() => handleCheckout(checkoutPlan)}
                     disabled={checkoutLoading !== null}
                     className={`w-full text-center py-3.5 rounded-xl font-semibold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isPro ? "btn-gold" : isLifetime ? "btn-emerald" : "btn-ghost"
+                      isPro ? "btn-gold" : isLifetime ? "btn-emerald" : isStarter ? "btn-amber" : "btn-ghost"
                     }`}
                   >
                     {checkoutLoading === plan.plan ? "Redirecting…" : plan.cta}
                   </button>
 
-                  {/* Money-back guarantee for Pro */}
-                  {isPro && (
+                  {/* Money-back guarantee for Pro + Starter */}
+                  {(isPro || isStarter) && (
                     <div className="flex items-center justify-center gap-1.5 mt-3 text-[0.72rem]" style={{ color: "#22c55e" }}>
                       <Shield size={10} />
                       7-day money-back guarantee, no questions asked
