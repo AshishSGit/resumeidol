@@ -264,6 +264,15 @@ function ScoreHero({ before, after, jobTitle }: { before: number; after: number;
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: afterColor, boxShadow: `0 0 10px ${afterColor}` }} />
             <p className="text-sm font-bold" style={{ color: afterColor }}>{afterLabel}</p>
           </div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2.1 }}
+            className="text-xs font-semibold tracking-wide mt-0.5"
+            style={{ color: getPercentile(after).color }}
+          >
+            {getPercentile(after).text}
+          </motion.p>
         </div>
       </div>
 
@@ -316,6 +325,120 @@ function BulletList({ content, icon: Icon, iconColor }: { content: string; icon:
         </li>
       ))}
     </ul>
+  );
+}
+
+// ── Percentile helper ─────────────────────────────────────────────────────────
+function getPercentile(score: number): { text: string; color: string } {
+  if (score >= 85) return { text: "Top 10% of applicants", color: "#22c55e" };
+  if (score >= 75) return { text: "Top 25% of applicants", color: "#22c55e" };
+  if (score >= 65) return { text: "Top 35% of applicants", color: "#C9A84C" };
+  if (score >= 55) return { text: "Top 50% of applicants", color: "#C9A84C" };
+  if (score >= 45) return { text: "Top 65% of applicants", color: "#f59e0b" };
+  return { text: "Below average match", color: "#ef4444" };
+}
+
+// ── Keyword chips ──────────────────────────────────────────────────────────────
+function KeywordChips({ content }: { content: string }) {
+  const keywords = content
+    .split("\n")
+    .map(l => l.replace(/^[-•*\d.]\s*/, "").trim())
+    .filter(l => l.length > 2 && l.length < 80 && !/^[-─═*]{2,}$/.test(l));
+  return (
+    <div className="flex flex-wrap gap-2">
+      {keywords.map((kw, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, scale: 0.72, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: i * 0.04, type: "spring", stiffness: 380, damping: 26 }}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
+          style={{ background: "rgba(201,168,76,0.09)", border: "1px solid rgba(201,168,76,0.26)", color: "#DEC27A" }}
+        >
+          <CheckCircle size={11} style={{ color: "#C9A84C", flexShrink: 0 }} />
+          {kw}
+        </motion.span>
+      ))}
+    </div>
+  );
+}
+
+// ── Impact cards (Changes tab) ─────────────────────────────────────────────────
+function ImpactCards({ content }: { content: string }) {
+  const items = content
+    .split("\n")
+    .map(l => l.replace(/^[-•*\d.]\s*/, "").trim())
+    .filter(l => l.length > 3 && !/^[-─═*]{2,}$/.test(l));
+  return (
+    <div className="space-y-2.5">
+      {items.map((item, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, x: -14 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.055, ease: [0.25, 0.46, 0.45, 0.94], duration: 0.28 }}
+          className="flex items-start gap-4 px-4 py-3.5 rounded-xl"
+          style={{ background: "rgba(34,197,94,0.04)", border: "1px solid rgba(34,197,94,0.11)" }}
+        >
+          <div
+            className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold"
+            style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.22)", color: "#4ade80", fontFamily: "Playfair Display, serif" }}
+          >
+            {i + 1}
+          </div>
+          <p className="text-sm text-[#9CA3AF] leading-relaxed flex-1">{item}</p>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+// ── Gap cards (Gaps tab) ───────────────────────────────────────────────────────
+function GapCards({ content }: { content: string }) {
+  const items = content
+    .split("\n")
+    .map(l => l.replace(/^[-•*\d.]\s*/, "").trim())
+    .filter(l => l.length > 3 && !/^[-─═*]{2,}$/.test(l));
+  const gapCount = items.length;
+  return (
+    <div>
+      <div className="flex items-start justify-between mb-5 gap-4">
+        <div>
+          <p className="text-sm font-semibold mb-1" style={{ color: "#F0F2F7" }}>
+            {gapCount} skill gap{gapCount !== 1 ? "s" : ""} to address
+          </p>
+          <p className="text-xs leading-relaxed" style={{ color: "#4B5563", maxWidth: "22rem" }}>
+            Skills the employer prioritised that don&apos;t appear in your background. Be ready to discuss these honestly in interviews.
+          </p>
+        </div>
+        <span
+          className="px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 mt-0.5"
+          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", color: "#fbbf24" }}
+        >
+          Be upfront
+        </span>
+      </div>
+      <div className="space-y-2.5">
+        {items.map((item, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05, duration: 0.26 }}
+            className="flex items-start gap-3.5 px-4 py-3.5 rounded-xl"
+            style={{ background: "rgba(245,158,11,0.04)", border: "1px solid rgba(245,158,11,0.11)" }}
+          >
+            <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(245,158,11,0.14)", border: "1px solid rgba(245,158,11,0.28)" }}>
+              <span className="w-2 h-2 rounded-full" style={{ background: "#f59e0b", boxShadow: "0 0 6px rgba(245,158,11,0.6)" }} />
+            </div>
+            <p className="text-sm text-[#9CA3AF] leading-relaxed flex-1">{item}</p>
+          </motion.div>
+        ))}
+      </div>
+      <div className="mt-5 p-4 rounded-xl text-xs leading-relaxed" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", color: "#4B5563" }}>
+        <span className="font-semibold" style={{ color: "#6B7A99" }}>Interview tip:</span> For each gap, prepare a 1-2 sentence honest response. Interviewers respect candidates who acknowledge gaps and show a plan to close them.
+      </div>
+    </div>
   );
 }
 
@@ -417,6 +540,8 @@ function TailorInner() {
   const STARTER_LIMIT = 8;
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [downloadedDocx, setDownloadedDocx] = useState(false);
+  const [downloadedPdf, setDownloadedPdf] = useState(false);
   const [streamedResume, setStreamedResume] = useState("");
   const [streamComplete, setStreamComplete] = useState(true);
   const streamTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -697,6 +822,8 @@ function TailorInner() {
       a.download = `resume-${company || "resumeidol"}.docx`;
       a.click();
       URL.revokeObjectURL(url);
+      setDownloadedDocx(true);
+      setTimeout(() => setDownloadedDocx(false), 2500);
     } catch {
       setError("DOCX download failed. Try copying the text instead.");
     }
@@ -719,6 +846,8 @@ function TailorInner() {
       a.download = `resume-${company || "resumeidol"}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
+      setDownloadedPdf(true);
+      setTimeout(() => setDownloadedPdf(false), 2500);
     } catch {
       setError("PDF download failed. Try the .docx option instead.");
     }
@@ -737,6 +866,12 @@ function TailorInner() {
     () => (result && originalResumeText ? computeWordDiff(originalResumeText, result.tailoredResume) : { left: [], right: [] }),
     [result, originalResumeText]
   );
+
+  const tabCounts = useMemo(() => {
+    if (!result) return { keywords: 0, changes: 0, gaps: 0 };
+    const count = (s: string) => s.split("\n").filter(l => l.replace(/^[-•*\d.]\s*/, "").trim().length > 3).length;
+    return { keywords: count(result.keywordsAdded), changes: count(result.changesMade), gaps: count(result.gaps) };
+  }, [result]);
 
   const withinLimit = isPro || (isStarter ? tailorCount < STARTER_LIMIT : tailorCount < FREE_LIMIT);
   const canTailor = resumeText.trim().length > 50 && jobDescription.trim().length > 50 && withinLimit;
@@ -1186,7 +1321,7 @@ function TailorInner() {
                       <div>
                         <p className="text-xs uppercase tracking-[0.16em] font-semibold mb-1.5" style={{ color: "#3A4558" }}>Analysis Complete</p>
                         <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.7rem", fontWeight: 700, color: "#F0F2F7", lineHeight: 1.05 }}>
-                          Your Match Report
+                          {result.atsScoreAfter >= 75 ? "Strong match secured" : result.atsScoreAfter >= 55 ? "Competitive position built" : "Resume analysis complete"}
                         </h3>
                       </div>
                       <div className="flex items-center gap-4">
@@ -1215,6 +1350,33 @@ function TailorInner() {
 
                     {/* Score hero */}
                     <ScoreHero before={result.atsScoreBefore} after={result.atsScoreAfter} jobTitle={jobTitle || undefined} />
+
+                    {/* Stats banner */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1.9, duration: 0.4 }}
+                      className="grid grid-cols-3 gap-3 mt-6"
+                    >
+                      {[
+                        { value: tabCounts.keywords, label: "Keywords injected", icon: Tag, color: "#C9A84C" },
+                        { value: tabCounts.changes, label: "Improvements made", icon: TrendingUp, color: "#22c55e" },
+                        { value: tabCounts.gaps, label: "Gaps identified", icon: AlertCircle, color: "#f59e0b" },
+                      ].map(({ value, label, icon: Icon, color }, i) => (
+                        <motion.div
+                          key={label}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 1.9 + i * 0.1 }}
+                          className="flex flex-col items-center gap-1 py-3 px-2 rounded-xl text-center"
+                          style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}
+                        >
+                          <Icon size={13} style={{ color }} />
+                          <span className="text-xl font-black" style={{ color, fontFamily: "Playfair Display, serif", lineHeight: 1 }}>{value}</span>
+                          <span className="text-[0.62rem] uppercase tracking-[0.12em] font-medium" style={{ color: "#3A4558" }}>{label}</span>
+                        </motion.div>
+                      ))}
+                    </motion.div>
 
                     {/* Conditional banners */}
                     {result.atsScoreAfter >= 80 && result.atsScoreAfter - result.atsScoreBefore >= 10 && (
@@ -1293,6 +1455,15 @@ function TailorInner() {
                             )}
                             <tab.icon size={13} className="relative z-10 shrink-0" />
                             <span className="relative z-10">{tab.label}</span>
+                            {tab.id === "keywords" && tabCounts.keywords > 0 && (
+                              <span className="relative z-10 ml-0.5 px-1.5 py-0.5 rounded-full text-[0.6rem] font-bold leading-none" style={{ background: "rgba(201,168,76,0.15)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.2)" }}>{tabCounts.keywords}</span>
+                            )}
+                            {tab.id === "changes" && tabCounts.changes > 0 && (
+                              <span className="relative z-10 ml-0.5 px-1.5 py-0.5 rounded-full text-[0.6rem] font-bold leading-none" style={{ background: "rgba(34,197,94,0.12)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }}>{tabCounts.changes}</span>
+                            )}
+                            {tab.id === "gaps" && tabCounts.gaps > 0 && (
+                              <span className="relative z-10 ml-0.5 px-1.5 py-0.5 rounded-full text-[0.6rem] font-bold leading-none" style={{ background: "rgba(245,158,11,0.12)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.2)" }}>{tabCounts.gaps}</span>
+                            )}
                           </button>
                         );
                       })}
@@ -1390,48 +1561,31 @@ function TailorInner() {
                             <button
                               onClick={handleDownloadDocx}
                               className="flex flex-col items-center justify-center gap-1 py-3.5 rounded-xl text-sm font-semibold transition-all"
-                              style={{
-                                background: "linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(29,78,216,0.08) 100%)",
-                                border: "1px solid rgba(96,165,250,0.25)",
-                                color: "#93c5fd",
-                                boxShadow: "0 4px 16px rgba(37,99,235,0.12)",
-                              }}
-                              onMouseEnter={e => {
-                                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(96,165,250,0.45)";
-                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 24px rgba(37,99,235,0.22)";
-                              }}
-                              onMouseLeave={e => {
-                                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(96,165,250,0.25)";
-                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 16px rgba(37,99,235,0.12)";
-                              }}
+                              style={downloadedDocx
+                                ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80", boxShadow: "0 4px 16px rgba(34,197,94,0.15)" }
+                                : { background: "linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(29,78,216,0.08) 100%)", border: "1px solid rgba(96,165,250,0.25)", color: "#93c5fd", boxShadow: "0 4px 16px rgba(37,99,235,0.12)" }
+                              }
                             >
                               <div className="flex items-center gap-1.5">
-                                <Download size={13} />
-                                Word .docx
+                                {downloadedDocx ? <CheckCircle size={13} /> : <Download size={13} />}
+                                {downloadedDocx ? "Downloaded!" : "Word .docx"}
                               </div>
-                              <span className="text-[0.6rem] opacity-60 font-normal tracking-wider">ATS-friendly format</span>
+                              <span className="text-[0.6rem] opacity-60 font-normal tracking-wider">{downloadedDocx ? "Opening in Word" : "ATS-friendly format"}</span>
                             </button>
                             {/* PDF — primary gold */}
                             <button
                               onClick={handleDownloadPdf}
                               className="flex flex-col items-center justify-center gap-1 py-3.5 rounded-xl text-sm font-semibold transition-all"
-                              style={{
-                                background: "linear-gradient(135deg, #C9A84C 0%, #B8952F 100%)",
-                                color: "#07090F",
-                                boxShadow: "0 4px 20px rgba(201,168,76,0.28)",
-                              }}
-                              onMouseEnter={e => {
-                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 28px rgba(201,168,76,0.45)";
-                              }}
-                              onMouseLeave={e => {
-                                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 20px rgba(201,168,76,0.28)";
-                              }}
+                              style={downloadedPdf
+                                ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80", boxShadow: "0 4px 16px rgba(34,197,94,0.15)" }
+                                : { background: "linear-gradient(135deg, #C9A84C 0%, #B8952F 100%)", color: "#07090F", boxShadow: "0 4px 20px rgba(201,168,76,0.28)" }
+                              }
                             >
                               <div className="flex items-center gap-1.5">
-                                <Download size={13} />
-                                Download PDF
+                                {downloadedPdf ? <CheckCircle size={13} /> : <Download size={13} />}
+                                {downloadedPdf ? "Downloaded!" : "Download PDF"}
                               </div>
-                              <span className="text-[0.6rem] opacity-60 font-normal tracking-wider">Best for applications</span>
+                              <span className="text-[0.6rem] opacity-60 font-normal tracking-wider">{downloadedPdf ? "Good luck!" : "Best for applications"}</span>
                             </button>
                           </div>
                         </div>
@@ -1473,46 +1627,57 @@ function TailorInner() {
                     )}
                     {activeTab === "keywords" && (
                       <div>
-                        <p className="text-sm text-[#6B7A99] mb-5 leading-relaxed">These keywords from the job description were naturally woven into your resume:</p>
-                        <BulletList content={result.keywordsAdded} icon={CheckCircle} iconColor="#C9A84C" />
+                        <div className="flex items-center justify-between mb-5">
+                          <div>
+                            <p className="text-base font-semibold" style={{ color: "#F0F2F7" }}>
+                              <span style={{ color: "#C9A84C", fontFamily: "Playfair Display, serif" }}>{tabCounts.keywords}</span> keywords injected
+                            </p>
+                            <p className="text-xs mt-0.5" style={{ color: "#4B5563" }}>Naturally woven into your resume for maximum ATS relevance</p>
+                          </div>
+                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.22)", color: "#C9A84C" }}>ATS Optimised</span>
+                        </div>
+                        <KeywordChips content={result.keywordsAdded} />
                       </div>
                     )}
                     {activeTab === "changes" && (
                       <div>
-                        <p className="text-sm text-[#6B7A99] mb-5 leading-relaxed">Key improvements made to maximise your impact:</p>
-                        <BulletList content={result.changesMade} icon={ArrowUp} iconColor="#22c55e" />
+                        <div className="flex items-center justify-between mb-5">
+                          <div>
+                            <p className="text-base font-semibold" style={{ color: "#F0F2F7" }}>
+                              <span style={{ color: "#4ade80", fontFamily: "Playfair Display, serif" }}>{tabCounts.changes}</span> improvements made
+                            </p>
+                            <p className="text-xs mt-0.5" style={{ color: "#4B5563" }}>Every change was crafted to strengthen your candidacy for this specific role</p>
+                          </div>
+                        </div>
+                        <ImpactCards content={result.changesMade} />
                       </div>
                     )}
                     {activeTab === "gaps" && (
-                      <div>
-                        <p className="text-sm text-[#6B7A99] mb-5 leading-relaxed">Skills in the job description that don&apos;t appear in your background — be upfront about these in applications:</p>
-                        <BulletList content={result.gaps} icon={AlertCircle} iconColor="#f59e0b" />
-                      </div>
+                      <GapCards content={result.gaps} />
                     )}
                   </motion.div>
                   </AnimatePresence>
                 </div>
 
                 {/* Re-tailor */}
-                <div className="flex items-center gap-3 stagger-reveal" style={{ animationDelay: "320ms" }}>
-                  <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                <div className="flex flex-col items-center gap-3 pt-2 stagger-reveal" style={{ animationDelay: "320ms" }}>
+                  <p className="text-xs" style={{ color: "#3A4558" }}>Applying to another role?</p>
                   <button
                     onClick={() => { setResult(null); setError(null); }}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-medium transition-all"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", color: "#4B5563" }}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "#6B7A99" }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLButtonElement).style.color = "#9CA3AF";
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.12)";
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(201,168,76,0.25)";
+                      (e.currentTarget as HTMLButtonElement).style.color = "#DEC27A";
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLButtonElement).style.color = "#4B5563";
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.07)";
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.08)";
+                      (e.currentTarget as HTMLButtonElement).style.color = "#6B7A99";
                     }}
                   >
-                    <RotateCcw size={12} />
-                    Tailor a different job
+                    <RotateCcw size={13} />
+                    Tailor for a different role
                   </button>
-                  <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
                 </div>
               </motion.div>
             )}
