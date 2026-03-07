@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import JobCard, { Job } from "@/components/JobCard";
 import {
   Search, SlidersHorizontal, MapPin, X, Loader2,
-  Wifi, WifiOff, ChevronDown, LayoutGrid, List, ArrowRight
+  Wifi, WifiOff, ChevronDown, LayoutGrid, List, ArrowRight, CheckCircle
 } from "lucide-react";
 
 const SENIORITY = ["Any Level", "Internship", "Entry Level", "Mid Level", "Senior", "Lead", "Director"];
@@ -15,27 +15,30 @@ const JOB_TYPES = ["Any Type", "Full-time", "Part-time", "Contract", "Remote", "
 const DATE_POSTED = ["Any time", "Past 24 hours", "Past week", "Past month"];
 const SOURCES = ["All", "LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Dice", "Remotive", "BeBee", "Jooble", "Snagajob"];
 
+const SCAN_BOARDS = ["LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Dice", "Remotive", "Monster", "BeBee"];
+
 const DEFAULT_LOCATIONS = [
   "Remote", "New York, NY", "San Francisco, CA", "San Jose, CA",
   "Los Angeles, CA", "Seattle, WA", "Austin, TX", "Chicago, IL",
   "Boston, MA", "London, UK", "Toronto, Canada", "Sydney, Australia",
 ];
 
-// Simulated live activity feed shown before first search
 const TRENDING_ROLES = [
-  { title: "Senior Product Designer",     company: "Stripe",     location: "Remote",        salary: "$175k+" },
-  { title: "Staff Frontend Engineer",     company: "Linear",     location: "San Francisco", salary: "$195k+" },
-  { title: "DevRel Lead",                 company: "Vercel",     location: "Remote",        salary: "$160k+" },
-  { title: "Product Manager, Growth",     company: "Figma",      location: "New York",      salary: "$170k+" },
-  { title: "AI Research Engineer",        company: "Anthropic",  location: "Remote",        salary: "$220k+" },
+  { title: "Senior Product Designer",  company: "Stripe",     location: "Remote",        salary: "$175k+", tag: "Hot" },
+  { title: "Staff Frontend Engineer",  company: "Linear",     location: "San Francisco", salary: "$195k+", tag: "New" },
+  { title: "DevRel Lead",              company: "Vercel",     location: "Remote",        salary: "$160k+", tag: "" },
+  { title: "Product Manager, Growth",  company: "Figma",      location: "New York",      salary: "$170k+", tag: "Hot" },
+  { title: "AI Research Engineer",     company: "Anthropic",  location: "Remote",        salary: "$220k+", tag: "New" },
+  { title: "Engineering Manager",      company: "Notion",     location: "San Francisco", salary: "$210k+", tag: "" },
 ];
 
-const COMPANY_STYLE: Record<string, { bg: string; color: string }> = {
-  "Stripe":    { bg: "rgba(99,102,241,0.15)",  color: "#818cf8" },
-  "Linear":    { bg: "rgba(121,87,255,0.15)",  color: "#a78bfa" },
-  "Vercel":    { bg: "rgba(240,242,247,0.1)",  color: "#D0D4E0" },
-  "Figma":     { bg: "rgba(241,100,76,0.15)",  color: "#fb923c" },
-  "Anthropic": { bg: "rgba(201,168,76,0.15)",  color: "#C9A84C" },
+const COMPANY_STYLE: Record<string, { bg: string; color: string; grad: string }> = {
+  "Stripe":    { bg: "rgba(99,102,241,0.12)",  color: "#818cf8", grad: "rgba(99,102,241,0.18)" },
+  "Linear":    { bg: "rgba(121,87,255,0.12)",  color: "#a78bfa", grad: "rgba(121,87,255,0.18)" },
+  "Vercel":    { bg: "rgba(240,242,247,0.07)", color: "#D0D4E0", grad: "rgba(240,242,247,0.12)" },
+  "Figma":     { bg: "rgba(241,100,76,0.12)",  color: "#fb923c", grad: "rgba(241,100,76,0.18)" },
+  "Anthropic": { bg: "rgba(201,168,76,0.12)",  color: "#C9A84C", grad: "rgba(201,168,76,0.18)" },
+  "Notion":    { bg: "rgba(255,255,255,0.07)", color: "#E8EDF5", grad: "rgba(255,255,255,0.1)" },
 };
 
 function formatPlace(displayName: string): string {
@@ -85,6 +88,45 @@ export default function SearchPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Live job counter for hero
+  const [liveCount, setLiveCount] = useState(14_847);
+  useEffect(() => {
+    const t = setInterval(() => setLiveCount(c => c + Math.floor(Math.random() * 3 + 1)), 4500);
+    return () => clearInterval(t);
+  }, []);
+
+  // Scan progress + board checkmarks
+  const [scanProgress, setScanProgress] = useState(0);
+  const [scannedBoards, setScannedBoards] = useState<string[]>([]);
+  const scanTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const startScanAnimation = useCallback(() => {
+    scanTimers.current.forEach(clearTimeout);
+    scanTimers.current = [];
+    setScanProgress(0);
+    setScannedBoards([]);
+
+    // Progress bar: 0 → 72% over 3s, then creep to 90% waiting for result
+    let p = 0;
+    const tick = setInterval(() => {
+      p = Math.min(p + (p < 70 ? 4 : 0.8), 90);
+      setScanProgress(Math.round(p));
+    }, 180);
+    scanTimers.current.push(tick as unknown as ReturnType<typeof setTimeout>);
+
+    // Board checkmarks appear one by one
+    SCAN_BOARDS.forEach((board, i) => {
+      const t = setTimeout(() => setScannedBoards(prev => [...prev, board]), 400 + i * 520);
+      scanTimers.current.push(t);
+    });
+  }, []);
+
+  const stopScanAnimation = useCallback(() => {
+    scanTimers.current.forEach(clearTimeout);
+    setScanProgress(100);
+    setScannedBoards(SCAN_BOARDS);
+  }, []);
+
   const handleSearch = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!query.trim()) return;
@@ -92,6 +134,7 @@ export default function SearchPage() {
     setLoading(true);
     setSearched(true);
     setJobs([]);
+    startScanAnimation();
     try {
       const locVal = locationInput.trim();
       const effectiveLocation = locVal === "" || locVal.toLowerCase() === "anywhere" ? "" : locVal;
@@ -106,9 +149,10 @@ export default function SearchPage() {
     } catch (err) {
       console.error(err);
     } finally {
+      stopScanAnimation();
       setLoading(false);
     }
-  }, [query, locationInput, remote, seniority, jobType, datePosted, source]);
+  }, [query, locationInput, remote, seniority, jobType, datePosted, source, startScanAnimation, stopScanAnimation]);
 
   const handleTailor = (job: Job) => {
     const params = new URLSearchParams({ jobTitle: job.title, company: job.company, jobDescription: job.description, applyUrl: job.applyUrl });
@@ -186,15 +230,9 @@ export default function SearchPage() {
         }}
       />
 
-      {/* ── Side orbs (soft, blurred) ── */}
-      <div
-        className="absolute pointer-events-none"
-        style={{ top: "10%", left: "-15%", width: "600px", height: "600px", borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)", filter: "blur(80px)", zIndex: 0 }}
-      />
-      <div
-        className="absolute pointer-events-none"
-        style={{ top: "45%", right: "-15%", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%)", filter: "blur(80px)", zIndex: 0 }}
-      />
+      {/* ── Side orbs ── */}
+      <div className="absolute pointer-events-none" style={{ top: "10%", left: "-15%", width: "600px", height: "600px", borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)", filter: "blur(80px)", zIndex: 0 }} />
+      <div className="absolute pointer-events-none" style={{ top: "45%", right: "-15%", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%)", filter: "blur(80px)", zIndex: 0 }} />
 
       <Navbar />
 
@@ -203,10 +241,21 @@ export default function SearchPage() {
         {/* ── Search Hero ── */}
         <div className="max-w-4xl mx-auto px-6 pt-10 pb-6">
           <div className="text-center mb-10">
-            <div className="badge-gold mb-5 inline-flex items-center gap-2">
+            {/* Live counter badge */}
+            <div className="badge-gold mb-5 inline-flex items-center gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
-              Live · 500+ job boards · Real-time
+              <motion.span
+                key={liveCount}
+                initial={{ opacity: 0.6, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="tabular-nums font-bold"
+              >
+                {liveCount.toLocaleString()}
+              </motion.span>
+              <span style={{ color: "#8A8060" }}>jobs live · 500+ boards · real-time</span>
             </div>
+
             <h1
               style={{
                 fontFamily: "Playfair Display, serif",
@@ -221,7 +270,7 @@ export default function SearchPage() {
               <span className="shimmer-text italic">breakthrough role</span>
             </h1>
             <p className="text-[#6B7A99] mt-4 text-[1rem] max-w-md mx-auto leading-relaxed">
-              Search once. ResumeIdol scans 500+ boards and surfaces the best fits.
+              Search once. ResumeIdol scans 500+ boards and surfaces the best fits — then tailors your resume in one click.
             </p>
           </div>
 
@@ -232,7 +281,8 @@ export default function SearchPage() {
               style={{
                 background: "rgba(255,255,255,0.025)",
                 border: "1px solid rgba(255,255,255,0.09)",
-                boxShadow: "0 12px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.04)",
+                boxShadow: "0 16px 70px rgba(0,0,0,0.45), 0 0 0 1px rgba(201,168,76,0.05)",
+                transition: "box-shadow 0.2s ease",
               }}
             >
               <div className="flex-1 relative">
@@ -360,26 +410,80 @@ export default function SearchPage() {
             </div>
           )}
 
-          {/* Loading — cinematic scan */}
+          {/* ── Loading — cinematic board scan ── */}
           {loading && (
             <div>
-              <div className="relative overflow-hidden rounded-2xl mb-6 px-6 py-5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                <div className="flex items-center gap-4">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 animate-pulse" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)" }}>
-                    <Search size={15} className="text-[#C9A84C]" />
+              <div
+                className="relative overflow-hidden rounded-2xl mb-6 px-6 py-5"
+                style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(201,168,76,0.12)", boxShadow: "0 0 40px rgba(201,168,76,0.05)" }}
+              >
+                {/* Gold shimmer top */}
+                <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.5), transparent)", marginBottom: "1rem" }} />
+
+                {/* Header row */}
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.22)" }}>
+                    <Search size={16} className="text-[#C9A84C] animate-pulse" />
                   </div>
-                  <div>
-                    <p className="text-sm text-[#DEC27A] font-medium">Scanning 500+ job boards...</p>
-                    <p className="text-xs text-[#4B5563] mt-0.5">Finding the best matches for &ldquo;{query}&rdquo;</p>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold" style={{ color: "#DEC27A" }}>
+                      Finding top matches for &ldquo;{query}&rdquo;
+                    </p>
+                    <p className="text-xs mt-0.5" style={{ color: "#4B5563" }}>Scanning 500+ job boards in real-time</p>
                   </div>
-                  <div className="ml-auto flex gap-1.5">
-                    {[0, 1, 2].map(i => (
-                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#C9A84C] animate-pulse" style={{ animationDelay: `${i * 200}ms`, opacity: 0.7 }} />
-                    ))}
+                  <div className="text-right shrink-0">
+                    <motion.p
+                      key={scanProgress}
+                      animate={{ opacity: 1 }}
+                      className="text-sm font-bold font-mono tabular-nums"
+                      style={{ color: "#C9A84C" }}
+                    >
+                      {scanProgress}%
+                    </motion.p>
+                    <p className="text-[0.6rem] uppercase tracking-widest" style={{ color: "#3A4558" }}>scanned</p>
                   </div>
                 </div>
+
+                {/* Progress bar */}
+                <div className="h-1 rounded-full overflow-hidden mb-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+                  <motion.div
+                    className="h-full rounded-full"
+                    animate={{ width: `${scanProgress}%` }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    style={{ background: "linear-gradient(90deg, rgba(201,168,76,0.5) 0%, rgba(222,194,122,1) 100%)", boxShadow: "0 0 8px rgba(201,168,76,0.5)" }}
+                  />
+                </div>
+
+                {/* Board chips */}
+                <div className="flex flex-wrap gap-1.5">
+                  {SCAN_BOARDS.map((board) => {
+                    const checked = scannedBoards.includes(board);
+                    return (
+                      <motion.span
+                        key={board}
+                        animate={checked ? { scale: [1, 1.08, 1] } : {}}
+                        transition={{ duration: 0.25 }}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-500"
+                        style={{
+                          background: checked ? "rgba(34,197,94,0.07)" : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${checked ? "rgba(34,197,94,0.22)" : "rgba(255,255,255,0.06)"}`,
+                          color: checked ? "#4ade80" : "#3A4558",
+                        }}
+                      >
+                        {checked
+                          ? <CheckCircle size={9} style={{ color: "#22c55e" }} />
+                          : <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "rgba(201,168,76,0.4)" }} />
+                        }
+                        {board}
+                      </motion.span>
+                    );
+                  })}
+                </div>
+
                 <div className="scan-beam" />
               </div>
+
+              {/* Skeleton cards */}
               <div className="space-y-4">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="card p-5" style={{ animationDelay: `${i * 80}ms` }}>
@@ -390,6 +494,7 @@ export default function SearchPage() {
                         <div className="skeleton h-4 w-1/3 rounded" />
                         <div className="skeleton h-3 w-3/4 rounded" />
                         <div className="flex gap-2"><div className="skeleton h-6 w-20 rounded-full" /><div className="skeleton h-6 w-16 rounded-full" /></div>
+                        <div className="skeleton h-9 w-full rounded-xl mt-1" />
                       </div>
                     </div>
                   </div>
@@ -428,71 +533,126 @@ export default function SearchPage() {
           {/* Empty state after search */}
           {!loading && searched && jobs.length === 0 && (
             <div className="text-center py-20">
-              <div className="text-5xl mb-4">🎯</div>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.14)" }}>
+                <Search size={26} style={{ color: "#3A4558" }} />
+              </div>
               <h3 className="text-[#F0F2F7] font-semibold text-lg mb-2">No jobs found</h3>
-              <p className="text-[#6B7A99] text-sm max-w-xs mx-auto">Try different keywords, broaden your location, or switch to &quot;All&quot; sources.</p>
+              <p className="text-[#6B7A99] text-sm max-w-xs mx-auto mb-6">Try different keywords, broaden your location, or switch to &quot;All&quot; sources.</p>
+              <button
+                onClick={clearSearch}
+                className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all"
+                style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)", color: "#DEC27A" }}
+              >
+                Start a new search
+              </button>
             </div>
           )}
 
           {/* ── Initial state — live activity feed ── */}
           {!searched && !loading && (
-            <div className="py-8">
+            <div className="py-4">
 
-              {/* Feed header */}
-              <div className="flex items-center gap-3 mb-5 max-w-xl mx-auto">
-                <span className="text-[#6B7A99] text-xs font-medium tracking-wider uppercase">Trending roles</span>
+              {/* Trending roles header */}
+              <div className="flex items-center gap-3 mb-5">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+                  <span className="text-[#6B7A99] text-xs font-semibold tracking-widest uppercase">Hot right now</span>
+                </div>
                 <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.07), transparent)" }} />
+                <span className="text-[0.65rem] text-[#3A4558]">Updated just now</span>
               </div>
 
-              {/* Trending role rows */}
-              <div className="max-w-xl mx-auto space-y-1.5 mb-12">
-                {TRENDING_ROLES.map((job, i) => (
-                  <button
-                    key={i}
-                    className="w-full group flex items-center gap-4 px-4 py-3.5 rounded-xl text-left card-enter transition-all"
-                    style={{
-                      border: "1px solid rgba(255,255,255,0.05)",
-                      background: "rgba(255,255,255,0.012)",
-                      animationDelay: `${i * 70}ms`,
-                    }}
-                    onClick={() => launchSearch(job.title)}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.borderColor = "rgba(201,168,76,0.14)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.012)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)"; }}
-                  >
-                    {/* Company initial chip */}
-                    <div
-                      className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-sm font-semibold"
+              {/* Trending role cards — 2-col grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
+                {TRENDING_ROLES.map((job, i) => {
+                  const cs = COMPANY_STYLE[job.company] ?? { bg: "rgba(255,255,255,0.06)", color: "#6B7A99", grad: "rgba(255,255,255,0.08)" };
+                  return (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.06, duration: 0.3, ease: "easeOut" }}
+                      className="group relative overflow-hidden rounded-2xl p-5 text-left transition-all duration-200"
                       style={{
-                        background: COMPANY_STYLE[job.company]?.bg ?? "rgba(255,255,255,0.06)",
-                        color: COMPANY_STYLE[job.company]?.color ?? "#9CA3AF",
+                        background: `linear-gradient(135deg, ${cs.bg} 0%, rgba(255,255,255,0.02) 100%)`,
+                        border: "1px solid rgba(255,255,255,0.07)",
+                      }}
+                      onClick={() => launchSearch(job.title)}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.borderColor = `${cs.color}35`;
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px ${cs.color}20`;
+                        (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.07)";
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
+                        (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
                       }}
                     >
-                      {job.company[0]}
-                    </div>
-                    {/* Title + meta */}
-                    <div className="flex-1 min-w-0 text-left">
-                      <p className="text-[#C4CEDF] text-sm font-medium truncate group-hover:text-[#F0F2F7] transition-colors">{job.title}</p>
-                      <p className="text-[#6B7A99] text-xs mt-0.5">{job.company} · {job.location}</p>
-                    </div>
-                    {/* Salary */}
-                    <p className="text-[#C9A84C] text-xs font-semibold shrink-0">{job.salary}</p>
-                    {/* Arrow hint */}
-                    <ArrowRight size={14} className="text-[#2A3A50] group-hover:text-[#6B7A99] transition-colors shrink-0" />
-                  </button>
-                ))}
+                      {/* Company color accent — top edge */}
+                      <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, transparent, ${cs.color}60, ${cs.color}90, ${cs.color}60, transparent)` }} />
+
+                      {/* Header */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
+                            style={{ background: cs.bg, color: cs.color, border: `1px solid ${cs.color}30` }}
+                          >
+                            {job.company[0]}
+                          </div>
+                          <span className="text-xs font-medium" style={{ color: cs.color }}>{job.company}</span>
+                        </div>
+                        {job.tag && (
+                          <span
+                            className="text-[0.65rem] font-bold px-2 py-0.5 rounded-full"
+                            style={job.tag === "Hot"
+                              ? { background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.22)", color: "#f87171" }
+                              : { background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }
+                            }
+                          >
+                            {job.tag === "Hot" ? "🔥 Hot" : "✦ New"}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Job title */}
+                      <p className="text-sm font-semibold mb-2 transition-colors duration-150 group-hover:text-[#DEC27A]" style={{ color: "#E8EDF5", lineHeight: 1.3 }}>
+                        {job.title}
+                      </p>
+
+                      {/* Meta */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs" style={{ color: "#6B7A99" }}>{job.location}</span>
+                        <span className="text-xs font-bold" style={{ color: "#C9A84C" }}>{job.salary}</span>
+                      </div>
+
+                      {/* Arrow hint */}
+                      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                        <ArrowRight size={14} style={{ color: cs.color }} />
+                      </div>
+                    </motion.button>
+                  );
+                })}
               </div>
 
               {/* Stats row */}
-              <div className="flex items-center justify-center gap-10 sm:gap-16 mb-12">
+              <div className="flex items-center justify-center gap-10 sm:gap-16 mb-10">
                 {[
                   ["500+", "Job Boards"],
                   ["Real-time", "Live Results"],
                   ["1-click", "Auto Tailor"],
-                ].map(([val, label]) => (
-                  <div key={label} className="text-center">
+                ].map(([val, label], i) => (
+                  <motion.div
+                    key={label}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 + i * 0.1 }}
+                    className="text-center"
+                  >
                     <div className="font-bold text-xl mb-1" style={{ color: "#C9A84C", fontFamily: "Playfair Display, serif" }}>{val}</div>
                     <div className="text-[#5A6A82] text-xs">{label}</div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
@@ -500,14 +660,17 @@ export default function SearchPage() {
               <div className="text-center">
                 <p className="text-[#3A4A5C] text-[0.7rem] mb-3 uppercase tracking-widest font-semibold">Popular searches</p>
                 <div className="flex items-center justify-center flex-wrap gap-2">
-                  {["Senior Designer", "React Engineer", "Product Manager", "Data Scientist", "DevRel"].map((q) => (
-                    <button
+                  {["Senior Designer", "React Engineer", "Product Manager", "Data Scientist", "DevRel", "AI Engineer"].map((q, i) => (
+                    <motion.button
                       key={q}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.6 + i * 0.05 }}
                       onClick={() => launchSearch(q)}
-                      className="badge-gold cursor-pointer hover:opacity-80 transition-opacity"
+                      className="badge-gold cursor-pointer transition-all duration-150 hover:scale-105"
                     >
                       {q}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>

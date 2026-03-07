@@ -108,9 +108,19 @@ export default function JobCard({ job, onTailor, onSave, saved = false, compact 
 
   return (
     <div
-      className="card group relative overflow-hidden cursor-pointer"
+      className="card group relative overflow-hidden cursor-pointer transition-all duration-200"
       style={{ padding: "20px", borderRadius: "16px" }}
       onClick={() => window.open(job.applyUrl, "_blank")}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(201,168,76,0.18)";
+        (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,168,76,0.1)";
+        (e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.borderColor = "";
+        (e.currentTarget as HTMLDivElement).style.boxShadow = "";
+        (e.currentTarget as HTMLDivElement).style.transform = "";
+      }}
     >
       {/* Match score progress bar — top edge */}
       {job.matchScore && (
@@ -229,32 +239,42 @@ export default function JobCard({ job, onTailor, onSave, saved = false, compact 
             )}
           </div>
 
-          {/* Action bar */}
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={handleTailor}
-              disabled={tailoring}
-              className="btn-gold flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg font-semibold disabled:opacity-60"
-            >
-              <Zap size={12} />
-              {tailoring ? "Opening..." : "Tailor Resume"}
-            </button>
+          {/* Primary CTA — Tailor Resume (full-width, dominant) */}
+          <button
+            onClick={handleTailor}
+            disabled={tailoring}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all mb-2 disabled:opacity-60"
+            style={tailoring
+              ? { background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)", color: "#DEC27A" }
+              : { background: "linear-gradient(135deg, #C9A84C 0%, #B8952F 100%)", color: "#07090F", boxShadow: "0 4px 20px rgba(201,168,76,0.25)" }
+            }
+          >
+            <Zap size={14} />
+            {tailoring ? "Opening Tailor..." : "Tailor My Resume for This Role →"}
+          </button>
+
+          {/* Secondary row — Apply + Bookmark */}
+          <div className="flex items-center gap-2">
             <a
               href={job.applyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-ghost flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg"
+              className="btn-ghost flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg flex-1 justify-center"
               onClick={(e) => e.stopPropagation()}
             >
-              Apply
+              Apply directly
               <ExternalLink size={11} />
             </a>
             <button
               onClick={handleSave}
-              className="ml-auto p-2 rounded-lg transition-all"
-              style={{ color: bookmarked ? "#C9A84C" : "#4B5563" }}
+              className="p-2 rounded-lg transition-all"
+              style={{
+                color: bookmarked ? "#C9A84C" : "#4B5563",
+                background: bookmarked ? "rgba(201,168,76,0.08)" : "transparent",
+                border: bookmarked ? "1px solid rgba(201,168,76,0.2)" : "1px solid transparent",
+              }}
               onMouseEnter={(e) => { if (!bookmarked) (e.currentTarget as HTMLButtonElement).style.color = "#6B7A99"; }}
-              onMouseLeave={(e) => { if (!bookmarked) (e.currentTarget as HTMLButtonElement).style.color = "#4B5563"; }}
+              onMouseLeave={(e) => { if (!bookmarked) (e.currentTarget as HTMLButtonElement).style.color = bookmarked ? "#C9A84C" : "#4B5563"; }}
             >
               {bookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
             </button>
