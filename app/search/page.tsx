@@ -41,6 +41,19 @@ const COMPANY_STYLE: Record<string, { bg: string; color: string; grad: string }>
   "Notion":    { bg: "rgba(255,255,255,0.07)", color: "#E8EDF5", grad: "rgba(255,255,255,0.1)" },
 };
 
+function computeMatchScore(resumeText: string, jobText: string, skills?: string[]): number {
+  const resumeWords = new Set(
+    (resumeText.toLowerCase().match(/\b[a-z][a-z0-9]+\b/g) ?? []).filter(w => w.length > 3)
+  );
+  const raw = (jobText + " " + (skills?.join(" ") ?? ""))
+    .toLowerCase()
+    .match(/\b[a-z][a-z0-9]+\b/g)?.filter(w => w.length > 3) ?? [];
+  const unique = [...new Set(raw)];
+  if (unique.length === 0) return 0;
+  const hits = unique.filter(w => resumeWords.has(w)).length;
+  return Math.min(Math.round((hits / unique.length) * 180), 95);
+}
+
 function formatPlace(displayName: string): string {
   const parts = displayName.split(", ").map((p) => p.trim());
   if (parts.length >= 2) return `${parts[0]}, ${parts[parts.length - 1]}`;
@@ -87,6 +100,15 @@ export default function SearchPage() {
   const [isLive, setIsLive] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Saved resume for client-side match scoring
+  const [savedResumeText, setSavedResumeText] = useState("");
+  useEffect(() => {
+    fetch("/api/resume")
+      .then(r => r.json())
+      .then(({ resume }) => { if (resume?.resume_text) setSavedResumeText(resume.resume_text); })
+      .catch(() => {});
+  }, []);
 
   // Live job counter for hero
   const [liveCount, setLiveCount] = useState(14_847);
@@ -200,6 +222,15 @@ export default function SearchPage() {
   }, [locationInput, nominatimResults]);
 
   const activeFilterCount = [seniority !== "Any Level", jobType !== "Any Type", datePosted !== "Past week", source !== "All"].filter(Boolean).length;
+
+  // Enrich jobs with client-side match score when saved resume is available
+  const enrichedJobs = useMemo(() => {
+    if (!savedResumeText || !jobs.length) return jobs;
+    return jobs.map(j => ({
+      ...j,
+      matchScore: computeMatchScore(savedResumeText, j.description + " " + j.title, j.skills),
+    }));
+  }, [jobs, savedResumeText]);
 
   const launchSearch = (title: string) => {
     setQuery(title);
@@ -515,9 +546,9 @@ export default function SearchPage() {
           )}
 
           {/* Results */}
-          {!loading && jobs.length > 0 && (
+          {!loading && enrichedJobs.length > 0 && (
             <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-4"}>
-              {jobs.map((job, i) => (
+              {enrichedJobs.map((job, i) => (
                 <motion.div
                   key={job.id}
                   initial={{ opacity: 0, y: 20 }}

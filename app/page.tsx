@@ -1,14 +1,26 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import {
   Crown, Search, FileText, BarChart2, Briefcase,
   ArrowRight, CheckCircle, Star, Zap, Shield, TrendingUp,
-  ChevronDown, Menu, X, AlertCircle, ArrowLeftRight, Tag, Target
+  ChevronDown, Menu, X, AlertCircle, ArrowLeftRight, Tag, Target, ArrowUp
 } from "lucide-react";
+
+const ACTIVITY_FEED = [
+  { name: "Alex T.",   company: "Google",    pts: 34, time: "2m" },
+  { name: "Sarah M.",  company: "Stripe",    pts: 28, time: "4m" },
+  { name: "Marcus L.", company: "Netflix",   pts: 41, time: "1m" },
+  { name: "Priya K.",  company: "Anthropic", pts: 19, time: "6m" },
+  { name: "Jordan R.", company: "Linear",    pts: 36, time: "3m" },
+  { name: "Emma S.",   company: "Figma",     pts: 22, time: "8m" },
+  { name: "Dev P.",    company: "OpenAI",    pts: 45, time: "1m" },
+  { name: "Nina W.",   company: "Apple",     pts: 31, time: "5m" },
+];
 
 const STATS = [
   { value: "784", label: "avg applications to land 1 offer", suffix: "x" },
@@ -509,12 +521,24 @@ export default function LandingPage() {
   const [companyFading, setCompanyFading] = useState(false);
 
   const [liveCount, setLiveCount] = useState(2847);
+  const [tickerIdx, setTickerIdx] = useState(0);
+  const [tickerOn, setTickerOn] = useState(false);
 
   useEffect(() => {
     const id = setInterval(() => {
       setLiveCount(c => c + Math.floor(Math.random() * 3) + 1);
     }, 7000);
     return () => clearInterval(id);
+  }, []);
+
+  // Activity ticker — starts 4s after mount, cycles every 6s forever
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval>;
+    const start = setTimeout(() => {
+      setTickerOn(true);
+      intervalId = setInterval(() => setTickerIdx(i => (i + 1) % ACTIVITY_FEED.length), 6000);
+    }, 4000);
+    return () => { clearTimeout(start); clearInterval(intervalId); };
   }, []);
 
   useEffect(() => {
@@ -1148,6 +1172,45 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Live activity ticker — floating bottom-left ── */}
+      <AnimatePresence mode="wait">
+        {tickerOn && (
+          <motion.div
+            key={tickerIdx}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="fixed bottom-8 left-6 z-50 pointer-events-none"
+            style={{ maxWidth: "260px" }}
+          >
+            <div style={{
+              background: "rgba(7,9,15,0.95)",
+              backdropFilter: "blur(24px)",
+              border: "1px solid rgba(201,168,76,0.22)",
+              borderRadius: "14px",
+              padding: "10px 14px",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.06)",
+            }}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#22c55e] shrink-0 animate-pulse" style={{ boxShadow: "0 0 8px rgba(34,197,94,0.6)" }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs leading-snug" style={{ color: "#9CA3AF" }}>
+                    <span style={{ color: "#F0F2F7", fontWeight: 600 }}>{ACTIVITY_FEED[tickerIdx % ACTIVITY_FEED.length].name}</span>
+                    {" "}tailored for{" "}
+                    <span style={{ color: "#C9A84C", fontWeight: 600 }}>{ACTIVITY_FEED[tickerIdx % ACTIVITY_FEED.length].company}</span>
+                  </p>
+                  <p className="text-[0.68rem] mt-0.5 flex items-center gap-1" style={{ color: "#4ade80" }}>
+                    <ArrowUp size={9} className="shrink-0" />
+                    +{ACTIVITY_FEED[tickerIdx % ACTIVITY_FEED.length].pts} pts · {ACTIVITY_FEED[tickerIdx % ACTIVITY_FEED.length].time} ago
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── FOOTER ── */}
       <footer className="border-t border-[rgba(255,255,255,0.05)] py-12 px-6">

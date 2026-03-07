@@ -306,6 +306,51 @@ function ScoreHero({ before, after, jobTitle }: { before: number; after: number;
           ))}
         </div>
       </div>
+
+      {/* ── Percentile boast banner ── */}
+      {(() => {
+        const p = getPercentile(after);
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.5, duration: 0.5 }}
+            className="mt-5 p-4 rounded-2xl flex items-center gap-4"
+            style={{
+              background: `linear-gradient(135deg, ${p.color}0A 0%, transparent 100%)`,
+              border: `1px solid ${p.color}28`,
+            }}
+          >
+            <div
+              className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl"
+              style={{ background: `${p.color}14`, border: `1px solid ${p.color}25`, fontSize: "1.25rem" }}
+            >
+              🏆
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold mb-1.5 leading-snug" style={{ color: p.color }}>
+                You&apos;re ahead of{" "}
+                <span style={{ fontFamily: "Playfair Display, serif", fontSize: "1.05rem" }}>{p.aheadPct}%</span>
+                {" "}of applicants for this role
+              </p>
+              <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                <motion.div
+                  initial={{ width: "0%" }}
+                  animate={{ width: `${p.aheadPct}%` }}
+                  transition={{ delay: 3.0, duration: 0.9, ease: [0.34, 1.56, 0.64, 1] }}
+                  style={{
+                    position: "absolute",
+                    top: 0, bottom: 0, left: 0,
+                    borderRadius: "999px",
+                    background: `linear-gradient(90deg, ${p.color}55, ${p.color})`,
+                    boxShadow: `0 0 10px ${p.color}60`,
+                  }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        );
+      })()}
     </div>
   );
 }
@@ -329,14 +374,26 @@ function BulletList({ content, icon: Icon, iconColor }: { content: string; icon:
 }
 
 // ── Percentile helper ─────────────────────────────────────────────────────────
-function getPercentile(score: number): { text: string; color: string } {
-  if (score >= 85) return { text: "Top 10% of applicants", color: "#22c55e" };
-  if (score >= 75) return { text: "Top 25% of applicants", color: "#22c55e" };
-  if (score >= 65) return { text: "Top 35% of applicants", color: "#C9A84C" };
-  if (score >= 55) return { text: "Top 50% of applicants", color: "#C9A84C" };
-  if (score >= 45) return { text: "Top 65% of applicants", color: "#f59e0b" };
-  return { text: "Below average match", color: "#ef4444" };
+function getPercentile(score: number): { text: string; color: string; aheadPct: number } {
+  if (score >= 85) return { text: "Top 10% of applicants", color: "#22c55e", aheadPct: 90 };
+  if (score >= 75) return { text: "Top 25% of applicants", color: "#22c55e", aheadPct: 75 };
+  if (score >= 65) return { text: "Top 35% of applicants", color: "#C9A84C", aheadPct: 65 };
+  if (score >= 55) return { text: "Top 50% of applicants", color: "#C9A84C", aheadPct: 50 };
+  if (score >= 45) return { text: "Top 65% of applicants", color: "#f59e0b", aheadPct: 35 };
+  return { text: "Below average match", color: "#ef4444", aheadPct: 15 };
 }
+
+// ── Live activity feed data ───────────────────────────────────────────────────
+const ACTIVITY_FEED = [
+  { name: "Alex T.",   company: "Google",    pts: 34, time: "2m" },
+  { name: "Sarah M.",  company: "Stripe",    pts: 28, time: "4m" },
+  { name: "Marcus L.", company: "Netflix",   pts: 41, time: "1m" },
+  { name: "Priya K.",  company: "Anthropic", pts: 19, time: "6m" },
+  { name: "Jordan R.", company: "Linear",    pts: 36, time: "3m" },
+  { name: "Emma S.",   company: "Figma",     pts: 22, time: "8m" },
+  { name: "Dev P.",    company: "OpenAI",    pts: 45, time: "1m" },
+  { name: "Nina W.",   company: "Apple",     pts: 31, time: "5m" },
+];
 
 // ── Keyword chips ──────────────────────────────────────────────────────────────
 function KeywordChips({ content }: { content: string }) {
@@ -573,6 +630,11 @@ function TailorInner() {
   const handleDownloadDocxRef = useRef<(() => void) | null>(null);
   const handleDownloadPdfRef = useRef<(() => void) | null>(null);
   const handleCopyRef = useRef<(() => void) | null>(null);
+  // ── Activity ticker ──
+  const [tickerIdx, setTickerIdx] = useState(0);
+  const [tickerOn, setTickerOn] = useState(false);
+  const tickerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const tickerStartRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -660,6 +722,30 @@ function TailorInner() {
     return () => subscription.unsubscribe();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Ticker: start 3s after results arrive, cycle every 5.5s, auto-stop after 8 cycles ──
+  useEffect(() => {
+    if (!result) {
+      setTickerOn(false);
+      if (tickerIntervalRef.current) clearInterval(tickerIntervalRef.current);
+      if (tickerStartRef.current) clearTimeout(tickerStartRef.current);
+      return;
+    }
+    tickerStartRef.current = setTimeout(() => {
+      setTickerIdx(Math.floor(Math.random() * ACTIVITY_FEED.length));
+      setTickerOn(true);
+      let count = 0;
+      tickerIntervalRef.current = setInterval(() => {
+        count++;
+        if (count >= 8) { clearInterval(tickerIntervalRef.current!); setTickerOn(false); return; }
+        setTickerIdx(i => (i + 1) % ACTIVITY_FEED.length);
+      }, 5500);
+    }, 3000);
+    return () => {
+      if (tickerStartRef.current) clearTimeout(tickerStartRef.current);
+      if (tickerIntervalRef.current) clearInterval(tickerIntervalRef.current);
+    };
+  }, [result]);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file) return;
@@ -2036,6 +2122,45 @@ function TailorInner() {
                   </div>
                 );
               })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Live activity ticker — floating bottom-left ── */}
+      <AnimatePresence mode="wait">
+        {tickerOn && result && (
+          <motion.div
+            key={tickerIdx}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="fixed bottom-8 left-6 z-50 pointer-events-none"
+            style={{ maxWidth: "260px" }}
+          >
+            <div style={{
+              background: "rgba(7,9,15,0.95)",
+              backdropFilter: "blur(24px)",
+              border: "1px solid rgba(201,168,76,0.22)",
+              borderRadius: "14px",
+              padding: "10px 14px",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.06)",
+            }}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#22c55e] shrink-0 animate-pulse" style={{ boxShadow: "0 0 8px rgba(34,197,94,0.6)" }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs leading-snug" style={{ color: "#9CA3AF" }}>
+                    <span style={{ color: "#F0F2F7", fontWeight: 600 }}>{ACTIVITY_FEED[tickerIdx % ACTIVITY_FEED.length].name}</span>
+                    {" "}tailored for{" "}
+                    <span style={{ color: "#C9A84C", fontWeight: 600 }}>{ACTIVITY_FEED[tickerIdx % ACTIVITY_FEED.length].company}</span>
+                  </p>
+                  <p className="text-[0.68rem] mt-0.5 flex items-center gap-1" style={{ color: "#4ade80" }}>
+                    <ArrowUp size={9} className="shrink-0" />
+                    +{ACTIVITY_FEED[tickerIdx % ACTIVITY_FEED.length].pts} pts · {ACTIVITY_FEED[tickerIdx % ACTIVITY_FEED.length].time} ago
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
