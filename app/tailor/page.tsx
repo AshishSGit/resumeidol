@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/utils/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import {
   Upload, FileText, Zap, Download, CheckCircle, AlertCircle,
   RotateCcw, ArrowUp, ChevronRight, Loader2, X, Pencil, Check, ExternalLink, Link2,
@@ -419,6 +420,17 @@ function TailorInner() {
   const [streamedResume, setStreamedResume] = useState("");
   const [streamComplete, setStreamComplete] = useState(true);
   const streamTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const pendingActionRef = useRef<"pdf" | "docx" | "copy" | null>(null);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [signInEmail, setSignInEmail] = useState("");
+  const [signInLoading, setSignInLoading] = useState(false);
+  const [signInSent, setSignInSent] = useState(false);
+  const [signInError, setSignInError] = useState<string | null>(null);
+  // Refs so onAuthStateChange always calls the latest handler version (avoids stale closure)
+  const handleDownloadDocxRef = useRef<(() => void) | null>(null);
+  const handleDownloadPdfRef = useRef<(() => void) | null>(null);
+  const handleCopyRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -454,10 +466,23 @@ function TailorInner() {
     };
     init();
 
-    // Clear personal data when user signs out
+    // Track auth state — get current user + fire pending action on sign-in
     const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user: u } }) => setUser(u ?? null));
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) {
+        // Fire any action the user tried before signing in
+        const pending = pendingActionRef.current;
+        pendingActionRef.current = null;
+        setShowSignInModal(false);
+        if (pending === "docx") setTimeout(() => handleDownloadDocxRef.current?.(), 300);
+        if (pending === "pdf") setTimeout(() => handleDownloadPdfRef.current?.(), 300);
+        if (pending === "copy") setTimeout(() => handleCopyRef.current?.(), 300);
+      } else {
+        // Clear personal data when user signs out
         setResumeText("");
         setResumeFile(null);
         setUsingCloudResume(false);
@@ -645,7 +670,18 @@ function TailorInner() {
     }
   };
 
+  const requireAuth = useCallback((action: "pdf" | "docx" | "copy"): boolean => {
+    if (user) return false;
+    pendingActionRef.current = action;
+    setShowSignInModal(true);
+    setSignInSent(false);
+    setSignInError(null);
+    setSignInEmail("");
+    return true;
+  }, [user]);
+
   const handleDownloadDocx = async () => {
+    if (requireAuth("docx")) return;
     if (!result) return;
     try {
       const res = await fetch("/api/download", {
@@ -667,6 +703,7 @@ function TailorInner() {
   };
 
   const handleDownloadPdf = async () => {
+    if (requireAuth("pdf")) return;
     if (!result) return;
     try {
       const res = await fetch("/api/download/pdf", {
@@ -685,6 +722,15 @@ function TailorInner() {
     } catch {
       setError("PDF download failed. Try the .docx option instead.");
     }
+  };
+
+  // Keep refs current so onAuthStateChange always calls the latest handler
+  handleDownloadDocxRef.current = handleDownloadDocx;
+  handleDownloadPdfRef.current = handleDownloadPdf;
+  handleCopyRef.current = () => {
+    navigator.clipboard.writeText(editedResume);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   };
 
   const diffOps = useMemo(
@@ -1040,7 +1086,7 @@ function TailorInner() {
                 <button
                   onClick={handleTailor}
                   disabled={!canTailor || tailoring}
-                  className={`btn-gold w-full py-5 rounded-2xl font-semibold flex items-center justify-center gap-2.5 text-lg disabled:opacity-40 disabled:cursor-not-allowed${canTailor && !tailoring ? " btn-gold-hero" : ""}`}
+                  className={`btn-gold w-full py-5 rounded-2xl font-semibold flex items-center justify-center gap-2.5 text-lg disabled:opacity-40 disabled:cursor-not-allowed${step2Done && !tailoring ? " btn-gold-hero" : ""}`}
                 >
                   {tailoring ? (
                     <>
@@ -1425,6 +1471,7 @@ function TailorInner() {
                             {/* Copy */}
                             <button
                               onClick={() => {
+                                if (requireAuth("copy")) return;
                                 navigator.clipboard.writeText(editedResume);
                                 setCopied(true);
                                 setTimeout(() => setCopied(false), 1500);
@@ -1574,6 +1621,132 @@ function TailorInner() {
           )}
         </div>
       </div>
+
+      {/* ── Sign-in gate modal ────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showSignInModal && (
+          <motion.div
+            key="signin-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
+            onClick={(e) => { if (e.target === e.currentTarget) setShowSignInModal(false); }}
+          >
+            <motion.div
+              key="signin-card"
+              initial={{ opacity: 0, y: 28, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.97 }}
+              transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="relative w-full max-w-sm rounded-2xl overflow-hidden"
+              style={{
+                background: "linear-gradient(145deg, #111827 0%, #0A0E17 100%)",
+                border: "1px solid rgba(201,168,76,0.18)",
+                boxShadow: "0 0 0 1px rgba(201,168,76,0.06), 0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(201,168,76,0.05)",
+              }}
+            >
+              {/* Gold shimmer top line */}
+              <div style={{ height: "1px", background: "linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.5) 50%, transparent 100%)" }} />
+
+              {/* Close button */}
+              <button
+                onClick={() => setShowSignInModal(false)}
+                className="absolute top-4 right-4 rounded-lg p-1.5 transition-all"
+                style={{ color: "#4B5563", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "#9CA3AF"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "#4B5563"; }}
+              >
+                <X size={14} />
+              </button>
+
+              <div className="p-8">
+                {/* Icon + headline */}
+                <div className="flex flex-col items-center text-center mb-7">
+                  <div className="mb-4 rounded-2xl p-3" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.15)" }}>
+                    <Crown size={26} style={{ color: "#C9A84C" }} />
+                  </div>
+                  <h2 className="text-xl font-semibold mb-1.5" style={{ color: "#F0F2F7", fontFamily: "var(--font-playfair)" }}>
+                    Save your tailored resume
+                  </h2>
+                  <p className="text-sm leading-relaxed" style={{ color: "#6B7280" }}>
+                    Sign in to download, copy, and keep your results. It only takes 10 seconds.
+                  </p>
+                </div>
+
+                {signInSent ? (
+                  <div className="text-center py-4">
+                    <div className="mb-3 mx-auto w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                      <CheckCircle size={22} style={{ color: "#4ade80" }} />
+                    </div>
+                    <p className="font-medium mb-1" style={{ color: "#F0F2F7" }}>Check your email</p>
+                    <p className="text-sm" style={{ color: "#6B7280" }}>
+                      We sent a magic link to <span style={{ color: "#C9A84C" }}>{signInEmail}</span>. Click it to sign in instantly.
+                    </p>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!signInEmail.trim()) return;
+                      setSignInLoading(true);
+                      setSignInError(null);
+                      try {
+                        const supabase = createClient();
+                        const { error: err } = await supabase.auth.signInWithOtp({
+                          email: signInEmail.trim(),
+                          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+                        });
+                        if (err) throw err;
+                        setSignInSent(true);
+                      } catch (err: unknown) {
+                        setSignInError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+                      } finally {
+                        setSignInLoading(false);
+                      }
+                    }}
+                  >
+                    <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "#4B5563" }}>
+                      Email address
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={signInEmail}
+                      onChange={e => setSignInEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="input-luxury w-full px-4 py-3 mb-3 text-sm"
+                      autoFocus
+                    />
+                    {signInError && (
+                      <p className="text-xs mb-3" style={{ color: "#f87171" }}>{signInError}</p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={signInLoading || !signInEmail.trim()}
+                      className="btn-gold w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {signInLoading ? (
+                        <><Loader2 size={15} className="animate-spin" /> Sending link...</>
+                      ) : (
+                        <>Send magic link</>
+                      )}
+                    </button>
+                    <p className="text-center text-xs mt-4" style={{ color: "#374151" }}>
+                      No password needed · Free to sign in
+                    </p>
+                  </form>
+                )}
+              </div>
+
+              {/* Bottom gold shimmer */}
+              <div style={{ height: "1px", background: "linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.15) 50%, transparent 100%)" }} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

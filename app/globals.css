@@ -167,7 +167,12 @@ body {
   outline: none;
   border-color: rgba(201,168,76,0.45);
   background: rgba(201,168,76,0.04);
-  box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.08), 0 0 24px rgba(201,168,76,0.10);
+}
+textarea.input-luxury:focus {
+  border-color: rgba(201,168,76,0.5);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.10), 0 0 32px rgba(201,168,76,0.14);
+  transition: all 0.25s ease;
 }
 .input-luxury::placeholder { color: #445568; }
 
