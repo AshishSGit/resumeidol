@@ -545,7 +545,11 @@ export default function LandingPage() {
         body: JSON.stringify({ plan }),
       });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Checkout failed. Please try again.");
+      }
     } catch {
       alert("Something went wrong. Please try again.");
     } finally {
