@@ -8,7 +8,7 @@ import { createClient } from "@/utils/supabase/client";
 import {
   Upload, FileText, Zap, Download, CheckCircle, AlertCircle,
   RotateCcw, ArrowUp, ChevronRight, Loader2, X, Pencil, Check, ExternalLink, Link2,
-  Tag, TrendingUp, ArrowLeftRight, Copy
+  Tag, TrendingUp, ArrowLeftRight, Copy, Crown
 } from "lucide-react";
 
 interface TailorResult {
@@ -129,6 +129,172 @@ function ScoreRing({ before, after }: { before: number; after: number }) {
             <ArrowUp size={15} />+{diff}% improvement
           </span>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ScoreArc({ value, size, dim }: { value: number; size: number; dim?: boolean }) {
+  const r = size * 0.42;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (value / 100) * circ;
+  const color = dim ? "#3A4558" : value >= 80 ? "#22c55e" : value >= 60 ? "#C9A84C" : "#ef4444";
+  const cx = size / 2;
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size} style={{ overflow: "visible" }}>
+      <circle cx={cx} cy={cx} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={size * 0.065} />
+      <circle
+        cx={cx} cy={cx} r={r} fill="none"
+        stroke={color} strokeWidth={size * 0.065}
+        strokeDasharray={circ} strokeDashoffset={dim ? circ * 0.55 : offset}
+        strokeLinecap="round"
+        style={{
+          transform: "rotate(-90deg)",
+          transformOrigin: "50% 50%",
+          transition: "stroke-dashoffset 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.4s ease",
+          filter: dim ? "none" : `drop-shadow(0 0 10px ${color}90)`,
+        }}
+      />
+    </svg>
+  );
+}
+
+function ScoreHero({ before, after, jobTitle }: { before: number; after: number; jobTitle?: string }) {
+  const [displayed, setDisplayed] = useState(before);
+  const [showParticles, setShowParticles] = useState(false);
+  const improvement = after - before;
+  const afterColor = after >= 80 ? "#22c55e" : after >= 60 ? "#C9A84C" : "#ef4444";
+  const afterLabel = after >= 80 ? "Strong Match" : after >= 65 ? "Good Match" : after >= 45 ? "Fair Match" : "Weak Match";
+
+  const particles = useMemo(() =>
+    Array.from({ length: 16 }, (_, i) => ({
+      id: i,
+      angle: (i / 16) * 360,
+      dist: 90 + (i % 3) * 20,
+      size: 3 + (i % 3),
+    })), []);
+
+  useEffect(() => {
+    const duration = 1800;
+    const start = Date.now();
+    const timer = setInterval(() => {
+      const p = Math.min((Date.now() - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplayed(Math.round(before + (after - before) * eased));
+      if (p >= 1) {
+        clearInterval(timer);
+        if (after >= 75) { setShowParticles(true); setTimeout(() => setShowParticles(false), 1000); }
+      }
+    }, 16);
+    return () => clearInterval(timer);
+  }, [before, after]);
+
+  return (
+    <div className="relative">
+      {/* Ambient glow */}
+      <div className="absolute inset-0 rounded-3xl pointer-events-none" style={{ background: `radial-gradient(ellipse 70% 60% at 70% 50%, ${afterColor}0A 0%, transparent 70%)` }} />
+
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-8 items-center py-2">
+        {/* ── BEFORE ── */}
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-[0.65rem] uppercase tracking-widest font-semibold" style={{ color: "#4B5563" }}>Before</p>
+          <div className="relative" style={{ width: 144, height: 144, overflow: "visible" }}>
+            <ScoreArc value={before} size={144} dim />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="font-bold text-3xl leading-none" style={{ color: "#4B5563", fontFamily: "Playfair Display, serif" }}>{before}</span>
+              <span className="text-[0.6rem] text-[#3A4558] mt-0.5 tracking-wider uppercase">/ 100</span>
+            </div>
+          </div>
+          <p className="text-xs font-medium" style={{ color: "#4B5563" }}>Original resume</p>
+        </div>
+
+        {/* ── IMPROVEMENT ── */}
+        <div className="flex flex-col items-center gap-3 px-4">
+          <motion.div
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.6, type: "spring", stiffness: 300, damping: 20 }}
+            className="flex flex-col items-center gap-1"
+          >
+            <div
+              className="px-5 py-2.5 rounded-2xl text-center"
+              style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.25)" }}
+            >
+              <p className="text-3xl font-black" style={{ color: "#4ade80", fontFamily: "Playfair Display, serif", lineHeight: 1 }}>
+                +{improvement}
+              </p>
+              <p className="text-[0.6rem] uppercase tracking-widest text-[#22c55e] mt-0.5 font-semibold">pts gained</p>
+            </div>
+            <div className="flex items-center gap-1 text-[#3A4558]">
+              <div className="w-8 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+              <ArrowUp size={14} className="text-[#22c55e]" />
+              <div className="w-8 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ── AFTER ── */}
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-[0.65rem] uppercase tracking-widest font-semibold" style={{ color: "#4ade80" }}>After Tailoring</p>
+          <div className="relative" style={{ width: 160, height: 160, overflow: "visible" }}>
+            {/* Particle burst */}
+            <AnimatePresence>
+              {showParticles && particles.map(p => {
+                const rad = (p.angle * Math.PI) / 180;
+                return (
+                  <motion.span key={p.id}
+                    initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                    animate={{ x: Math.cos(rad) * p.dist, y: Math.sin(rad) * p.dist, opacity: 0, scale: 0 }}
+                    transition={{ duration: 0.85, ease: "easeOut" }}
+                    style={{ position: "absolute", top: "50%", left: "50%", width: p.size, height: p.size, borderRadius: "50%", background: afterColor, boxShadow: `0 0 6px ${afterColor}`, marginLeft: -p.size / 2, marginTop: -p.size / 2, pointerEvents: "none", zIndex: 20 }}
+                  />
+                );
+              })}
+            </AnimatePresence>
+            {/* Glow halo */}
+            <div className="absolute inset-0 rounded-full" style={{ background: `radial-gradient(circle, ${afterColor}28 0%, transparent 70%)`, filter: "blur(12px)" }} />
+            <ScoreArc value={displayed} size={160} />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="font-black leading-none" style={{ color: afterColor, fontFamily: "Playfair Display, serif", fontSize: "2.6rem" }}>{displayed}</span>
+              <span className="text-[0.6rem] tracking-wider uppercase mt-0.5" style={{ color: afterColor + "99" }}>/ 100</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full" style={{ background: afterColor, boxShadow: `0 0 8px ${afterColor}` }} />
+            <p className="text-sm font-semibold" style={{ color: afterColor }}>{afterLabel}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Score bar */}
+      <div className="mt-6 pt-5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[0.65rem] uppercase tracking-widest text-[#3A4558] font-semibold">ATS Score Range</span>
+          <span className="text-xs font-medium" style={{ color: afterColor }}>{after}/100</span>
+        </div>
+        <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+          <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: "100%", background: "linear-gradient(90deg, #ef4444 0%, #f59e0b 40%, #C9A84C 65%, #22c55e 100%)", opacity: 0.3 }} />
+          <motion.div
+            className="absolute inset-y-0 left-0 rounded-full"
+            initial={{ width: `${before}%` }}
+            animate={{ width: `${after}%` }}
+            transition={{ duration: 1.8, ease: [0.34, 1.56, 0.64, 1], delay: 0.2 }}
+            style={{ background: `linear-gradient(90deg, #ef4444 0%, ${afterColor} 100%)`, boxShadow: `0 0 12px ${afterColor}60` }}
+          />
+          {/* Needle */}
+          <motion.div
+            className="absolute top-0 bottom-0 w-0.5 rounded-full"
+            initial={{ left: `${before}%` }}
+            animate={{ left: `${after}%` }}
+            transition={{ duration: 1.8, ease: [0.34, 1.56, 0.64, 1], delay: 0.2 }}
+            style={{ background: "white", boxShadow: "0 0 8px white", marginLeft: "-1px" }}
+          />
+        </div>
+        <div className="flex justify-between mt-1.5">
+          {["0", "25", "50", "75", "100"].map(v => (
+            <span key={v} className="text-[0.6rem] text-[#2A3448]">{v}</span>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -635,10 +801,10 @@ function TailorInner() {
           </div>
         </div>}
 
-        <div className={`grid gap-7 ${result ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 max-w-2xl mx-auto w-full"}`}>
-          {/* ── LEFT PANEL: Inputs (hidden during tailoring for immersive loading) ── */}
+        <div className={`grid gap-7 ${result ? "grid-cols-1 max-w-5xl mx-auto w-full" : "grid-cols-1 max-w-2xl mx-auto w-full"}`}>
+          {/* ── LEFT PANEL: Inputs — hidden during tailoring AND after results arrive ── */}
           <AnimatePresence>
-          {!tailoring && (
+          {!tailoring && !result && (
           <motion.div
             className="space-y-6"
             initial={{ opacity: 0 }}
@@ -947,80 +1113,112 @@ function TailorInner() {
           {/* ── RIGHT PANEL: Loading (full-width immersive) or Results ── */}
           {(tailoring || result) && (
           <motion.div
-            className={tailoring ? "col-span-full" : "card-enter"}
-            initial={{ opacity: 0, scale: tailoring ? 0.97 : 1, x: tailoring ? 0 : 40 }}
+            className="card-enter"
+            initial={{ opacity: 0, scale: tailoring ? 0.97 : 1, x: tailoring ? 0 : 0 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             {/* Loading state — full-width immersive */}
             {tailoring && (
-              <div className="relative flex flex-col items-center justify-center py-24 px-10 overflow-hidden" style={{ minHeight: "560px" }}>
-                {/* Ambient radial glow behind rings */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="loading-ambient" style={{ width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.09) 0%, rgba(201,168,76,0.03) 45%, transparent 70%)" }} />
+              <div className="relative flex flex-col items-center justify-center py-20 px-10" style={{ minHeight: "580px" }}>
+                {/* Ambient radial glow — absolute, behind everything */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 0 }}>
+                  <div className="loading-ambient" style={{ width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.10) 0%, rgba(201,168,76,0.04) 40%, transparent 68%)" }} />
                 </div>
 
-                {/* Orbital animation — larger for full-width drama */}
-                <div className="relative w-44 h-44 mb-12 z-10">
+                {/* Orbital rings — overflow:visible on SVGs prevents arc clipping */}
+                <div className="relative mb-10" style={{ width: 200, height: 200, zIndex: 1 }}>
                   {/* Outer ring — slow spin */}
-                  <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "4s", animationTimingFunction: "linear" }} viewBox="0 0 176 176">
-                    <circle cx="88" cy="88" r="80" fill="none" stroke="rgba(201,168,76,0.07)" strokeWidth="1.5" />
-                    <circle cx="88" cy="88" r="80" fill="none" stroke="rgba(201,168,76,0.65)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="70 432" />
+                  <svg
+                    className="absolute animate-spin"
+                    style={{ inset: "-12px", width: "calc(100% + 24px)", height: "calc(100% + 24px)", animationDuration: "5s", animationTimingFunction: "linear", overflow: "visible" }}
+                    viewBox="0 0 224 224"
+                  >
+                    <circle cx="112" cy="112" r="104" fill="none" stroke="rgba(201,168,76,0.06)" strokeWidth="1.5" />
+                    <circle cx="112" cy="112" r="104" fill="none" stroke="rgba(201,168,76,0.7)" strokeWidth="2" strokeLinecap="round" strokeDasharray="80 573" />
+                    {/* Glow dot at arc head */}
+                    <circle cx="112" cy="8" r="3.5" fill="rgba(201,168,76,0.9)" style={{ filter: "blur(1px)" }} />
                   </svg>
-                  {/* Middle ring — medium reverse spin */}
-                  <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "2.5s", animationTimingFunction: "linear", animationDirection: "reverse" }} viewBox="0 0 176 176">
-                    <circle cx="88" cy="88" r="62" fill="none" stroke="rgba(201,168,76,0.04)" strokeWidth="1" />
-                    <circle cx="88" cy="88" r="62" fill="none" stroke="rgba(201,168,76,0.4)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="45 340" />
+                  {/* Middle ring — reverse spin */}
+                  <svg
+                    className="absolute animate-spin"
+                    style={{ inset: "10px", width: "calc(100% - 20px)", height: "calc(100% - 20px)", animationDuration: "3s", animationTimingFunction: "linear", animationDirection: "reverse", overflow: "visible" }}
+                    viewBox="0 0 180 180"
+                  >
+                    <circle cx="90" cy="90" r="84" fill="none" stroke="rgba(201,168,76,0.04)" strokeWidth="1" />
+                    <circle cx="90" cy="90" r="84" fill="none" stroke="rgba(201,168,76,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="55 473" />
                   </svg>
                   {/* Inner ring — fast spin */}
-                  <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "1.6s", animationTimingFunction: "linear" }} viewBox="0 0 176 176">
-                    <circle cx="88" cy="88" r="42" fill="none" stroke="rgba(201,168,76,0.03)" strokeWidth="1" />
-                    <circle cx="88" cy="88" r="42" fill="none" stroke="rgba(201,168,76,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="25 230" />
+                  <svg
+                    className="absolute animate-spin"
+                    style={{ inset: "34px", width: "calc(100% - 68px)", height: "calc(100% - 68px)", animationDuration: "2s", animationTimingFunction: "linear", overflow: "visible" }}
+                    viewBox="0 0 132 132"
+                  >
+                    <circle cx="66" cy="66" r="60" fill="none" stroke="rgba(201,168,76,0.03)" strokeWidth="1" />
+                    <circle cx="66" cy="66" r="60" fill="none" stroke="rgba(201,168,76,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="35 342" />
                   </svg>
-                  {/* Center */}
+                  {/* Center icon — Crown (brand logo) */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)", boxShadow: "0 0 50px rgba(201,168,76,0.2), 0 0 100px rgba(201,168,76,0.08)" }}>
-                      <Zap size={30} className="text-[#C9A84C]" />
+                    <div
+                      className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center"
+                      style={{
+                        background: "linear-gradient(135deg, rgba(201,168,76,0.18) 0%, rgba(201,168,76,0.06) 100%)",
+                        border: "1px solid rgba(201,168,76,0.4)",
+                        boxShadow: "0 0 40px rgba(201,168,76,0.25), 0 0 80px rgba(201,168,76,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
+                      }}
+                    >
+                      <Crown size={28} style={{ color: "#C9A84C" }} strokeWidth={2} />
                     </div>
                   </div>
                 </div>
 
-                <h3 className="z-10" style={{ fontFamily: "Playfair Display, serif", fontSize: "1.9rem", fontWeight: 700, color: "#F0F2F7", marginBottom: "0.75rem", textAlign: "center" }}>
-                  ResumeIdol is working its magic...
+                <h3 className="shimmer-text" style={{ fontFamily: "Playfair Display, serif", fontSize: "1.85rem", fontWeight: 700, marginBottom: "0.6rem", textAlign: "center", zIndex: 1, position: "relative" }}>
+                  Working its magic...
                 </h3>
-                <p className="text-[#6B7A99] text-base mb-14 text-center z-10" style={{ maxWidth: 360, lineHeight: 1.7 }}>
-                  Analyzing the job description, mapping your skills, and rewriting every line to maximise your ATS score.
+                <p className="text-[#4B5563] text-sm mb-12 text-center" style={{ maxWidth: 320, lineHeight: 1.7, zIndex: 1, position: "relative" }}>
+                  Rewriting every line of your resume to maximise ATS match for this specific role.
                 </p>
 
-                {/* Step list */}
-                <div className="w-full max-w-[320px] space-y-5 z-10">
+                {/* Step list — card-style rows */}
+                <div className="w-full max-w-[340px] space-y-3" style={{ zIndex: 1, position: "relative" }}>
                   {LOADING_STEPS.map((s, i) => {
                     const done = i < loadingStep;
                     const active = i === loadingStep;
                     return (
-                      <div key={i} className="flex items-center gap-4">
+                      <div
+                        key={i}
+                        className="flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-400"
+                        style={{
+                          background: done
+                            ? "rgba(34,197,94,0.05)"
+                            : active
+                            ? "rgba(201,168,76,0.07)"
+                            : "rgba(255,255,255,0.02)",
+                          border: `1px solid ${done ? "rgba(34,197,94,0.15)" : active ? "rgba(201,168,76,0.2)" : "rgba(255,255,255,0.04)"}`,
+                        }}
+                      >
                         <div
-                          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-300"
+                          className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-300"
                           style={{
                             background: done ? "rgba(34,197,94,0.15)" : active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
-                            border: `1px solid ${done ? "rgba(34,197,94,0.4)" : active ? "rgba(201,168,76,0.4)" : "rgba(255,255,255,0.08)"}`,
+                            border: `1px solid ${done ? "rgba(34,197,94,0.35)" : active ? "rgba(201,168,76,0.35)" : "rgba(255,255,255,0.08)"}`,
                           }}
                         >
                           {done ? (
-                            <CheckCircle size={14} className="text-[#22c55e] step-tick" />
+                            <CheckCircle size={13} className="text-[#22c55e]" />
                           ) : active ? (
-                            <Loader2 size={13} className="text-[#C9A84C] animate-spin" />
+                            <Loader2 size={12} className="text-[#C9A84C] animate-spin" />
                           ) : (
-                            <span className="w-2 h-2 rounded-full" style={{ background: "rgba(255,255,255,0.12)" }} />
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.1)" }} />
                           )}
                         </div>
                         <span
-                          className="text-base transition-colors duration-300"
-                          style={{ color: done ? "#22c55e" : active ? "#DEC27A" : "#4B5563", fontWeight: active ? 500 : 400 }}
+                          className="text-sm transition-colors duration-300 flex-1"
+                          style={{ color: done ? "#4ade80" : active ? "#DEC27A" : "#3A4558", fontWeight: active ? 500 : 400 }}
                         >
                           {s.label}
-                          {done && " ✓"}
                         </span>
+                        {done && <CheckCircle size={13} className="text-[#22c55e] shrink-0" />}
                       </div>
                     );
                   })}
@@ -1036,52 +1234,94 @@ function TailorInner() {
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                {/* Score card */}
-                <div className="card-input overflow-hidden stagger-reveal" style={{ animationDelay: "0ms" }}>
-                  {/* Gold accent line at top */}
-                  <div style={{ height: "2px", background: "linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.7) 30%, rgba(201,168,76,0.9) 55%, transparent 100%)" }} />
-                  <div className="p-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <p className="text-[0.68rem] uppercase tracking-widest text-[#4B5563] font-semibold mb-1">ATS Analysis Complete</p>
-                      <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.2rem", fontWeight: 700, color: "#F0F2F7" }}>
-                        Your Resume Score
-                      </h3>
+                {/* ── ATS Score Hero ── */}
+                <motion.div
+                  className="overflow-hidden rounded-2xl stagger-reveal"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  style={{
+                    background: "linear-gradient(160deg, #111827 0%, #0B0E1A 100%)",
+                    border: "1px solid rgba(201,168,76,0.25)",
+                    boxShadow: "0 0 80px rgba(201,168,76,0.07), 0 0 0 1px rgba(201,168,76,0.06)",
+                  }}
+                >
+                  {/* Shimmer top line */}
+                  <div style={{ height: "2px", background: "linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.4) 20%, rgba(222,194,122,1) 50%, rgba(201,168,76,0.4) 80%, transparent 100%)" }} />
+
+                  <div className="p-8 pb-6">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-8">
+                      <div>
+                        <p className="text-[0.65rem] uppercase tracking-widest font-semibold mb-1" style={{ color: "#3A4558" }}>AI Analysis Complete</p>
+                        <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.45rem", fontWeight: 700, color: "#F0F2F7", lineHeight: 1.1 }}>
+                          ATS Match Score
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        {applyUrl && (
+                          <a
+                            href={applyUrl} target="_blank" rel="noopener noreferrer"
+                            className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                            style={{
+                              background: "linear-gradient(135deg, #C9A84C 0%, #B8952F 100%)",
+                              color: "#07090F",
+                              boxShadow: "0 4px 20px rgba(201,168,76,0.3)",
+                            }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 6px 28px rgba(201,168,76,0.45)"; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 20px rgba(201,168,76,0.3)"; }}
+                          >
+                            Apply Now
+                            <ExternalLink size={13} />
+                          </a>
+                        )}
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}>
+                          <CheckCircle size={11} />
+                          Optimised
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}>
-                      <CheckCircle size={12} />
-                      Optimised
-                    </div>
+
+                    {/* Score hero */}
+                    <ScoreHero before={result.atsScoreBefore} after={result.atsScoreAfter} jobTitle={jobTitle || undefined} />
+
+                    {/* Conditional banners */}
+                    {result.atsScoreAfter >= 80 && result.atsScoreAfter - result.atsScoreBefore >= 10 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 1.5 }}
+                        className="flex items-center gap-3 mt-6 p-4 rounded-xl"
+                        style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.15)" }}
+                      >
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.12)" }}>
+                          <TrendingUp size={15} className="text-[#22c55e]" />
+                        </div>
+                        <div>
+                          <p className="text-[#22c55e] text-sm font-semibold">Top candidate tier</p>
+                          <p className="text-[#4B5563] text-xs mt-0.5">Your tailored resume is now in the top 25% for this role</p>
+                        </div>
+                      </motion.div>
+                    )}
+                    {result.atsScoreAfter < 20 && (
+                      <div className="flex items-center gap-3 mt-6 p-4 rounded-xl" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
+                        <AlertCircle size={16} className="text-[#f87171] shrink-0" />
+                        <span className="text-[#f87171] text-sm">Low score — the job description may be incomplete. Try pasting the full description for better results.</span>
+                      </div>
+                    )}
+
+                    {/* Mobile apply button */}
+                    {applyUrl && (
+                      <a
+                        href={applyUrl} target="_blank" rel="noopener noreferrer"
+                        className="sm:hidden flex items-center justify-center gap-2 mt-6 py-3.5 rounded-xl text-sm font-semibold"
+                        style={{ background: "linear-gradient(135deg, #C9A84C 0%, #B8952F 100%)", color: "#07090F", boxShadow: "0 4px 20px rgba(201,168,76,0.3)" }}
+                      >
+                        Apply Now with Tailored Resume <ExternalLink size={14} />
+                      </a>
+                    )}
                   </div>
-                  <ScoreRing before={result.atsScoreBefore} after={result.atsScoreAfter} />
-                  {result.atsScoreAfter >= 80 && result.atsScoreAfter - result.atsScoreBefore >= 10 ? (
-                  <div className="flex items-center gap-3 mt-7 p-4 rounded-xl" style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.12)" }}>
-                    <ArrowUp size={16} className="text-[#22c55e] shrink-0" />
-                    <span className="text-[#22c55e] text-sm font-medium">
-                      You&apos;re now in the top candidate tier for this role
-                    </span>
-                  </div>
-                  ) : result.atsScoreAfter < 20 ? (
-                  <div className="flex items-center gap-3 mt-7 p-4 rounded-xl" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
-                    <AlertCircle size={16} className="text-[#f87171] shrink-0" />
-                    <span className="text-[#f87171] text-sm">
-                      Low score — the job description may have been incomplete. Try pasting the full description directly for better results.
-                    </span>
-                  </div>
-                  ) : null}
-                  {applyUrl && (
-                    <a
-                      href={applyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-gold w-full mt-5 py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-                    >
-                      Apply Now with Tailored Resume
-                      <ExternalLink size={15} />
-                    </a>
-                  )}
-                  </div>{/* /p-8 */}
-                </div>
+                </motion.div>
 
                 {/* Tabs */}
                 <div className="card-input overflow-hidden stagger-reveal" style={{ animationDelay: "180ms" }}>
