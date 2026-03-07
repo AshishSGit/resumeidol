@@ -2064,12 +2064,11 @@ function TailorInner() {
                 <motion.div
                   className="h-full rounded-full"
                   initial={{ width: "0%" }}
-                  animate={{ width: `${Math.min((loadingElapsed / 28) * 90, 90)}%` }}
+                  animate={{ width: `${loadingStep < 3 ? [5, 30, 55][loadingStep] : Math.min(80 + Math.max(0, (loadingElapsed - 12) / 55) * 10, 90)}%` }}
                   transition={{ duration: 0.9, ease: "easeOut" }}
                   style={{ background: "linear-gradient(90deg, rgba(201,168,76,0.45) 0%, rgba(222,194,122,0.95) 100%)", boxShadow: "0 0 8px rgba(201,168,76,0.4)" }}
                 />
               </div>
-              <span className="text-xs" style={{ color: "#2A3040" }}>~28s</span>
             </div>
 
             {/* Rotating tip */}
@@ -2123,6 +2122,21 @@ function TailorInner() {
                 );
               })}
             </div>
+
+            {/* Reassurance after 40s */}
+            <AnimatePresence>
+              {loadingElapsed > 40 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6 }}
+                  className="text-xs text-center mt-5"
+                  style={{ color: "#3A4558", position: "relative", zIndex: 1 }}
+                >
+                  Still going — complex resumes take a moment longer
+                </motion.p>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

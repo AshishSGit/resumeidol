@@ -771,18 +771,18 @@ export default function LandingPage() {
           </div>
 
           {/* Trust */}
-          <div className="flex items-center justify-center gap-3 text-sm" style={{ animation: "fadeUp 0.6s 0.4s ease-out both" }}>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-sm" style={{ animation: "fadeUp 0.6s 0.4s ease-out both" }}>
             {[
-              { icon: "✦", label: "3 free tailors, no card" },
+              { icon: "✦", label: "1 free tailor, no card" },
               { icon: "✦", label: "Beat ATS filters instantly" },
               { icon: "✦", label: "DOCX + PDF in seconds" },
-            ].map(({ icon, label }, i) => (
-              <span key={i} className="flex items-center gap-1.5">
-                {i > 0 && <span className="text-[#2A3040]">·</span>}
+            ].flatMap(({ icon, label }, i) => [
+              i > 0 ? <span key={`sep-${i}`} className="text-[#2A3040] hidden sm:inline">·</span> : null,
+              <span key={i} className="inline-flex items-center gap-1.5 whitespace-nowrap">
                 <span style={{ color: "#C9A84C", fontSize: "0.55rem" }}>{icon}</span>
                 <span className="text-[#6B7A99]">{label}</span>
-              </span>
-            ))}
+              </span>,
+            ]).filter(Boolean)}
           </div>
 
           {/* Keyword marquee */}
